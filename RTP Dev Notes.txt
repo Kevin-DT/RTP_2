@@ -1,0 +1,38 @@
+
+
+** AUTO SAVE
+Separate file to setting & printer cfg - "RT_AutoSave.cfg"
+******
+TxtUser
+TxtOrderRef
+TxtPurchaser
+ChkSkipMaster
+TxtMasterSSID
+ChkConnectToID
+TxtMasterManCode
+ChkSkipCIB
+TxtCIBid
+ChkCIBidOnly
+TxtCIBManCode
+ChkNHP
+
+ChkInventoryLbl
+ChkMasterLbl
+ChkCIBLbl
+ChkAutoPrint
+ChkAutoStep
+
+*****
+
+Validate ID
+
+Check DB for existing units
+ '***** Check if code matches NHP checkbox setting
+                    Dim IntModuleNumber As Integer = Val(Strings.Right(sScannerString, 5))
+                    Select Case IntModuleNumber
+						Case >= 50000
+                            '** NHP Unit
+                            If ChkNHP.Checked = False Then
+                                MsgBox("Master Unit Number range indicates NHP Product but NHP checkbox is not selected", vbOKOnly + vbCritical, "ALERT")
+                            End If
+Add NHP Prefixes as required
