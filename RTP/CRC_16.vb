@@ -131,7 +131,7 @@
         '        FrmMain.lblMaster.Text = "Master is " & FrmMain.sMasterType
     End Sub
     Public Function DisplayTestResults(sData As String)
-        '** iType is the element to update. sData is the result data to use
+        '** iType is the element to Update. sData is the result data to use
         '** 0 = Checkbox
         Dim name As String = ""
 

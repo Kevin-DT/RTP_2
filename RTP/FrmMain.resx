@@ -129,7 +129,62 @@
   <metadata name="TmrWifi.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>292, 17</value>
   </metadata>
+  <metadata name="ToolTip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>387, 17</value>
+  </metadata>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="PicStatM8.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAABAAAAAHCAIAAACOQloVAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAK
+        7gAACu4BrzForAAAAAd0SU1FB+QKDBAkLnB/GzQAAAARSURBVChTY2ggEYxqIAwaGgCT56gBjZBDqgAA
+        AABJRU5ErkJggg==
+</value>
+  </data>
+  <data name="PicStatM7.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAABAAAAAHCAIAAACOQloVAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAK
+        7gAACu4BrzForAAAAAd0SU1FB+QKDBAkLnB/GzQAAAARSURBVChTY2ggEYxqIAwaGgCT56gBjZBDqgAA
+        AABJRU5ErkJggg==
+</value>
+  </data>
+  <data name="PicStatM6.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAABAAAAAHCAIAAACOQloVAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAK
+        7gAACu4BrzForAAAAAd0SU1FB+QKDBAkLnB/GzQAAAARSURBVChTY2ggEYxqIAwaGgCT56gBjZBDqgAA
+        AABJRU5ErkJggg==
+</value>
+  </data>
+  <data name="PicStatM5.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAABAAAAAHCAIAAACOQloVAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAK
+        7gAACu4BrzForAAAAAd0SU1FB+QKDBAkLnB/GzQAAAARSURBVChTY2ggEYxqIAwaGgCT56gBjZBDqgAA
+        AABJRU5ErkJggg==
+</value>
+  </data>
+  <data name="PicStatM4.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAABAAAAAHCAIAAACOQloVAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAK
+        7gAACu4BrzForAAAAAd0SU1FB+QKDBAkLnB/GzQAAAARSURBVChTY2ggEYxqIAwaGgCT56gBjZBDqgAA
+        AABJRU5ErkJggg==
+</value>
+  </data>
+  <data name="PicStatM3.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAABAAAAAHCAIAAACOQloVAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAK
+        7gAACu4BrzForAAAAAd0SU1FB+QKDBAkLnB/GzQAAAARSURBVChTY2ggEYxqIAwaGgCT56gBjZBDqgAA
+        AABJRU5ErkJggg==
+</value>
+  </data>
+  <data name="PicStatM2.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAABAAAAAHCAIAAACOQloVAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAK
+        7gAACu4BrzForAAAAAd0SU1FB+QKDBAkLnB/GzQAAAARSURBVChTY2ggEYxqIAwaGgCT56gBjZBDqgAA
+        AABJRU5ErkJggg==
+</value>
+  </data>
+  <metadata name="$this.TrayHeight" type="System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>63</value>
+  </metadata>
   <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         AAABAAEAAAAAAAEAIAAoIAQAFgAAACgAAAAAAQAAAAIAAAEAIAAAAAAAAAAEACMuAAAjLgAAAAAAAAAA
