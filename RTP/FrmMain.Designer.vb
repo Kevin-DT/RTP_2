@@ -45,6 +45,15 @@ Partial Class FrmMain
         Me.TSLogPath = New System.Windows.Forms.ToolStripStatusLabel()
         Me.ChkSkipMaster = New System.Windows.Forms.CheckBox()
         Me.GrpMaster = New System.Windows.Forms.GroupBox()
+        Me.LblMguid = New System.Windows.Forms.Label()
+        Me.Label38 = New System.Windows.Forms.Label()
+        Me.Label37 = New System.Windows.Forms.Label()
+        Me.Label36 = New System.Windows.Forms.Label()
+        Me.Label35 = New System.Windows.Forms.Label()
+        Me.Label21 = New System.Windows.Forms.Label()
+        Me.Label22 = New System.Windows.Forms.Label()
+        Me.Label20 = New System.Windows.Forms.Label()
+        Me.Label19 = New System.Windows.Forms.Label()
         Me.Label6 = New System.Windows.Forms.Label()
         Me.Label5 = New System.Windows.Forms.Label()
         Me.TxtMasterManCode = New System.Windows.Forms.TextBox()
@@ -53,13 +62,41 @@ Partial Class FrmMain
         Me.ChkConnectToID = New System.Windows.Forms.CheckBox()
         Me.ChkSkipCIB = New System.Windows.Forms.CheckBox()
         Me.GrpCIB = New System.Windows.Forms.GroupBox()
+        Me.Label49 = New System.Windows.Forms.Label()
+        Me.Label50 = New System.Windows.Forms.Label()
+        Me.Label47 = New System.Windows.Forms.Label()
+        Me.Label48 = New System.Windows.Forms.Label()
+        Me.Label43 = New System.Windows.Forms.Label()
+        Me.Label44 = New System.Windows.Forms.Label()
+        Me.Label45 = New System.Windows.Forms.Label()
+        Me.Label46 = New System.Windows.Forms.Label()
+        Me.Label39 = New System.Windows.Forms.Label()
+        Me.Label40 = New System.Windows.Forms.Label()
+        Me.Label41 = New System.Windows.Forms.Label()
+        Me.Label42 = New System.Windows.Forms.Label()
+        Me.Label33 = New System.Windows.Forms.Label()
+        Me.Label32 = New System.Windows.Forms.Label()
+        Me.Label31 = New System.Windows.Forms.Label()
+        Me.Label34 = New System.Windows.Forms.Label()
+        Me.Label27 = New System.Windows.Forms.Label()
+        Me.Label28 = New System.Windows.Forms.Label()
+        Me.Label29 = New System.Windows.Forms.Label()
+        Me.Label30 = New System.Windows.Forms.Label()
+        Me.Label23 = New System.Windows.Forms.Label()
+        Me.Label24 = New System.Windows.Forms.Label()
+        Me.Label25 = New System.Windows.Forms.Label()
+        Me.Label26 = New System.Windows.Forms.Label()
+        Me.LblCIBguid = New System.Windows.Forms.Label()
         Me.ChkCIBidOnly = New System.Windows.Forms.CheckBox()
         Me.Label8 = New System.Windows.Forms.Label()
         Me.Label7 = New System.Windows.Forms.Label()
         Me.TxtCIBManCode = New System.Windows.Forms.TextBox()
         Me.TxtCIBid = New System.Windows.Forms.TextBox()
+        Me.ChkSound = New System.Windows.Forms.CheckBox()
         Me.ChkManCntrls = New System.Windows.Forms.CheckBox()
         Me.GrpManual = New System.Windows.Forms.GroupBox()
+        Me.BtnWriteMGuid = New System.Windows.Forms.Button()
+        Me.BtnSetMasterID = New System.Windows.Forms.Button()
         Me.BtnChDn = New System.Windows.Forms.Button()
         Me.Label10 = New System.Windows.Forms.Label()
         Me.BtnTrip = New System.Windows.Forms.Button()
@@ -96,11 +133,17 @@ Partial Class FrmMain
         Me.LblType = New System.Windows.Forms.Label()
         Me.TabControl1 = New System.Windows.Forms.TabControl()
         Me.TabProg = New System.Windows.Forms.TabPage()
+        Me.LblStatus = New System.Windows.Forms.Label()
         Me.lblCurrentStep = New System.Windows.Forms.Label()
         Me.GroupBox5 = New System.Windows.Forms.GroupBox()
         Me.LstWiFi = New System.Windows.Forms.ListBox()
         Me.LblPrompt = New System.Windows.Forms.Label()
         Me.TabUtil = New System.Windows.Forms.TabPage()
+        Me.BtnTestAudio = New System.Windows.Forms.Button()
+        Me.Label9 = New System.Windows.Forms.Label()
+        Me.Label11 = New System.Windows.Forms.Label()
+        Me.TxtGUID = New System.Windows.Forms.TextBox()
+        Me.GroupBox6 = New System.Windows.Forms.GroupBox()
         Me.Label18 = New System.Windows.Forms.Label()
         Me.TxtTimeout = New System.Windows.Forms.TextBox()
         Me.LblScaleInUse = New System.Windows.Forms.Label()
@@ -114,20 +157,34 @@ Partial Class FrmMain
         Me.rbNegative = New System.Windows.Forms.RadioButton()
         Me.rbPositive = New System.Windows.Forms.RadioButton()
         Me.rbAnyPhase = New System.Windows.Forms.RadioButton()
-        Me.BtnSetMasterID = New System.Windows.Forms.Button()
-        Me.LblStatus = New System.Windows.Forms.Label()
-        Me.Label38 = New System.Windows.Forms.Label()
-        Me.Label37 = New System.Windows.Forms.Label()
-        Me.Label36 = New System.Windows.Forms.Label()
-        Me.Label35 = New System.Windows.Forms.Label()
-        Me.Label21 = New System.Windows.Forms.Label()
-        Me.Label22 = New System.Windows.Forms.Label()
-        Me.Label20 = New System.Windows.Forms.Label()
-        Me.Label19 = New System.Windows.Forms.Label()
         Me.ToolTip1 = New System.Windows.Forms.ToolTip(Me.components)
-        Me.GroupBox6 = New System.Windows.Forms.GroupBox()
+        Me.Lbl_Server = New System.Windows.Forms.Label()
         Me.PicRTbarcode = New System.Windows.Forms.PictureBox()
         Me.BtnPackStock = New System.Windows.Forms.Button()
+        Me.PicStatCIB24 = New System.Windows.Forms.PictureBox()
+        Me.PicStatCIB23 = New System.Windows.Forms.PictureBox()
+        Me.PicStatCIB22 = New System.Windows.Forms.PictureBox()
+        Me.PicStatCIB21 = New System.Windows.Forms.PictureBox()
+        Me.PicStatCIB20 = New System.Windows.Forms.PictureBox()
+        Me.PicStatCIB19 = New System.Windows.Forms.PictureBox()
+        Me.PicStatCIB18 = New System.Windows.Forms.PictureBox()
+        Me.PicStatCIB17 = New System.Windows.Forms.PictureBox()
+        Me.PicStatCIB16 = New System.Windows.Forms.PictureBox()
+        Me.PicStatCIB15 = New System.Windows.Forms.PictureBox()
+        Me.PicStatCIB14 = New System.Windows.Forms.PictureBox()
+        Me.PicStatCIB13 = New System.Windows.Forms.PictureBox()
+        Me.PicStatCIB12 = New System.Windows.Forms.PictureBox()
+        Me.PicStatCIB11 = New System.Windows.Forms.PictureBox()
+        Me.PicStatCIB10 = New System.Windows.Forms.PictureBox()
+        Me.PicStatCIB09 = New System.Windows.Forms.PictureBox()
+        Me.PicStatCIB08 = New System.Windows.Forms.PictureBox()
+        Me.PicStatCIB07 = New System.Windows.Forms.PictureBox()
+        Me.PicStatCIB06 = New System.Windows.Forms.PictureBox()
+        Me.PicStatCIB05 = New System.Windows.Forms.PictureBox()
+        Me.PicStatCIB04 = New System.Windows.Forms.PictureBox()
+        Me.PicStatCIB03 = New System.Windows.Forms.PictureBox()
+        Me.PicStatCIB02 = New System.Windows.Forms.PictureBox()
+        Me.PicStatCIB01 = New System.Windows.Forms.PictureBox()
         Me.PicStatM8 = New System.Windows.Forms.PictureBox()
         Me.PicStatM7 = New System.Windows.Forms.PictureBox()
         Me.PicStatM6 = New System.Windows.Forms.PictureBox()
@@ -138,7 +195,12 @@ Partial Class FrmMain
         Me.PicStatM1 = New System.Windows.Forms.PictureBox()
         Me.ChkProdDev = New System.Windows.Forms.CheckBox()
         Me.PicTimerHB = New System.Windows.Forms.PictureBox()
-        Me.Lbl_Server = New System.Windows.Forms.Label()
+        Me.LblPOText = New System.Windows.Forms.Label()
+        Me.LblSearch = New System.Windows.Forms.Label()
+        Me.DateSummary = New System.Windows.Forms.DateTimePicker()
+        Me.TxtSummary = New System.Windows.Forms.TextBox()
+        Me.ChkSummary = New System.Windows.Forms.CheckBox()
+        Me.BtnSummary = New System.Windows.Forms.Button()
         PrinterToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.MenuStrip1.SuspendLayout()
         Me.GroupBox1.SuspendLayout()
@@ -152,9 +214,33 @@ Partial Class FrmMain
         Me.TabProg.SuspendLayout()
         Me.GroupBox5.SuspendLayout()
         Me.TabUtil.SuspendLayout()
-        Me.GroupBox4.SuspendLayout()
         Me.GroupBox6.SuspendLayout()
+        Me.GroupBox4.SuspendLayout()
         CType(Me.PicRTbarcode, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.PicStatCIB24, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.PicStatCIB23, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.PicStatCIB22, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.PicStatCIB21, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.PicStatCIB20, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.PicStatCIB19, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.PicStatCIB18, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.PicStatCIB17, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.PicStatCIB16, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.PicStatCIB15, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.PicStatCIB14, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.PicStatCIB13, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.PicStatCIB12, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.PicStatCIB11, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.PicStatCIB10, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.PicStatCIB09, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.PicStatCIB08, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.PicStatCIB07, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.PicStatCIB06, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.PicStatCIB05, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.PicStatCIB04, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.PicStatCIB03, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.PicStatCIB02, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.PicStatCIB01, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.PicStatM8, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.PicStatM7, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.PicStatM6, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -346,6 +432,7 @@ Partial Class FrmMain
         '
         'GrpMaster
         '
+        Me.GrpMaster.Controls.Add(Me.LblMguid)
         Me.GrpMaster.Controls.Add(Me.Label38)
         Me.GrpMaster.Controls.Add(Me.Label37)
         Me.GrpMaster.Controls.Add(Me.Label36)
@@ -374,6 +461,99 @@ Partial Class FrmMain
         Me.GrpMaster.TabIndex = 7
         Me.GrpMaster.TabStop = False
         Me.GrpMaster.Text = " Master "
+        '
+        'LblMguid
+        '
+        Me.LblMguid.AutoSize = True
+        Me.LblMguid.Font = New System.Drawing.Font("Microsoft Sans Serif", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.LblMguid.ForeColor = System.Drawing.Color.Blue
+        Me.LblMguid.Location = New System.Drawing.Point(319, 65)
+        Me.LblMguid.Name = "LblMguid"
+        Me.LblMguid.Size = New System.Drawing.Size(42, 17)
+        Me.LblMguid.TabIndex = 64
+        Me.LblMguid.Text = "GUID"
+        Me.LblMguid.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
+        Me.LblMguid.Visible = False
+        '
+        'Label38
+        '
+        Me.Label38.AutoSize = True
+        Me.Label38.ForeColor = System.Drawing.Color.Blue
+        Me.Label38.Location = New System.Drawing.Point(351, 106)
+        Me.Label38.Name = "Label38"
+        Me.Label38.Size = New System.Drawing.Size(14, 15)
+        Me.Label38.TabIndex = 31
+        Me.Label38.Text = "7"
+        '
+        'Label37
+        '
+        Me.Label37.AutoSize = True
+        Me.Label37.ForeColor = System.Drawing.Color.Blue
+        Me.Label37.Location = New System.Drawing.Point(327, 106)
+        Me.Label37.Name = "Label37"
+        Me.Label37.Size = New System.Drawing.Size(14, 15)
+        Me.Label37.TabIndex = 30
+        Me.Label37.Text = "6"
+        '
+        'Label36
+        '
+        Me.Label36.AutoSize = True
+        Me.Label36.ForeColor = System.Drawing.Color.Blue
+        Me.Label36.Location = New System.Drawing.Point(222, 106)
+        Me.Label36.Name = "Label36"
+        Me.Label36.Size = New System.Drawing.Size(14, 15)
+        Me.Label36.TabIndex = 29
+        Me.Label36.Text = "3"
+        '
+        'Label35
+        '
+        Me.Label35.AutoSize = True
+        Me.Label35.ForeColor = System.Drawing.Color.Blue
+        Me.Label35.Location = New System.Drawing.Point(198, 106)
+        Me.Label35.Name = "Label35"
+        Me.Label35.Size = New System.Drawing.Size(14, 15)
+        Me.Label35.TabIndex = 28
+        Me.Label35.Text = "2"
+        '
+        'Label21
+        '
+        Me.Label21.AutoSize = True
+        Me.Label21.ForeColor = System.Drawing.Color.Blue
+        Me.Label21.Location = New System.Drawing.Point(373, 106)
+        Me.Label21.Name = "Label21"
+        Me.Label21.Size = New System.Drawing.Size(14, 15)
+        Me.Label21.TabIndex = 27
+        Me.Label21.Text = "8"
+        '
+        'Label22
+        '
+        Me.Label22.AutoSize = True
+        Me.Label22.ForeColor = System.Drawing.Color.Blue
+        Me.Label22.Location = New System.Drawing.Point(305, 106)
+        Me.Label22.Name = "Label22"
+        Me.Label22.Size = New System.Drawing.Size(14, 15)
+        Me.Label22.TabIndex = 26
+        Me.Label22.Text = "5"
+        '
+        'Label20
+        '
+        Me.Label20.AutoSize = True
+        Me.Label20.ForeColor = System.Drawing.Color.Blue
+        Me.Label20.Location = New System.Drawing.Point(244, 106)
+        Me.Label20.Name = "Label20"
+        Me.Label20.Size = New System.Drawing.Size(14, 15)
+        Me.Label20.TabIndex = 25
+        Me.Label20.Text = "4"
+        '
+        'Label19
+        '
+        Me.Label19.AutoSize = True
+        Me.Label19.ForeColor = System.Drawing.Color.Blue
+        Me.Label19.Location = New System.Drawing.Point(176, 106)
+        Me.Label19.Name = "Label19"
+        Me.Label19.Size = New System.Drawing.Size(14, 15)
+        Me.Label19.TabIndex = 24
+        Me.Label19.Text = "1"
         '
         'Label6
         '
@@ -446,6 +626,55 @@ Partial Class FrmMain
         '
         'GrpCIB
         '
+        Me.GrpCIB.Controls.Add(Me.Label49)
+        Me.GrpCIB.Controls.Add(Me.Label50)
+        Me.GrpCIB.Controls.Add(Me.Label47)
+        Me.GrpCIB.Controls.Add(Me.Label48)
+        Me.GrpCIB.Controls.Add(Me.Label43)
+        Me.GrpCIB.Controls.Add(Me.Label44)
+        Me.GrpCIB.Controls.Add(Me.Label45)
+        Me.GrpCIB.Controls.Add(Me.Label46)
+        Me.GrpCIB.Controls.Add(Me.Label39)
+        Me.GrpCIB.Controls.Add(Me.Label40)
+        Me.GrpCIB.Controls.Add(Me.Label41)
+        Me.GrpCIB.Controls.Add(Me.Label42)
+        Me.GrpCIB.Controls.Add(Me.PicStatCIB24)
+        Me.GrpCIB.Controls.Add(Me.PicStatCIB23)
+        Me.GrpCIB.Controls.Add(Me.PicStatCIB22)
+        Me.GrpCIB.Controls.Add(Me.PicStatCIB21)
+        Me.GrpCIB.Controls.Add(Me.PicStatCIB20)
+        Me.GrpCIB.Controls.Add(Me.PicStatCIB19)
+        Me.GrpCIB.Controls.Add(Me.PicStatCIB18)
+        Me.GrpCIB.Controls.Add(Me.PicStatCIB17)
+        Me.GrpCIB.Controls.Add(Me.PicStatCIB16)
+        Me.GrpCIB.Controls.Add(Me.PicStatCIB15)
+        Me.GrpCIB.Controls.Add(Me.PicStatCIB14)
+        Me.GrpCIB.Controls.Add(Me.PicStatCIB13)
+        Me.GrpCIB.Controls.Add(Me.PicStatCIB12)
+        Me.GrpCIB.Controls.Add(Me.PicStatCIB11)
+        Me.GrpCIB.Controls.Add(Me.PicStatCIB10)
+        Me.GrpCIB.Controls.Add(Me.PicStatCIB09)
+        Me.GrpCIB.Controls.Add(Me.PicStatCIB08)
+        Me.GrpCIB.Controls.Add(Me.PicStatCIB07)
+        Me.GrpCIB.Controls.Add(Me.PicStatCIB06)
+        Me.GrpCIB.Controls.Add(Me.PicStatCIB05)
+        Me.GrpCIB.Controls.Add(Me.PicStatCIB04)
+        Me.GrpCIB.Controls.Add(Me.PicStatCIB03)
+        Me.GrpCIB.Controls.Add(Me.PicStatCIB02)
+        Me.GrpCIB.Controls.Add(Me.PicStatCIB01)
+        Me.GrpCIB.Controls.Add(Me.Label33)
+        Me.GrpCIB.Controls.Add(Me.Label32)
+        Me.GrpCIB.Controls.Add(Me.Label31)
+        Me.GrpCIB.Controls.Add(Me.Label34)
+        Me.GrpCIB.Controls.Add(Me.Label27)
+        Me.GrpCIB.Controls.Add(Me.Label28)
+        Me.GrpCIB.Controls.Add(Me.Label29)
+        Me.GrpCIB.Controls.Add(Me.Label30)
+        Me.GrpCIB.Controls.Add(Me.Label23)
+        Me.GrpCIB.Controls.Add(Me.Label24)
+        Me.GrpCIB.Controls.Add(Me.Label25)
+        Me.GrpCIB.Controls.Add(Me.Label26)
+        Me.GrpCIB.Controls.Add(Me.LblCIBguid)
         Me.GrpCIB.Controls.Add(Me.ChkCIBidOnly)
         Me.GrpCIB.Controls.Add(Me.Label8)
         Me.GrpCIB.Controls.Add(Me.Label7)
@@ -457,6 +686,259 @@ Partial Class FrmMain
         Me.GrpCIB.TabIndex = 9
         Me.GrpCIB.TabStop = False
         Me.GrpCIB.Text = " CIB "
+        '
+        'Label49
+        '
+        Me.Label49.AutoSize = True
+        Me.Label49.ForeColor = System.Drawing.Color.Blue
+        Me.Label49.Location = New System.Drawing.Point(735, 95)
+        Me.Label49.Name = "Label49"
+        Me.Label49.Size = New System.Drawing.Size(21, 15)
+        Me.Label49.TabIndex = 113
+        Me.Label49.Text = "23"
+        '
+        'Label50
+        '
+        Me.Label50.AutoSize = True
+        Me.Label50.ForeColor = System.Drawing.Color.Blue
+        Me.Label50.Location = New System.Drawing.Point(711, 95)
+        Me.Label50.Name = "Label50"
+        Me.Label50.Size = New System.Drawing.Size(21, 15)
+        Me.Label50.TabIndex = 112
+        Me.Label50.Text = "22"
+        '
+        'Label47
+        '
+        Me.Label47.AutoSize = True
+        Me.Label47.ForeColor = System.Drawing.Color.Blue
+        Me.Label47.Location = New System.Drawing.Point(632, 95)
+        Me.Label47.Name = "Label47"
+        Me.Label47.Size = New System.Drawing.Size(21, 15)
+        Me.Label47.TabIndex = 111
+        Me.Label47.Text = "19"
+        '
+        'Label48
+        '
+        Me.Label48.AutoSize = True
+        Me.Label48.ForeColor = System.Drawing.Color.Blue
+        Me.Label48.Location = New System.Drawing.Point(608, 95)
+        Me.Label48.Name = "Label48"
+        Me.Label48.Size = New System.Drawing.Size(21, 15)
+        Me.Label48.TabIndex = 110
+        Me.Label48.Text = "18"
+        '
+        'Label43
+        '
+        Me.Label43.AutoSize = True
+        Me.Label43.ForeColor = System.Drawing.Color.Blue
+        Me.Label43.Location = New System.Drawing.Point(525, 95)
+        Me.Label43.Name = "Label43"
+        Me.Label43.Size = New System.Drawing.Size(21, 15)
+        Me.Label43.TabIndex = 109
+        Me.Label43.Text = "15"
+        '
+        'Label44
+        '
+        Me.Label44.AutoSize = True
+        Me.Label44.ForeColor = System.Drawing.Color.Blue
+        Me.Label44.Location = New System.Drawing.Point(501, 95)
+        Me.Label44.Name = "Label44"
+        Me.Label44.Size = New System.Drawing.Size(21, 15)
+        Me.Label44.TabIndex = 108
+        Me.Label44.Text = "14"
+        '
+        'Label45
+        '
+        Me.Label45.AutoSize = True
+        Me.Label45.ForeColor = System.Drawing.Color.Blue
+        Me.Label45.Location = New System.Drawing.Point(423, 95)
+        Me.Label45.Name = "Label45"
+        Me.Label45.Size = New System.Drawing.Size(21, 15)
+        Me.Label45.TabIndex = 107
+        Me.Label45.Text = "11"
+        '
+        'Label46
+        '
+        Me.Label46.AutoSize = True
+        Me.Label46.ForeColor = System.Drawing.Color.Blue
+        Me.Label46.Location = New System.Drawing.Point(399, 95)
+        Me.Label46.Name = "Label46"
+        Me.Label46.Size = New System.Drawing.Size(21, 15)
+        Me.Label46.TabIndex = 106
+        Me.Label46.Text = "10"
+        '
+        'Label39
+        '
+        Me.Label39.AutoSize = True
+        Me.Label39.ForeColor = System.Drawing.Color.Blue
+        Me.Label39.Location = New System.Drawing.Point(317, 95)
+        Me.Label39.Name = "Label39"
+        Me.Label39.Size = New System.Drawing.Size(14, 15)
+        Me.Label39.TabIndex = 105
+        Me.Label39.Text = "7"
+        '
+        'Label40
+        '
+        Me.Label40.AutoSize = True
+        Me.Label40.ForeColor = System.Drawing.Color.Blue
+        Me.Label40.Location = New System.Drawing.Point(293, 95)
+        Me.Label40.Name = "Label40"
+        Me.Label40.Size = New System.Drawing.Size(14, 15)
+        Me.Label40.TabIndex = 104
+        Me.Label40.Text = "6"
+        '
+        'Label41
+        '
+        Me.Label41.AutoSize = True
+        Me.Label41.ForeColor = System.Drawing.Color.Blue
+        Me.Label41.Location = New System.Drawing.Point(215, 95)
+        Me.Label41.Name = "Label41"
+        Me.Label41.Size = New System.Drawing.Size(14, 15)
+        Me.Label41.TabIndex = 103
+        Me.Label41.Text = "3"
+        '
+        'Label42
+        '
+        Me.Label42.AutoSize = True
+        Me.Label42.ForeColor = System.Drawing.Color.Blue
+        Me.Label42.Location = New System.Drawing.Point(191, 95)
+        Me.Label42.Name = "Label42"
+        Me.Label42.Size = New System.Drawing.Size(14, 15)
+        Me.Label42.TabIndex = 102
+        Me.Label42.Text = "2"
+        '
+        'Label33
+        '
+        Me.Label33.AutoSize = True
+        Me.Label33.ForeColor = System.Drawing.Color.Blue
+        Me.Label33.Location = New System.Drawing.Point(654, 95)
+        Me.Label33.Name = "Label33"
+        Me.Label33.Size = New System.Drawing.Size(21, 15)
+        Me.Label33.TabIndex = 99
+        Me.Label33.Text = "20"
+        '
+        'Label32
+        '
+        Me.Label32.AutoSize = True
+        Me.Label32.ForeColor = System.Drawing.Color.Blue
+        Me.Label32.Location = New System.Drawing.Point(689, 95)
+        Me.Label32.Name = "Label32"
+        Me.Label32.Size = New System.Drawing.Size(21, 15)
+        Me.Label32.TabIndex = 100
+        Me.Label32.Text = "21"
+        '
+        'Label31
+        '
+        Me.Label31.AutoSize = True
+        Me.Label31.ForeColor = System.Drawing.Color.Blue
+        Me.Label31.Location = New System.Drawing.Point(757, 95)
+        Me.Label31.Name = "Label31"
+        Me.Label31.Size = New System.Drawing.Size(21, 15)
+        Me.Label31.TabIndex = 101
+        Me.Label31.Text = "24"
+        '
+        'Label34
+        '
+        Me.Label34.AutoSize = True
+        Me.Label34.ForeColor = System.Drawing.Color.Blue
+        Me.Label34.Location = New System.Drawing.Point(586, 95)
+        Me.Label34.Name = "Label34"
+        Me.Label34.Size = New System.Drawing.Size(21, 15)
+        Me.Label34.TabIndex = 98
+        Me.Label34.Text = "17"
+        '
+        'Label27
+        '
+        Me.Label27.AutoSize = True
+        Me.Label27.ForeColor = System.Drawing.Color.Blue
+        Me.Label27.Location = New System.Drawing.Point(549, 95)
+        Me.Label27.Name = "Label27"
+        Me.Label27.Size = New System.Drawing.Size(21, 15)
+        Me.Label27.TabIndex = 89
+        Me.Label27.Text = "16"
+        '
+        'Label28
+        '
+        Me.Label28.AutoSize = True
+        Me.Label28.ForeColor = System.Drawing.Color.Blue
+        Me.Label28.Location = New System.Drawing.Point(481, 95)
+        Me.Label28.Name = "Label28"
+        Me.Label28.Size = New System.Drawing.Size(21, 15)
+        Me.Label28.TabIndex = 88
+        Me.Label28.Text = "13"
+        '
+        'Label29
+        '
+        Me.Label29.AutoSize = True
+        Me.Label29.ForeColor = System.Drawing.Color.Blue
+        Me.Label29.Location = New System.Drawing.Point(441, 95)
+        Me.Label29.Name = "Label29"
+        Me.Label29.Size = New System.Drawing.Size(21, 15)
+        Me.Label29.TabIndex = 87
+        Me.Label29.Text = "12"
+        '
+        'Label30
+        '
+        Me.Label30.AutoSize = True
+        Me.Label30.ForeColor = System.Drawing.Color.Blue
+        Me.Label30.Location = New System.Drawing.Point(376, 95)
+        Me.Label30.Name = "Label30"
+        Me.Label30.Size = New System.Drawing.Size(14, 15)
+        Me.Label30.TabIndex = 86
+        Me.Label30.Text = "9"
+        '
+        'Label23
+        '
+        Me.Label23.AutoSize = True
+        Me.Label23.ForeColor = System.Drawing.Color.Blue
+        Me.Label23.Location = New System.Drawing.Point(339, 95)
+        Me.Label23.Name = "Label23"
+        Me.Label23.Size = New System.Drawing.Size(14, 15)
+        Me.Label23.TabIndex = 77
+        Me.Label23.Text = "8"
+        '
+        'Label24
+        '
+        Me.Label24.AutoSize = True
+        Me.Label24.ForeColor = System.Drawing.Color.Blue
+        Me.Label24.Location = New System.Drawing.Point(271, 95)
+        Me.Label24.Name = "Label24"
+        Me.Label24.Size = New System.Drawing.Size(14, 15)
+        Me.Label24.TabIndex = 76
+        Me.Label24.Text = "5"
+        '
+        'Label25
+        '
+        Me.Label25.AutoSize = True
+        Me.Label25.ForeColor = System.Drawing.Color.Blue
+        Me.Label25.Location = New System.Drawing.Point(237, 95)
+        Me.Label25.Name = "Label25"
+        Me.Label25.Size = New System.Drawing.Size(14, 15)
+        Me.Label25.TabIndex = 75
+        Me.Label25.Text = "4"
+        '
+        'Label26
+        '
+        Me.Label26.AutoSize = True
+        Me.Label26.ForeColor = System.Drawing.Color.Blue
+        Me.Label26.Location = New System.Drawing.Point(169, 95)
+        Me.Label26.Name = "Label26"
+        Me.Label26.Size = New System.Drawing.Size(14, 15)
+        Me.Label26.TabIndex = 74
+        Me.Label26.Text = "1"
+        '
+        'LblCIBguid
+        '
+        Me.LblCIBguid.AutoSize = True
+        Me.LblCIBguid.Font = New System.Drawing.Font("Microsoft Sans Serif", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.LblCIBguid.ForeColor = System.Drawing.Color.Blue
+        Me.LblCIBguid.Location = New System.Drawing.Point(319, 53)
+        Me.LblCIBguid.Name = "LblCIBguid"
+        Me.LblCIBguid.Size = New System.Drawing.Size(42, 17)
+        Me.LblCIBguid.TabIndex = 65
+        Me.LblCIBguid.Text = "GUID"
+        Me.LblCIBguid.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
+        Me.LblCIBguid.Visible = False
         '
         'ChkCIBidOnly
         '
@@ -508,6 +990,19 @@ Partial Class FrmMain
         Me.TxtCIBid.Size = New System.Drawing.Size(119, 26)
         Me.TxtCIBid.TabIndex = 4
         '
+        'ChkSound
+        '
+        Me.ChkSound.AutoSize = True
+        Me.ChkSound.Checked = True
+        Me.ChkSound.CheckState = System.Windows.Forms.CheckState.Checked
+        Me.ChkSound.ForeColor = System.Drawing.Color.Black
+        Me.ChkSound.Location = New System.Drawing.Point(902, 407)
+        Me.ChkSound.Name = "ChkSound"
+        Me.ChkSound.Size = New System.Drawing.Size(126, 19)
+        Me.ChkSound.TabIndex = 114
+        Me.ChkSound.Text = "Play Sound at End"
+        Me.ChkSound.UseVisualStyleBackColor = True
+        '
         'ChkManCntrls
         '
         Me.ChkManCntrls.AutoSize = True
@@ -520,6 +1015,7 @@ Partial Class FrmMain
         '
         'GrpManual
         '
+        Me.GrpManual.Controls.Add(Me.BtnWriteMGuid)
         Me.GrpManual.Controls.Add(Me.BtnSetMasterID)
         Me.GrpManual.Controls.Add(Me.BtnChDn)
         Me.GrpManual.Controls.Add(Me.Label10)
@@ -541,6 +1037,24 @@ Partial Class FrmMain
         Me.GrpManual.TabIndex = 11
         Me.GrpManual.TabStop = False
         Me.GrpManual.Text = " Manual Controls "
+        '
+        'BtnWriteMGuid
+        '
+        Me.BtnWriteMGuid.Location = New System.Drawing.Point(342, 18)
+        Me.BtnWriteMGuid.Name = "BtnWriteMGuid"
+        Me.BtnWriteMGuid.Size = New System.Drawing.Size(78, 43)
+        Me.BtnWriteMGuid.TabIndex = 31
+        Me.BtnWriteMGuid.Text = "Write M GUID"
+        Me.BtnWriteMGuid.UseVisualStyleBackColor = True
+        '
+        'BtnSetMasterID
+        '
+        Me.BtnSetMasterID.Location = New System.Drawing.Point(461, 18)
+        Me.BtnSetMasterID.Name = "BtnSetMasterID"
+        Me.BtnSetMasterID.Size = New System.Drawing.Size(78, 43)
+        Me.BtnSetMasterID.TabIndex = 30
+        Me.BtnSetMasterID.Text = "Set SSID"
+        Me.BtnSetMasterID.UseVisualStyleBackColor = True
         '
         'BtnChDn
         '
@@ -885,6 +1399,7 @@ Partial Class FrmMain
         '
         'TabProg
         '
+        Me.TabProg.Controls.Add(Me.ChkSound)
         Me.TabProg.Controls.Add(Me.LblStatus)
         Me.TabProg.Controls.Add(Me.lblCurrentStep)
         Me.TabProg.Controls.Add(Me.GroupBox5)
@@ -916,6 +1431,18 @@ Partial Class FrmMain
         Me.TabProg.TabIndex = 0
         Me.TabProg.Text = "Programming"
         Me.TabProg.UseVisualStyleBackColor = True
+        '
+        'LblStatus
+        '
+        Me.LblStatus.AutoSize = True
+        Me.LblStatus.Font = New System.Drawing.Font("Microsoft Sans Serif", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.LblStatus.ForeColor = System.Drawing.Color.Blue
+        Me.LblStatus.Location = New System.Drawing.Point(899, 293)
+        Me.LblStatus.Name = "LblStatus"
+        Me.LblStatus.Size = New System.Drawing.Size(49, 17)
+        Me.LblStatus.TabIndex = 63
+        Me.LblStatus.Text = "Ready"
+        Me.LblStatus.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
         '
         'lblCurrentStep
         '
@@ -962,6 +1489,16 @@ Partial Class FrmMain
         '
         'TabUtil
         '
+        Me.TabUtil.Controls.Add(Me.LblPOText)
+        Me.TabUtil.Controls.Add(Me.LblSearch)
+        Me.TabUtil.Controls.Add(Me.DateSummary)
+        Me.TabUtil.Controls.Add(Me.TxtSummary)
+        Me.TabUtil.Controls.Add(Me.ChkSummary)
+        Me.TabUtil.Controls.Add(Me.BtnSummary)
+        Me.TabUtil.Controls.Add(Me.BtnTestAudio)
+        Me.TabUtil.Controls.Add(Me.Label9)
+        Me.TabUtil.Controls.Add(Me.Label11)
+        Me.TabUtil.Controls.Add(Me.TxtGUID)
         Me.TabUtil.Controls.Add(Me.GroupBox6)
         Me.TabUtil.Controls.Add(Me.Label18)
         Me.TabUtil.Controls.Add(Me.TxtTimeout)
@@ -979,6 +1516,56 @@ Partial Class FrmMain
         Me.TabUtil.TabIndex = 1
         Me.TabUtil.Text = "Utilities"
         Me.TabUtil.UseVisualStyleBackColor = True
+        '
+        'BtnTestAudio
+        '
+        Me.BtnTestAudio.Location = New System.Drawing.Point(24, 382)
+        Me.BtnTestAudio.Name = "BtnTestAudio"
+        Me.BtnTestAudio.Size = New System.Drawing.Size(75, 30)
+        Me.BtnTestAudio.TabIndex = 132
+        Me.BtnTestAudio.Text = "Test Audio"
+        Me.BtnTestAudio.UseVisualStyleBackColor = True
+        '
+        'Label9
+        '
+        Me.Label9.AutoSize = True
+        Me.Label9.Font = New System.Drawing.Font("Microsoft Sans Serif", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Label9.ForeColor = System.Drawing.SystemColors.ControlText
+        Me.Label9.Location = New System.Drawing.Point(122, 296)
+        Me.Label9.Name = "Label9"
+        Me.Label9.Size = New System.Drawing.Size(196, 17)
+        Me.Label9.TabIndex = 131
+        Me.Label9.Text = "36 characters including 4 x ""-"""
+        '
+        'Label11
+        '
+        Me.Label11.AutoSize = True
+        Me.Label11.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!)
+        Me.Label11.ForeColor = System.Drawing.SystemColors.ControlText
+        Me.Label11.Location = New System.Drawing.Point(12, 256)
+        Me.Label11.Name = "Label11"
+        Me.Label11.Size = New System.Drawing.Size(107, 20)
+        Me.Label11.TabIndex = 130
+        Me.Label11.Text = "Manual GUID"
+        '
+        'TxtGUID
+        '
+        Me.TxtGUID.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.TxtGUID.ForeColor = System.Drawing.SystemColors.ControlText
+        Me.TxtGUID.Location = New System.Drawing.Point(126, 253)
+        Me.TxtGUID.Name = "TxtGUID"
+        Me.TxtGUID.Size = New System.Drawing.Size(393, 26)
+        Me.TxtGUID.TabIndex = 129
+        '
+        'GroupBox6
+        '
+        Me.GroupBox6.Controls.Add(Me.ChkProdDev)
+        Me.GroupBox6.Location = New System.Drawing.Point(1005, 33)
+        Me.GroupBox6.Name = "GroupBox6"
+        Me.GroupBox6.Size = New System.Drawing.Size(135, 100)
+        Me.GroupBox6.TabIndex = 128
+        Me.GroupBox6.TabStop = False
+        Me.GroupBox6.Text = " Environment "
         '
         'Label18
         '
@@ -1129,116 +1716,17 @@ Partial Class FrmMain
         Me.rbAnyPhase.Text = "Any"
         Me.rbAnyPhase.UseVisualStyleBackColor = True
         '
-        'BtnSetMasterID
+        'Lbl_Server
         '
-        Me.BtnSetMasterID.Location = New System.Drawing.Point(461, 18)
-        Me.BtnSetMasterID.Name = "BtnSetMasterID"
-        Me.BtnSetMasterID.Size = New System.Drawing.Size(78, 43)
-        Me.BtnSetMasterID.TabIndex = 30
-        Me.BtnSetMasterID.Text = "Set SSID"
-        Me.BtnSetMasterID.UseVisualStyleBackColor = True
-        '
-        'LblStatus
-        '
-        Me.LblStatus.AutoSize = True
-        Me.LblStatus.Font = New System.Drawing.Font("Microsoft Sans Serif", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.LblStatus.ForeColor = System.Drawing.Color.Blue
-        Me.LblStatus.Location = New System.Drawing.Point(899, 293)
-        Me.LblStatus.Name = "LblStatus"
-        Me.LblStatus.Size = New System.Drawing.Size(49, 17)
-        Me.LblStatus.TabIndex = 63
-        Me.LblStatus.Text = "Ready"
-        Me.LblStatus.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
-        '
-        'Label38
-        '
-        Me.Label38.AutoSize = True
-        Me.Label38.ForeColor = System.Drawing.Color.Blue
-        Me.Label38.Location = New System.Drawing.Point(351, 106)
-        Me.Label38.Name = "Label38"
-        Me.Label38.Size = New System.Drawing.Size(14, 15)
-        Me.Label38.TabIndex = 31
-        Me.Label38.Text = "7"
-        '
-        'Label37
-        '
-        Me.Label37.AutoSize = True
-        Me.Label37.ForeColor = System.Drawing.Color.Blue
-        Me.Label37.Location = New System.Drawing.Point(327, 106)
-        Me.Label37.Name = "Label37"
-        Me.Label37.Size = New System.Drawing.Size(14, 15)
-        Me.Label37.TabIndex = 30
-        Me.Label37.Text = "6"
-        '
-        'Label36
-        '
-        Me.Label36.AutoSize = True
-        Me.Label36.ForeColor = System.Drawing.Color.Blue
-        Me.Label36.Location = New System.Drawing.Point(222, 106)
-        Me.Label36.Name = "Label36"
-        Me.Label36.Size = New System.Drawing.Size(14, 15)
-        Me.Label36.TabIndex = 29
-        Me.Label36.Text = "3"
-        '
-        'Label35
-        '
-        Me.Label35.AutoSize = True
-        Me.Label35.ForeColor = System.Drawing.Color.Blue
-        Me.Label35.Location = New System.Drawing.Point(198, 106)
-        Me.Label35.Name = "Label35"
-        Me.Label35.Size = New System.Drawing.Size(14, 15)
-        Me.Label35.TabIndex = 28
-        Me.Label35.Text = "2"
-        '
-        'Label21
-        '
-        Me.Label21.AutoSize = True
-        Me.Label21.ForeColor = System.Drawing.Color.Blue
-        Me.Label21.Location = New System.Drawing.Point(373, 106)
-        Me.Label21.Name = "Label21"
-        Me.Label21.Size = New System.Drawing.Size(14, 15)
-        Me.Label21.TabIndex = 27
-        Me.Label21.Text = "8"
-        '
-        'Label22
-        '
-        Me.Label22.AutoSize = True
-        Me.Label22.ForeColor = System.Drawing.Color.Blue
-        Me.Label22.Location = New System.Drawing.Point(305, 106)
-        Me.Label22.Name = "Label22"
-        Me.Label22.Size = New System.Drawing.Size(14, 15)
-        Me.Label22.TabIndex = 26
-        Me.Label22.Text = "5"
-        '
-        'Label20
-        '
-        Me.Label20.AutoSize = True
-        Me.Label20.ForeColor = System.Drawing.Color.Blue
-        Me.Label20.Location = New System.Drawing.Point(244, 106)
-        Me.Label20.Name = "Label20"
-        Me.Label20.Size = New System.Drawing.Size(14, 15)
-        Me.Label20.TabIndex = 25
-        Me.Label20.Text = "4"
-        '
-        'Label19
-        '
-        Me.Label19.AutoSize = True
-        Me.Label19.ForeColor = System.Drawing.Color.Blue
-        Me.Label19.Location = New System.Drawing.Point(176, 106)
-        Me.Label19.Name = "Label19"
-        Me.Label19.Size = New System.Drawing.Size(14, 15)
-        Me.Label19.TabIndex = 24
-        Me.Label19.Text = "1"
-        '
-        'GroupBox6
-        '
-        Me.GroupBox6.Controls.Add(Me.ChkProdDev)
-        Me.GroupBox6.Location = New System.Drawing.Point(1005, 33)
-        Me.GroupBox6.Name = "GroupBox6"
-        Me.GroupBox6.Size = New System.Drawing.Size(135, 100)
-        Me.GroupBox6.TabIndex = 128
-        Me.GroupBox6.TabStop = False
-        Me.GroupBox6.Text = " Environment "
+        Me.Lbl_Server.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.Lbl_Server.AutoSize = True
+        Me.Lbl_Server.ForeColor = System.Drawing.Color.Red
+        Me.Lbl_Server.Location = New System.Drawing.Point(579, 9)
+        Me.Lbl_Server.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.Lbl_Server.Name = "Lbl_Server"
+        Me.Lbl_Server.Size = New System.Drawing.Size(88, 15)
+        Me.Lbl_Server.TabIndex = 26
+        Me.Lbl_Server.Text = "Not Connected"
         '
         'PicRTbarcode
         '
@@ -1259,6 +1747,270 @@ Partial Class FrmMain
         Me.BtnPackStock.Size = New System.Drawing.Size(73, 73)
         Me.BtnPackStock.TabIndex = 0
         Me.BtnPackStock.UseVisualStyleBackColor = True
+        '
+        'PicStatCIB24
+        '
+        Me.PicStatCIB24.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.PicStatCIB24.InitialImage = CType(resources.GetObject("PicStatCIB24.InitialImage"), System.Drawing.Image)
+        Me.PicStatCIB24.Location = New System.Drawing.Point(758, 78)
+        Me.PicStatCIB24.Name = "PicStatCIB24"
+        Me.PicStatCIB24.Size = New System.Drawing.Size(16, 12)
+        Me.PicStatCIB24.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
+        Me.PicStatCIB24.TabIndex = 97
+        Me.PicStatCIB24.TabStop = False
+        '
+        'PicStatCIB23
+        '
+        Me.PicStatCIB23.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.PicStatCIB23.InitialImage = CType(resources.GetObject("PicStatCIB23.InitialImage"), System.Drawing.Image)
+        Me.PicStatCIB23.Location = New System.Drawing.Point(736, 78)
+        Me.PicStatCIB23.Name = "PicStatCIB23"
+        Me.PicStatCIB23.Size = New System.Drawing.Size(16, 12)
+        Me.PicStatCIB23.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
+        Me.PicStatCIB23.TabIndex = 96
+        Me.PicStatCIB23.TabStop = False
+        '
+        'PicStatCIB22
+        '
+        Me.PicStatCIB22.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.PicStatCIB22.InitialImage = CType(resources.GetObject("PicStatCIB22.InitialImage"), System.Drawing.Image)
+        Me.PicStatCIB22.Location = New System.Drawing.Point(712, 78)
+        Me.PicStatCIB22.Name = "PicStatCIB22"
+        Me.PicStatCIB22.Size = New System.Drawing.Size(16, 12)
+        Me.PicStatCIB22.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
+        Me.PicStatCIB22.TabIndex = 95
+        Me.PicStatCIB22.TabStop = False
+        '
+        'PicStatCIB21
+        '
+        Me.PicStatCIB21.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.PicStatCIB21.InitialImage = CType(resources.GetObject("PicStatCIB21.InitialImage"), System.Drawing.Image)
+        Me.PicStatCIB21.Location = New System.Drawing.Point(690, 78)
+        Me.PicStatCIB21.Name = "PicStatCIB21"
+        Me.PicStatCIB21.Size = New System.Drawing.Size(16, 12)
+        Me.PicStatCIB21.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
+        Me.PicStatCIB21.TabIndex = 94
+        Me.PicStatCIB21.TabStop = False
+        '
+        'PicStatCIB20
+        '
+        Me.PicStatCIB20.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.PicStatCIB20.InitialImage = CType(resources.GetObject("PicStatCIB20.InitialImage"), System.Drawing.Image)
+        Me.PicStatCIB20.Location = New System.Drawing.Point(655, 78)
+        Me.PicStatCIB20.Name = "PicStatCIB20"
+        Me.PicStatCIB20.Size = New System.Drawing.Size(16, 12)
+        Me.PicStatCIB20.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
+        Me.PicStatCIB20.TabIndex = 93
+        Me.PicStatCIB20.TabStop = False
+        '
+        'PicStatCIB19
+        '
+        Me.PicStatCIB19.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.PicStatCIB19.InitialImage = CType(resources.GetObject("PicStatCIB19.InitialImage"), System.Drawing.Image)
+        Me.PicStatCIB19.Location = New System.Drawing.Point(633, 78)
+        Me.PicStatCIB19.Name = "PicStatCIB19"
+        Me.PicStatCIB19.Size = New System.Drawing.Size(16, 12)
+        Me.PicStatCIB19.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
+        Me.PicStatCIB19.TabIndex = 92
+        Me.PicStatCIB19.TabStop = False
+        '
+        'PicStatCIB18
+        '
+        Me.PicStatCIB18.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.PicStatCIB18.InitialImage = CType(resources.GetObject("PicStatCIB18.InitialImage"), System.Drawing.Image)
+        Me.PicStatCIB18.Location = New System.Drawing.Point(609, 78)
+        Me.PicStatCIB18.Name = "PicStatCIB18"
+        Me.PicStatCIB18.Size = New System.Drawing.Size(16, 12)
+        Me.PicStatCIB18.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
+        Me.PicStatCIB18.TabIndex = 91
+        Me.PicStatCIB18.TabStop = False
+        '
+        'PicStatCIB17
+        '
+        Me.PicStatCIB17.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.PicStatCIB17.InitialImage = CType(resources.GetObject("PicStatCIB17.InitialImage"), System.Drawing.Image)
+        Me.PicStatCIB17.Location = New System.Drawing.Point(587, 78)
+        Me.PicStatCIB17.Name = "PicStatCIB17"
+        Me.PicStatCIB17.Size = New System.Drawing.Size(16, 12)
+        Me.PicStatCIB17.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
+        Me.PicStatCIB17.TabIndex = 90
+        Me.PicStatCIB17.TabStop = False
+        '
+        'PicStatCIB16
+        '
+        Me.PicStatCIB16.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.PicStatCIB16.InitialImage = CType(resources.GetObject("PicStatCIB16.InitialImage"), System.Drawing.Image)
+        Me.PicStatCIB16.Location = New System.Drawing.Point(550, 78)
+        Me.PicStatCIB16.Name = "PicStatCIB16"
+        Me.PicStatCIB16.Size = New System.Drawing.Size(16, 12)
+        Me.PicStatCIB16.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
+        Me.PicStatCIB16.TabIndex = 85
+        Me.PicStatCIB16.TabStop = False
+        '
+        'PicStatCIB15
+        '
+        Me.PicStatCIB15.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.PicStatCIB15.InitialImage = CType(resources.GetObject("PicStatCIB15.InitialImage"), System.Drawing.Image)
+        Me.PicStatCIB15.Location = New System.Drawing.Point(528, 78)
+        Me.PicStatCIB15.Name = "PicStatCIB15"
+        Me.PicStatCIB15.Size = New System.Drawing.Size(16, 12)
+        Me.PicStatCIB15.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
+        Me.PicStatCIB15.TabIndex = 84
+        Me.PicStatCIB15.TabStop = False
+        '
+        'PicStatCIB14
+        '
+        Me.PicStatCIB14.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.PicStatCIB14.InitialImage = CType(resources.GetObject("PicStatCIB14.InitialImage"), System.Drawing.Image)
+        Me.PicStatCIB14.Location = New System.Drawing.Point(504, 78)
+        Me.PicStatCIB14.Name = "PicStatCIB14"
+        Me.PicStatCIB14.Size = New System.Drawing.Size(16, 12)
+        Me.PicStatCIB14.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
+        Me.PicStatCIB14.TabIndex = 83
+        Me.PicStatCIB14.TabStop = False
+        '
+        'PicStatCIB13
+        '
+        Me.PicStatCIB13.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.PicStatCIB13.InitialImage = CType(resources.GetObject("PicStatCIB13.InitialImage"), System.Drawing.Image)
+        Me.PicStatCIB13.Location = New System.Drawing.Point(482, 78)
+        Me.PicStatCIB13.Name = "PicStatCIB13"
+        Me.PicStatCIB13.Size = New System.Drawing.Size(16, 12)
+        Me.PicStatCIB13.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
+        Me.PicStatCIB13.TabIndex = 82
+        Me.PicStatCIB13.TabStop = False
+        '
+        'PicStatCIB12
+        '
+        Me.PicStatCIB12.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.PicStatCIB12.InitialImage = CType(resources.GetObject("PicStatCIB12.InitialImage"), System.Drawing.Image)
+        Me.PicStatCIB12.Location = New System.Drawing.Point(442, 78)
+        Me.PicStatCIB12.Name = "PicStatCIB12"
+        Me.PicStatCIB12.Size = New System.Drawing.Size(16, 12)
+        Me.PicStatCIB12.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
+        Me.PicStatCIB12.TabIndex = 81
+        Me.PicStatCIB12.TabStop = False
+        '
+        'PicStatCIB11
+        '
+        Me.PicStatCIB11.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.PicStatCIB11.InitialImage = CType(resources.GetObject("PicStatCIB11.InitialImage"), System.Drawing.Image)
+        Me.PicStatCIB11.Location = New System.Drawing.Point(420, 78)
+        Me.PicStatCIB11.Name = "PicStatCIB11"
+        Me.PicStatCIB11.Size = New System.Drawing.Size(16, 12)
+        Me.PicStatCIB11.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
+        Me.PicStatCIB11.TabIndex = 80
+        Me.PicStatCIB11.TabStop = False
+        '
+        'PicStatCIB10
+        '
+        Me.PicStatCIB10.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.PicStatCIB10.InitialImage = CType(resources.GetObject("PicStatCIB10.InitialImage"), System.Drawing.Image)
+        Me.PicStatCIB10.Location = New System.Drawing.Point(396, 78)
+        Me.PicStatCIB10.Name = "PicStatCIB10"
+        Me.PicStatCIB10.Size = New System.Drawing.Size(16, 12)
+        Me.PicStatCIB10.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
+        Me.PicStatCIB10.TabIndex = 79
+        Me.PicStatCIB10.TabStop = False
+        '
+        'PicStatCIB09
+        '
+        Me.PicStatCIB09.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.PicStatCIB09.InitialImage = CType(resources.GetObject("PicStatCIB09.InitialImage"), System.Drawing.Image)
+        Me.PicStatCIB09.Location = New System.Drawing.Point(374, 78)
+        Me.PicStatCIB09.Name = "PicStatCIB09"
+        Me.PicStatCIB09.Size = New System.Drawing.Size(16, 12)
+        Me.PicStatCIB09.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
+        Me.PicStatCIB09.TabIndex = 78
+        Me.PicStatCIB09.TabStop = False
+        '
+        'PicStatCIB08
+        '
+        Me.PicStatCIB08.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.PicStatCIB08.InitialImage = CType(resources.GetObject("PicStatCIB08.InitialImage"), System.Drawing.Image)
+        Me.PicStatCIB08.Location = New System.Drawing.Point(337, 78)
+        Me.PicStatCIB08.Name = "PicStatCIB08"
+        Me.PicStatCIB08.Size = New System.Drawing.Size(16, 12)
+        Me.PicStatCIB08.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
+        Me.PicStatCIB08.TabIndex = 73
+        Me.PicStatCIB08.TabStop = False
+        '
+        'PicStatCIB07
+        '
+        Me.PicStatCIB07.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.PicStatCIB07.InitialImage = CType(resources.GetObject("PicStatCIB07.InitialImage"), System.Drawing.Image)
+        Me.PicStatCIB07.Location = New System.Drawing.Point(315, 78)
+        Me.PicStatCIB07.Name = "PicStatCIB07"
+        Me.PicStatCIB07.Size = New System.Drawing.Size(16, 12)
+        Me.PicStatCIB07.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
+        Me.PicStatCIB07.TabIndex = 72
+        Me.PicStatCIB07.TabStop = False
+        '
+        'PicStatCIB06
+        '
+        Me.PicStatCIB06.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.PicStatCIB06.InitialImage = CType(resources.GetObject("PicStatCIB06.InitialImage"), System.Drawing.Image)
+        Me.PicStatCIB06.Location = New System.Drawing.Point(291, 78)
+        Me.PicStatCIB06.Name = "PicStatCIB06"
+        Me.PicStatCIB06.Size = New System.Drawing.Size(16, 12)
+        Me.PicStatCIB06.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
+        Me.PicStatCIB06.TabIndex = 71
+        Me.PicStatCIB06.TabStop = False
+        '
+        'PicStatCIB05
+        '
+        Me.PicStatCIB05.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.PicStatCIB05.InitialImage = CType(resources.GetObject("PicStatCIB05.InitialImage"), System.Drawing.Image)
+        Me.PicStatCIB05.Location = New System.Drawing.Point(269, 78)
+        Me.PicStatCIB05.Name = "PicStatCIB05"
+        Me.PicStatCIB05.Size = New System.Drawing.Size(16, 12)
+        Me.PicStatCIB05.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
+        Me.PicStatCIB05.TabIndex = 70
+        Me.PicStatCIB05.TabStop = False
+        '
+        'PicStatCIB04
+        '
+        Me.PicStatCIB04.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.PicStatCIB04.InitialImage = CType(resources.GetObject("PicStatCIB04.InitialImage"), System.Drawing.Image)
+        Me.PicStatCIB04.Location = New System.Drawing.Point(235, 78)
+        Me.PicStatCIB04.Name = "PicStatCIB04"
+        Me.PicStatCIB04.Size = New System.Drawing.Size(16, 12)
+        Me.PicStatCIB04.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
+        Me.PicStatCIB04.TabIndex = 69
+        Me.PicStatCIB04.TabStop = False
+        '
+        'PicStatCIB03
+        '
+        Me.PicStatCIB03.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.PicStatCIB03.InitialImage = CType(resources.GetObject("PicStatCIB03.InitialImage"), System.Drawing.Image)
+        Me.PicStatCIB03.Location = New System.Drawing.Point(213, 78)
+        Me.PicStatCIB03.Name = "PicStatCIB03"
+        Me.PicStatCIB03.Size = New System.Drawing.Size(16, 12)
+        Me.PicStatCIB03.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
+        Me.PicStatCIB03.TabIndex = 68
+        Me.PicStatCIB03.TabStop = False
+        '
+        'PicStatCIB02
+        '
+        Me.PicStatCIB02.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.PicStatCIB02.InitialImage = CType(resources.GetObject("PicStatCIB02.InitialImage"), System.Drawing.Image)
+        Me.PicStatCIB02.Location = New System.Drawing.Point(189, 78)
+        Me.PicStatCIB02.Name = "PicStatCIB02"
+        Me.PicStatCIB02.Size = New System.Drawing.Size(16, 12)
+        Me.PicStatCIB02.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
+        Me.PicStatCIB02.TabIndex = 67
+        Me.PicStatCIB02.TabStop = False
+        '
+        'PicStatCIB01
+        '
+        Me.PicStatCIB01.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.PicStatCIB01.InitialImage = CType(resources.GetObject("PicStatCIB01.InitialImage"), System.Drawing.Image)
+        Me.PicStatCIB01.Location = New System.Drawing.Point(167, 78)
+        Me.PicStatCIB01.Name = "PicStatCIB01"
+        Me.PicStatCIB01.Size = New System.Drawing.Size(16, 12)
+        Me.PicStatCIB01.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
+        Me.PicStatCIB01.TabIndex = 66
+        Me.PicStatCIB01.TabStop = False
         '
         'PicStatM8
         '
@@ -1371,17 +2123,64 @@ Partial Class FrmMain
         Me.PicTimerHB.TabIndex = 16
         Me.PicTimerHB.TabStop = False
         '
-        'Lbl_Server
+        'LblPOText
         '
-        Me.Lbl_Server.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.Lbl_Server.AutoSize = True
-        Me.Lbl_Server.ForeColor = System.Drawing.Color.Red
-        Me.Lbl_Server.Location = New System.Drawing.Point(579, 9)
-        Me.Lbl_Server.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.Lbl_Server.Name = "Lbl_Server"
-        Me.Lbl_Server.Size = New System.Drawing.Size(88, 15)
-        Me.Lbl_Server.TabIndex = 26
-        Me.Lbl_Server.Text = "Not Connected"
+        Me.LblPOText.AutoSize = True
+        Me.LblPOText.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.LblPOText.ForeColor = System.Drawing.Color.Fuchsia
+        Me.LblPOText.Location = New System.Drawing.Point(428, 111)
+        Me.LblPOText.Name = "LblPOText"
+        Me.LblPOText.Size = New System.Drawing.Size(535, 20)
+        Me.LblPOText.TabIndex = 138
+        Me.LblPOText.Text = "Enter a PO Number or the Begining of a PO Number to search for."
+        Me.LblPOText.Visible = False
+        '
+        'LblSearch
+        '
+        Me.LblSearch.AutoSize = True
+        Me.LblSearch.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.LblSearch.ForeColor = System.Drawing.Color.Fuchsia
+        Me.LblSearch.Location = New System.Drawing.Point(746, 39)
+        Me.LblSearch.Name = "LblSearch"
+        Me.LblSearch.Size = New System.Drawing.Size(110, 20)
+        Me.LblSearch.TabIndex = 137
+        Me.LblSearch.Text = "Search Date"
+        '
+        'DateSummary
+        '
+        Me.DateSummary.Format = System.Windows.Forms.DateTimePickerFormat.[Short]
+        Me.DateSummary.Location = New System.Drawing.Point(581, 34)
+        Me.DateSummary.Name = "DateSummary"
+        Me.DateSummary.Size = New System.Drawing.Size(135, 21)
+        Me.DateSummary.TabIndex = 134
+        '
+        'TxtSummary
+        '
+        Me.TxtSummary.Location = New System.Drawing.Point(572, 34)
+        Me.TxtSummary.Name = "TxtSummary"
+        Me.TxtSummary.Size = New System.Drawing.Size(144, 21)
+        Me.TxtSummary.TabIndex = 136
+        Me.TxtSummary.Visible = False
+        '
+        'ChkSummary
+        '
+        Me.ChkSummary.Appearance = System.Windows.Forms.Appearance.Button
+        Me.ChkSummary.Location = New System.Drawing.Point(744, 66)
+        Me.ChkSummary.Name = "ChkSummary"
+        Me.ChkSummary.Size = New System.Drawing.Size(144, 42)
+        Me.ChkSummary.TabIndex = 135
+        Me.ChkSummary.Text = "Toggle Search"
+        Me.ChkSummary.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
+        Me.ChkSummary.UseVisualStyleBackColor = True
+        '
+        'BtnSummary
+        '
+        Me.BtnSummary.Location = New System.Drawing.Point(572, 66)
+        Me.BtnSummary.Name = "BtnSummary"
+        Me.BtnSummary.Size = New System.Drawing.Size(144, 42)
+        Me.BtnSummary.TabIndex = 133
+        Me.BtnSummary.Text = "Get Summary"
+        Me.BtnSummary.UseVisualStyleBackColor = True
         '
         'FrmMain
         '
@@ -1422,11 +2221,35 @@ Partial Class FrmMain
         Me.GroupBox5.ResumeLayout(False)
         Me.TabUtil.ResumeLayout(False)
         Me.TabUtil.PerformLayout()
-        Me.GroupBox4.ResumeLayout(False)
-        Me.GroupBox4.PerformLayout()
         Me.GroupBox6.ResumeLayout(False)
         Me.GroupBox6.PerformLayout()
+        Me.GroupBox4.ResumeLayout(False)
+        Me.GroupBox4.PerformLayout()
         CType(Me.PicRTbarcode, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.PicStatCIB24, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.PicStatCIB23, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.PicStatCIB22, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.PicStatCIB21, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.PicStatCIB20, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.PicStatCIB19, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.PicStatCIB18, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.PicStatCIB17, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.PicStatCIB16, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.PicStatCIB15, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.PicStatCIB14, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.PicStatCIB13, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.PicStatCIB12, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.PicStatCIB11, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.PicStatCIB10, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.PicStatCIB09, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.PicStatCIB08, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.PicStatCIB07, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.PicStatCIB06, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.PicStatCIB05, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.PicStatCIB04, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.PicStatCIB03, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.PicStatCIB02, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.PicStatCIB01, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.PicStatM8, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.PicStatM7, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.PicStatM6, System.ComponentModel.ISupportInitialize).EndInit()
@@ -1555,4 +2378,66 @@ Partial Class FrmMain
     Friend WithEvents GroupBox6 As GroupBox
     Friend WithEvents ChkProdDev As CheckBox
     Friend WithEvents Lbl_Server As Label
+    Friend WithEvents Label9 As Label
+    Friend WithEvents Label11 As Label
+    Friend WithEvents TxtGUID As TextBox
+    Friend WithEvents BtnWriteMGuid As Button
+    Friend WithEvents LblMguid As Label
+    Friend WithEvents LblCIBguid As Label
+    Friend WithEvents Label49 As Label
+    Friend WithEvents Label50 As Label
+    Friend WithEvents Label47 As Label
+    Friend WithEvents Label48 As Label
+    Friend WithEvents Label43 As Label
+    Friend WithEvents Label44 As Label
+    Friend WithEvents Label45 As Label
+    Friend WithEvents Label46 As Label
+    Friend WithEvents Label39 As Label
+    Friend WithEvents Label40 As Label
+    Friend WithEvents Label41 As Label
+    Friend WithEvents Label42 As Label
+    Friend WithEvents PicStatCIB24 As PictureBox
+    Friend WithEvents PicStatCIB23 As PictureBox
+    Friend WithEvents PicStatCIB22 As PictureBox
+    Friend WithEvents PicStatCIB21 As PictureBox
+    Friend WithEvents PicStatCIB20 As PictureBox
+    Friend WithEvents PicStatCIB19 As PictureBox
+    Friend WithEvents PicStatCIB18 As PictureBox
+    Friend WithEvents PicStatCIB17 As PictureBox
+    Friend WithEvents PicStatCIB16 As PictureBox
+    Friend WithEvents PicStatCIB15 As PictureBox
+    Friend WithEvents PicStatCIB14 As PictureBox
+    Friend WithEvents PicStatCIB13 As PictureBox
+    Friend WithEvents PicStatCIB12 As PictureBox
+    Friend WithEvents PicStatCIB11 As PictureBox
+    Friend WithEvents PicStatCIB10 As PictureBox
+    Friend WithEvents PicStatCIB09 As PictureBox
+    Friend WithEvents PicStatCIB08 As PictureBox
+    Friend WithEvents PicStatCIB07 As PictureBox
+    Friend WithEvents PicStatCIB06 As PictureBox
+    Friend WithEvents PicStatCIB05 As PictureBox
+    Friend WithEvents PicStatCIB04 As PictureBox
+    Friend WithEvents PicStatCIB03 As PictureBox
+    Friend WithEvents PicStatCIB02 As PictureBox
+    Friend WithEvents PicStatCIB01 As PictureBox
+    Friend WithEvents Label33 As Label
+    Friend WithEvents Label32 As Label
+    Friend WithEvents Label31 As Label
+    Friend WithEvents Label34 As Label
+    Friend WithEvents Label27 As Label
+    Friend WithEvents Label28 As Label
+    Friend WithEvents Label29 As Label
+    Friend WithEvents Label30 As Label
+    Friend WithEvents Label23 As Label
+    Friend WithEvents Label24 As Label
+    Friend WithEvents Label25 As Label
+    Friend WithEvents Label26 As Label
+    Friend WithEvents ChkSound As CheckBox
+    Friend WithEvents BtnTestAudio As Button
+    Friend WithEvents LblPOText As Label
+    Friend WithEvents LblSearch As Label
+    Friend WithEvents DateSummary As DateTimePicker
+    Friend WithEvents TxtSummary As TextBox
+    Friend WithEvents ChkSummary As CheckBox
+    Friend WithEvents BtnSummary As Button
 End Class

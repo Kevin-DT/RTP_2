@@ -91,6 +91,15 @@ Namespace My.Resources
         End Property
         
         '''<summary>
+        '''  Looks up a localized resource of type System.IO.UnmanagedMemoryStream similar to System.IO.MemoryStream.
+        '''</summary>
+        Friend ReadOnly Property RT_End() As System.IO.UnmanagedMemoryStream
+            Get
+                Return ResourceManager.GetStream("RT_End", resourceCulture)
+            End Get
+        End Property
+        
+        '''<summary>
         '''  Looks up a localized resource of type System.Drawing.Bitmap.
         '''</summary>
         Friend ReadOnly Property sliderDev() As System.Drawing.Bitmap

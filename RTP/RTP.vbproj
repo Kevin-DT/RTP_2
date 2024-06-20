@@ -26,9 +26,12 @@
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
     <InstallUrl>http://www.datatransformation.com.au/Software/RTP/</InstallUrl>
-    <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
+    <ProductName>RTP</ProductName>
+    <PublisherName>Data Transformation Pty Ltd</PublisherName>
+    <SuiteName>Rapid Test</SuiteName>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>2</ApplicationRevision>
+    <OpenBrowserOnPublish>false</OpenBrowserOnPublish>
+    <ApplicationRevision>19</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -146,6 +149,12 @@
     <Compile Include="FrmSettings.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="My Project\FrmSummary.Designer.vb">
+      <DependentUpon>FrmSummary.vb</DependentUpon>
+    </Compile>
+    <Compile Include="My Project\FrmSummary.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Printers.Designer.vb">
       <DependentUpon>Printers.vb</DependentUpon>
     </Compile>
@@ -202,6 +211,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Rapid Test Logo.ico" />
+    <None Include="Resources\RT_End.wav" />
     <None Include="Resources\sliderProd.jpg" />
     <None Include="Resources\sliderDev.jpg" />
     <None Include="Resources\StatusYellow.png" />
