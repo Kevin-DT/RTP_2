@@ -209,6 +209,7 @@ Partial Class FrmMain
         Me.PicStatM1 = New System.Windows.Forms.PictureBox()
         Me.ChkProdDev = New System.Windows.Forms.CheckBox()
         Me.PicTimerHB = New System.Windows.Forms.PictureBox()
+        Me.LblEmail = New System.Windows.Forms.Label()
         PrinterToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.MenuStrip1.SuspendLayout()
         Me.GroupBox1.SuspendLayout()
@@ -308,7 +309,7 @@ Partial Class FrmMain
         Me.LblWifi.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.LblWifi.AutoSize = True
         Me.LblWifi.ForeColor = System.Drawing.Color.Red
-        Me.LblWifi.Location = New System.Drawing.Point(814, 7)
+        Me.LblWifi.Location = New System.Drawing.Point(814, 8)
         Me.LblWifi.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.LblWifi.Name = "LblWifi"
         Me.LblWifi.Size = New System.Drawing.Size(88, 15)
@@ -1788,7 +1789,7 @@ Partial Class FrmMain
         Me.Lbl_Server.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.Lbl_Server.AutoSize = True
         Me.Lbl_Server.ForeColor = System.Drawing.Color.Red
-        Me.Lbl_Server.Location = New System.Drawing.Point(579, 9)
+        Me.Lbl_Server.Location = New System.Drawing.Point(579, 8)
         Me.Lbl_Server.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.Lbl_Server.Name = "Lbl_Server"
         Me.Lbl_Server.Size = New System.Drawing.Size(88, 15)
@@ -2208,17 +2209,31 @@ Partial Class FrmMain
         '
         Me.PicTimerHB.BackgroundImage = Global.RTP.My.Resources.Resources.circle_blue
         Me.PicTimerHB.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom
-        Me.PicTimerHB.Location = New System.Drawing.Point(782, 3)
+        Me.PicTimerHB.Location = New System.Drawing.Point(782, 4)
         Me.PicTimerHB.Name = "PicTimerHB"
         Me.PicTimerHB.Size = New System.Drawing.Size(25, 22)
         Me.PicTimerHB.TabIndex = 16
         Me.PicTimerHB.TabStop = False
+        '
+        'LblEmail
+        '
+        Me.LblEmail.AutoSize = True
+        Me.LblEmail.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.LblEmail.ForeColor = System.Drawing.Color.Red
+        Me.LblEmail.Location = New System.Drawing.Point(273, 5)
+        Me.LblEmail.Name = "LblEmail"
+        Me.LblEmail.Size = New System.Drawing.Size(240, 20)
+        Me.LblEmail.TabIndex = 115
+        Me.LblEmail.Text = "Please wait... Sending Email."
+        Me.LblEmail.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
+        Me.LblEmail.Visible = False
         '
         'FrmMain
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(7.0!, 15.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(1202, 759)
+        Me.Controls.Add(Me.LblEmail)
         Me.Controls.Add(Me.Lbl_Server)
         Me.Controls.Add(Me.TabControl1)
         Me.Controls.Add(Me.PicTimerHB)
@@ -2480,4 +2495,5 @@ Partial Class FrmMain
     Friend WithEvents PrintStickerLabel As Printing.PrintDocument
     Friend WithEvents PrintDocument3 As Printing.PrintDocument
     Friend WithEvents PrintDocument5 As Printing.PrintDocument
+    Friend WithEvents LblEmail As Label
 End Class

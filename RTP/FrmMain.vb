@@ -81,6 +81,38 @@ Public Class FrmMain
     Public RtUnitChannel As Integer = 0 '*** The real zero based RT unit Channel
     Public B_RelayCheck As Boolean = False '*** Use when not tripping but testing channels - May become absolete
 
+    '*** Arrays for Packing details
+    '*** Array x 3 elements
+    '*** Unit ID and GUID string Type and count
+    Public S_Pack_Master(500, 6) As String
+    Public S_Pack_MC8F5(500, 6) As String
+    Public S_Pack_MasterM(500, 6) As String
+    Public S_Pack_MC8(500, 6) As String
+    Public S_Pack_CIB(500, 6) As String
+    Public S_Pack_MC8SS(500, 6) As String
+    Public S_Pack_CIBSS(500, 6) As String
+    Public S_Pack_MC8F(500, 6) As String
+    Public S_Pack_CIBF(500, 6) As String
+    Public S_Pack_CIB0F(500, 6) As String
+    Public StartIndex As Integer = 0
+    Public StopIndex As Integer = 1
+
+    '*** Product Type & qty
+    Public ArrayProducts(500, 4) As String
+    Public PrintExtras As Boolean = False
+
+    '**** Product Labels
+    Public S_LabelHeading As String = ""
+    Public S_PartNumber As String = ""
+    Public S_PartDesc As String = ""
+    Public S_ShipLine1 As String = ""
+    Public S_ShipLine2 As String = ""
+    Public S_ShipLine3 As String = ""
+    Public S_ShipLine4 As String = ""
+    Public S_CIB_GUID As String = "" '** This is the CIB GUID to write to the NDB
+    Public IntSummaryNoToPrint As String = "" '*** This is used to Print the summary sticker for hte Miscellaneous stock items packed
+    Public StrAttachedPO As String = "" '*** This Is the atached PO for the email from using the packing form
+
     '*** Debug
     Public S_LogFileText As String = ""
     Public BSuppressTimeWarning As Boolean
@@ -4148,7 +4180,7 @@ FROM            dbo.NDB_Board INNER JOIN
 
                         End Select
                     End If
-                    TxtCIBManCode.Focus()
+                    TxtMasterManCode.Focus()
                 End If
             Case Else
 
@@ -4217,4 +4249,187 @@ FROM            dbo.NDB_Board INNER JOIN
             End Select
         End If
     End Sub
+
+    Private Sub TxtMasterManCode_TextChanged(sender As Object, e As EventArgs) Handles TxtMasterManCode.TextChanged
+        TxtMasterManCode.Text = Strings.Replace(TxtMasterManCode.Text, vbCrLf, "")
+        TxtMasterManCode.Text = Strings.Replace(TxtMasterManCode.Text, vbCr, "")
+        TxtMasterManCode.Text = Strings.Replace(TxtMasterManCode.Text, vbLf, "")
+        TxtMasterManCode.Text = Strings.Replace(TxtMasterManCode.Text, "!", "")
+        TxtMasterManCode.Text = Strings.Replace(TxtMasterManCode.Text, "#", "")
+    End Sub
+
+    Private Sub TxtCIBManCode_TextChanged(sender As Object, e As EventArgs) Handles TxtCIBManCode.TextChanged
+        TxtCIBManCode.Text = Strings.Replace(TxtCIBManCode.Text, vbCrLf, "")
+        TxtCIBManCode.Text = Strings.Replace(TxtCIBManCode.Text, vbCr, "")
+        TxtCIBManCode.Text = Strings.Replace(TxtCIBManCode.Text, vbLf, "")
+        TxtCIBManCode.Text = Strings.Replace(TxtCIBManCode.Text, "!", "")
+        TxtCIBManCode.Text = Strings.Replace(TxtCIBManCode.Text, "#", "")
+    End Sub
+
+    Private Sub BtnPrintLabels_Click(sender As Object, e As EventArgs) Handles BtnPrintLabels.Click
+        If Trim(TxtOrderRef.Text) <> "" Then
+            '*** 
+            TxtOrderRef.Text = Trim(UCase(TxtOrderRef.Text))
+
+
+            If Trim(TxtUser.Text) <> "" Then
+                TxtUser.Text = Trim(StrConv(TxtUser.Text, VbStrConv.ProperCase))
+
+                If TxtPurchaser.Text <> "" Then
+                    '**** PRINT SALES LABELS
+                    Labels.ShowDialog()
+                Else
+
+                    MsgBox("You MUST have a Purchaser or indicate Stock.", vbCritical + vbOKOnly, "Warning")
+                End If
+
+            Else
+                MsgBox("You MUST have a User.", vbCritical + vbOKOnly, "Warning")
+            End If
+        Else
+            MsgBox("You MUST have an order reference", vbCritical + vbOKOnly, "Warning")
+        End If
+    End Sub
+
+    Private Sub BtnPackStock_Click(sender As Object, e As EventArgs) Handles BtnPackStock.Click
+        Pack.ShowDialog()
+    End Sub
+    Public Function SendPO() As Integer
+        '==============
+        '*** New variables for collecting & emailng the details to accounts.
+        Dim StrSendTo As String
+        Dim StrSubject As String
+        Dim StrBody As String
+        'SendOrderEmail(StrSendTo, StrSubject,StrBody)
+        '==============
+
+        '*** Divide into Master, MC8 & Channel 
+        '*** Get totals
+        Dim I_Masters As Integer = Val(S_Pack_Master(0, 2))
+        Dim I_MC8F5 As Integer = Val(S_Pack_MC8F5(0, 2))
+        Dim I_MastersM As Integer = Val(S_Pack_MasterM(0, 2))
+        Dim I_MC8 As Integer = Val(S_Pack_MC8(0, 2))
+        Dim I_MC8SS As Integer = Val(S_Pack_MC8SS(0, 2))
+        Dim I_CIB As Integer = Val(S_Pack_CIB(0, 2))
+        Dim I_CIBSS As Integer = Val(S_Pack_CIBSS(0, 2))
+
+        Dim I_MC8F As Integer = Val(S_Pack_MC8F(0, 2))
+        Dim I_CIBF As Integer = Val(S_Pack_CIBF(0, 2))
+
+        '*** Subject
+        StrSubject = "Rapid Test Systems. Order Details for " & UCase(Trim(Pack.Txt_PONumber.Text))
+
+        '*** Body
+        StrBody = "Order Details for " & UCase(Trim(Pack.Txt_PONumber.Text)) & vbCrLf
+        StrBody += vbCrLf
+
+        StrBody += "Date: " & Format(Now()) & vbCrLf
+        StrBody += "Packed for: " & Trim(Pack.Txt_Purchaser.Text) & vbCrLf & vbCrLf
+
+        StrBody += "Packed by: " & Trim(Pack.Txt_PackedBy.Text)
+        StrBody += vbCrLf
+        StrBody += vbCrLf
+
+        StrBody += "Qty" & vbTab & "Product Description" & vbCrLf
+        StrBody += "=======================" & vbCrLf
+
+        If I_Masters > 0 Then
+            StrBody += I_Masters.ToString & vbTab & "Standard Master Module (RTTUWF)" & vbCrLf
+        End If
+
+        If I_MastersM > 0 Then
+            StrBody += I_MastersM.ToString & vbTab & "Standard Master Module - MOV (RTTUWFM)" & vbCrLf
+        End If
+
+        If I_MC8F5 > 0 Then
+            StrBody += I_MC8F5.ToString & vbTab & "MC8F5 Master Module (MC8F5-110/230)" & vbCrLf
+        End If
+
+        If I_MC8 > 0 Then
+            StrBody += I_MC8.ToString & vbTab & "MC8 Master Module (RTMC8)" & vbCrLf
+        End If
+
+        If I_MC8F > 0 Then
+            StrBody += I_MC8F.ToString & vbTab & "MC8F Master Module (MC8-110/230)" & vbCrLf
+        End If
+
+        If I_CIBF > 0 Then
+            StrBody += I_CIBF.ToString & vbTab & "Channel Board Module - Fused (RTRB24F)" & vbCrLf
+        End If
+
+        If I_CIB > 0 Then
+            StrBody += I_CIB.ToString & vbTab & "Channel Board Module (RTRB24)" & vbCrLf
+        End If
+
+        If I_MC8SS > 0 Then
+            StrBody += I_MC8SS.ToString & vbTab & "MC8 Solid State Module (RTMC8SS) - THIS PRODUCT MUST NOT BE SHIPPED" & vbCrLf
+        End If
+
+        If I_CIBSS > 0 Then
+            StrBody += I_CIBSS.ToString & vbTab & "Solid State Channel  Module (RTRB24) - THIS PRODUCT MUST NOT BE SHIPPED" & vbCrLf
+        End If
+
+        '*** Other Products
+        '*** ArrayProducts
+
+        If ArrayProducts(0, 0) = "YES" Then
+            For x = 1 To 20 '*** Only loop through 20 items as there are not that many 
+                If ArrayProducts(x, 0) <> "" Then
+                    StrBody += ArrayProducts(x, 3) & vbTab & ArrayProducts(x, 1) & " (" & ArrayProducts(x, 0) & ")" & vbCrLf
+                End If
+            Next
+            PrintExtras = False
+        End If
+        '*** END Other products
+        StrBody += vbCrLf & vbCrLf
+        StrBody += "*** END OF ORDER ***"
+
+        '====== Send Email
+        StrSendTo = "accounts@ats.com.au"
+        SendOrderEmail(StrSendTo, StrSubject, StrBody)
+        Debug.Print("END EMAIL SENDING")
+        Application.DoEvents()
+        Return 1
+    End Function
+    Private Function SendOrderEmail(EmailSendTo As String, EmailSubject As String, EmailBody As String) As Integer
+        Dim EmailResult As Integer
+        Dim EmailTest As Boolean = False
+        LblEmail.Visible = True
+        Application.DoEvents()
+        If EmailSubject = "Test Only" Then EmailTest = True
+        Try
+            Dim SmtpServer As New SmtpClient()
+            Dim mail As New MailMessage()
+            'SmtpServer.Credentials = New Net.NetworkCredential("atsapps@gmx.com", "atsGMX2020")
+            SmtpServer.Credentials = New Net.NetworkCredential("meetingroom@ats.com.au", "Meeting01")
+            SmtpServer.Port = 587
+            'SmtpServer.Host = "mail.gmx.com"
+            SmtpServer.Host = "smtp.office365.com"
+            SmtpServer.EnableSsl = True
+            mail = New MailMessage With {
+                .From = New MailAddress("meetingroom@ats.com.au", "Rapid Test Orders")
+            }
+            mail.To.Add(EmailSendTo)
+            If Not EmailTest Then
+                mail.Bcc.Add("kevin@ats.com.au")
+                mail.To.Add("lance@ats.com.au")
+                mail.To.Add("wayne@ats.com.au")
+            End If
+            mail.Subject = EmailSubject
+            mail.Body = EmailBody
+
+            Application.DoEvents()
+
+            Dim FileAttachment As New Attachment(StrAttachedPO)
+            mail.Attachments.Add(FileAttachment)
+
+            SmtpServer.Send(mail)
+            EmailResult = 1
+        Catch ex As Exception
+            MsgBox(ex.ToString)
+            EmailResult = 0
+        End Try
+        LblEmail.Visible = False
+        Return EmailResult
+    End Function
 End Class

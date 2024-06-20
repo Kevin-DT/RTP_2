@@ -161,6 +161,18 @@
     <Compile Include="F_NDBMessage.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Labels.Designer.vb">
+      <DependentUpon>Labels.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Labels.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Pack.Designer.vb">
+      <DependentUpon>Pack.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Pack.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Printers.Designer.vb">
       <DependentUpon>Printers.vb</DependentUpon>
     </Compile>
@@ -196,6 +208,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="F_NDBMessage.resx">
       <DependentUpon>F_NDBMessage.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Labels.resx">
+      <DependentUpon>Labels.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Pack.resx">
+      <DependentUpon>Pack.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Printers.resx">
       <DependentUpon>Printers.vb</DependentUpon>
