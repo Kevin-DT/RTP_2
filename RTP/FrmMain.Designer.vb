@@ -139,6 +139,12 @@ Partial Class FrmMain
         Me.LstWiFi = New System.Windows.Forms.ListBox()
         Me.LblPrompt = New System.Windows.Forms.Label()
         Me.TabUtil = New System.Windows.Forms.TabPage()
+        Me.LblPOText = New System.Windows.Forms.Label()
+        Me.LblSearch = New System.Windows.Forms.Label()
+        Me.DateSummary = New System.Windows.Forms.DateTimePicker()
+        Me.TxtSummary = New System.Windows.Forms.TextBox()
+        Me.ChkSummary = New System.Windows.Forms.CheckBox()
+        Me.BtnSummary = New System.Windows.Forms.Button()
         Me.BtnTestAudio = New System.Windows.Forms.Button()
         Me.Label9 = New System.Windows.Forms.Label()
         Me.Label11 = New System.Windows.Forms.Label()
@@ -159,6 +165,14 @@ Partial Class FrmMain
         Me.rbAnyPhase = New System.Windows.Forms.RadioButton()
         Me.ToolTip1 = New System.Windows.Forms.ToolTip(Me.components)
         Me.Lbl_Server = New System.Windows.Forms.Label()
+        Me.PrintDocument11 = New System.Drawing.Printing.PrintDocument()
+        Me.PrintDocument12 = New System.Drawing.Printing.PrintDocument()
+        Me.PrintDocument1 = New System.Drawing.Printing.PrintDocument()
+        Me.PrintDocument2 = New System.Drawing.Printing.PrintDocument()
+        Me.PrintDocument4 = New System.Drawing.Printing.PrintDocument()
+        Me.PrintStickerLabel = New System.Drawing.Printing.PrintDocument()
+        Me.PrintDocument3 = New System.Drawing.Printing.PrintDocument()
+        Me.PrintDocument5 = New System.Drawing.Printing.PrintDocument()
         Me.PicRTbarcode = New System.Windows.Forms.PictureBox()
         Me.BtnPackStock = New System.Windows.Forms.Button()
         Me.PicStatCIB24 = New System.Windows.Forms.PictureBox()
@@ -195,12 +209,6 @@ Partial Class FrmMain
         Me.PicStatM1 = New System.Windows.Forms.PictureBox()
         Me.ChkProdDev = New System.Windows.Forms.CheckBox()
         Me.PicTimerHB = New System.Windows.Forms.PictureBox()
-        Me.LblPOText = New System.Windows.Forms.Label()
-        Me.LblSearch = New System.Windows.Forms.Label()
-        Me.DateSummary = New System.Windows.Forms.DateTimePicker()
-        Me.TxtSummary = New System.Windows.Forms.TextBox()
-        Me.ChkSummary = New System.Windows.Forms.CheckBox()
-        Me.BtnSummary = New System.Windows.Forms.Button()
         PrinterToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.MenuStrip1.SuspendLayout()
         Me.GroupBox1.SuspendLayout()
@@ -998,9 +1006,9 @@ Partial Class FrmMain
         Me.ChkSound.ForeColor = System.Drawing.Color.Black
         Me.ChkSound.Location = New System.Drawing.Point(902, 407)
         Me.ChkSound.Name = "ChkSound"
-        Me.ChkSound.Size = New System.Drawing.Size(126, 19)
+        Me.ChkSound.Size = New System.Drawing.Size(171, 19)
         Me.ChkSound.TabIndex = 114
-        Me.ChkSound.Text = "Play Sound at End"
+        Me.ChkSound.Text = "Play Sound when Finished"
         Me.ChkSound.UseVisualStyleBackColor = True
         '
         'ChkManCntrls
@@ -1517,6 +1525,65 @@ Partial Class FrmMain
         Me.TabUtil.Text = "Utilities"
         Me.TabUtil.UseVisualStyleBackColor = True
         '
+        'LblPOText
+        '
+        Me.LblPOText.AutoSize = True
+        Me.LblPOText.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.LblPOText.ForeColor = System.Drawing.Color.Fuchsia
+        Me.LblPOText.Location = New System.Drawing.Point(428, 111)
+        Me.LblPOText.Name = "LblPOText"
+        Me.LblPOText.Size = New System.Drawing.Size(535, 20)
+        Me.LblPOText.TabIndex = 138
+        Me.LblPOText.Text = "Enter a PO Number or the Begining of a PO Number to search for."
+        Me.LblPOText.Visible = False
+        '
+        'LblSearch
+        '
+        Me.LblSearch.AutoSize = True
+        Me.LblSearch.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.LblSearch.ForeColor = System.Drawing.Color.Fuchsia
+        Me.LblSearch.Location = New System.Drawing.Point(746, 39)
+        Me.LblSearch.Name = "LblSearch"
+        Me.LblSearch.Size = New System.Drawing.Size(110, 20)
+        Me.LblSearch.TabIndex = 137
+        Me.LblSearch.Text = "Search Date"
+        '
+        'DateSummary
+        '
+        Me.DateSummary.Format = System.Windows.Forms.DateTimePickerFormat.[Short]
+        Me.DateSummary.Location = New System.Drawing.Point(581, 34)
+        Me.DateSummary.Name = "DateSummary"
+        Me.DateSummary.Size = New System.Drawing.Size(135, 21)
+        Me.DateSummary.TabIndex = 134
+        '
+        'TxtSummary
+        '
+        Me.TxtSummary.Location = New System.Drawing.Point(572, 34)
+        Me.TxtSummary.Name = "TxtSummary"
+        Me.TxtSummary.Size = New System.Drawing.Size(144, 21)
+        Me.TxtSummary.TabIndex = 136
+        Me.TxtSummary.Visible = False
+        '
+        'ChkSummary
+        '
+        Me.ChkSummary.Appearance = System.Windows.Forms.Appearance.Button
+        Me.ChkSummary.Location = New System.Drawing.Point(744, 66)
+        Me.ChkSummary.Name = "ChkSummary"
+        Me.ChkSummary.Size = New System.Drawing.Size(144, 42)
+        Me.ChkSummary.TabIndex = 135
+        Me.ChkSummary.Text = "Toggle Search"
+        Me.ChkSummary.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
+        Me.ChkSummary.UseVisualStyleBackColor = True
+        '
+        'BtnSummary
+        '
+        Me.BtnSummary.Location = New System.Drawing.Point(572, 66)
+        Me.BtnSummary.Name = "BtnSummary"
+        Me.BtnSummary.Size = New System.Drawing.Size(144, 42)
+        Me.BtnSummary.TabIndex = 133
+        Me.BtnSummary.Text = "Get Summary"
+        Me.BtnSummary.UseVisualStyleBackColor = True
+        '
         'BtnTestAudio
         '
         Me.BtnTestAudio.Location = New System.Drawing.Point(24, 382)
@@ -1727,6 +1794,30 @@ Partial Class FrmMain
         Me.Lbl_Server.Size = New System.Drawing.Size(88, 15)
         Me.Lbl_Server.TabIndex = 26
         Me.Lbl_Server.Text = "Not Connected"
+        '
+        'PrintDocument11
+        '
+        '
+        'PrintDocument12
+        '
+        '
+        'PrintDocument1
+        '
+        '
+        'PrintDocument2
+        '
+        '
+        'PrintDocument4
+        '
+        '
+        'PrintStickerLabel
+        '
+        '
+        'PrintDocument3
+        '
+        '
+        'PrintDocument5
+        '
         '
         'PicRTbarcode
         '
@@ -2123,65 +2214,6 @@ Partial Class FrmMain
         Me.PicTimerHB.TabIndex = 16
         Me.PicTimerHB.TabStop = False
         '
-        'LblPOText
-        '
-        Me.LblPOText.AutoSize = True
-        Me.LblPOText.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.LblPOText.ForeColor = System.Drawing.Color.Fuchsia
-        Me.LblPOText.Location = New System.Drawing.Point(428, 111)
-        Me.LblPOText.Name = "LblPOText"
-        Me.LblPOText.Size = New System.Drawing.Size(535, 20)
-        Me.LblPOText.TabIndex = 138
-        Me.LblPOText.Text = "Enter a PO Number or the Begining of a PO Number to search for."
-        Me.LblPOText.Visible = False
-        '
-        'LblSearch
-        '
-        Me.LblSearch.AutoSize = True
-        Me.LblSearch.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.LblSearch.ForeColor = System.Drawing.Color.Fuchsia
-        Me.LblSearch.Location = New System.Drawing.Point(746, 39)
-        Me.LblSearch.Name = "LblSearch"
-        Me.LblSearch.Size = New System.Drawing.Size(110, 20)
-        Me.LblSearch.TabIndex = 137
-        Me.LblSearch.Text = "Search Date"
-        '
-        'DateSummary
-        '
-        Me.DateSummary.Format = System.Windows.Forms.DateTimePickerFormat.[Short]
-        Me.DateSummary.Location = New System.Drawing.Point(581, 34)
-        Me.DateSummary.Name = "DateSummary"
-        Me.DateSummary.Size = New System.Drawing.Size(135, 21)
-        Me.DateSummary.TabIndex = 134
-        '
-        'TxtSummary
-        '
-        Me.TxtSummary.Location = New System.Drawing.Point(572, 34)
-        Me.TxtSummary.Name = "TxtSummary"
-        Me.TxtSummary.Size = New System.Drawing.Size(144, 21)
-        Me.TxtSummary.TabIndex = 136
-        Me.TxtSummary.Visible = False
-        '
-        'ChkSummary
-        '
-        Me.ChkSummary.Appearance = System.Windows.Forms.Appearance.Button
-        Me.ChkSummary.Location = New System.Drawing.Point(744, 66)
-        Me.ChkSummary.Name = "ChkSummary"
-        Me.ChkSummary.Size = New System.Drawing.Size(144, 42)
-        Me.ChkSummary.TabIndex = 135
-        Me.ChkSummary.Text = "Toggle Search"
-        Me.ChkSummary.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
-        Me.ChkSummary.UseVisualStyleBackColor = True
-        '
-        'BtnSummary
-        '
-        Me.BtnSummary.Location = New System.Drawing.Point(572, 66)
-        Me.BtnSummary.Name = "BtnSummary"
-        Me.BtnSummary.Size = New System.Drawing.Size(144, 42)
-        Me.BtnSummary.TabIndex = 133
-        Me.BtnSummary.Text = "Get Summary"
-        Me.BtnSummary.UseVisualStyleBackColor = True
-        '
         'FrmMain
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(7.0!, 15.0!)
@@ -2440,4 +2472,12 @@ Partial Class FrmMain
     Friend WithEvents TxtSummary As TextBox
     Friend WithEvents ChkSummary As CheckBox
     Friend WithEvents BtnSummary As Button
+    Friend WithEvents PrintDocument11 As Printing.PrintDocument
+    Friend WithEvents PrintDocument12 As Printing.PrintDocument
+    Friend WithEvents PrintDocument1 As Printing.PrintDocument
+    Friend WithEvents PrintDocument2 As Printing.PrintDocument
+    Friend WithEvents PrintDocument4 As Printing.PrintDocument
+    Friend WithEvents PrintStickerLabel As Printing.PrintDocument
+    Friend WithEvents PrintDocument3 As Printing.PrintDocument
+    Friend WithEvents PrintDocument5 As Printing.PrintDocument
 End Class

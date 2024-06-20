@@ -22,68 +22,60 @@ Partial Class FrmSummary
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
-        Me.BtnClose = New System.Windows.Forms.Button()
+        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(FrmSummary))
         Me.DataSummaryGrid = New System.Windows.Forms.DataGridView()
         Me.LblSummaryResult = New System.Windows.Forms.Label()
+        Me.BtnClose = New System.Windows.Forms.Button()
         CType(Me.DataSummaryGrid, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
-        'BtnClose
-        '
-        Me.BtnClose.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.BtnClose.BackColor = System.Drawing.Color.Red
-        Me.BtnClose.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.BtnClose.ForeColor = System.Drawing.Color.White
-        Me.BtnClose.Location = New System.Drawing.Point(1099, 572)
-        Me.BtnClose.Name = "BtnClose"
-        Me.BtnClose.Size = New System.Drawing.Size(96, 44)
-        Me.BtnClose.TabIndex = 0
-        Me.BtnClose.Text = "Close"
-        Me.BtnClose.UseVisualStyleBackColor = False
-        '
         'DataSummaryGrid
         '
-        Me.DataSummaryGrid.AllowUserToAddRows = False
-        Me.DataSummaryGrid.AllowUserToDeleteRows = False
         Me.DataSummaryGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
-        Me.DataSummaryGrid.EditMode = System.Windows.Forms.DataGridViewEditMode.EditProgrammatically
-        Me.DataSummaryGrid.Location = New System.Drawing.Point(13, 12)
+        Me.DataSummaryGrid.Location = New System.Drawing.Point(12, 12)
         Me.DataSummaryGrid.Name = "DataSummaryGrid"
-        Me.DataSummaryGrid.ReadOnly = True
-        Me.DataSummaryGrid.Size = New System.Drawing.Size(1182, 554)
-        Me.DataSummaryGrid.TabIndex = 1
+        Me.DataSummaryGrid.Size = New System.Drawing.Size(1057, 485)
+        Me.DataSummaryGrid.TabIndex = 0
         '
         'LblSummaryResult
         '
         Me.LblSummaryResult.AutoSize = True
-        Me.LblSummaryResult.Font = New System.Drawing.Font("Microsoft Sans Serif", 11.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.LblSummaryResult.ForeColor = System.Drawing.Color.Blue
-        Me.LblSummaryResult.Location = New System.Drawing.Point(13, 602)
+        Me.LblSummaryResult.Location = New System.Drawing.Point(12, 511)
         Me.LblSummaryResult.Name = "LblSummaryResult"
-        Me.LblSummaryResult.Size = New System.Drawing.Size(50, 18)
-        Me.LblSummaryResult.TabIndex = 2
+        Me.LblSummaryResult.Size = New System.Drawing.Size(37, 13)
+        Me.LblSummaryResult.TabIndex = 1
         Me.LblSummaryResult.Text = "Result"
-        Me.LblSummaryResult.Visible = False
+        '
+        'BtnClose
+        '
+        Me.BtnClose.ForeColor = System.Drawing.Color.Red
+        Me.BtnClose.Location = New System.Drawing.Point(988, 503)
+        Me.BtnClose.Name = "BtnClose"
+        Me.BtnClose.Size = New System.Drawing.Size(81, 29)
+        Me.BtnClose.TabIndex = 2
+        Me.BtnClose.Text = "&Close"
+        Me.BtnClose.UseVisualStyleBackColor = True
         '
         'FrmSummary
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(1207, 628)
-        Me.ControlBox = False
+        Me.ClientSize = New System.Drawing.Size(1081, 538)
+        Me.Controls.Add(Me.BtnClose)
         Me.Controls.Add(Me.LblSummaryResult)
         Me.Controls.Add(Me.DataSummaryGrid)
-        Me.Controls.Add(Me.BtnClose)
+        Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle
+        Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
         Me.Name = "FrmSummary"
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent
-        Me.Text = "Summary Info"
+        Me.Text = "Summary"
         CType(Me.DataSummaryGrid, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
     End Sub
 
-    Friend WithEvents BtnClose As Button
     Friend WithEvents DataSummaryGrid As DataGridView
     Friend WithEvents LblSummaryResult As Label
+    Friend WithEvents BtnClose As Button
 End Class

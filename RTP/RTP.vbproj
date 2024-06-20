@@ -149,10 +149,16 @@
     <Compile Include="FrmSettings.vb">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="My Project\FrmSummary.Designer.vb">
+    <Compile Include="FrmSummary.Designer.vb">
       <DependentUpon>FrmSummary.vb</DependentUpon>
     </Compile>
-    <Compile Include="My Project\FrmSummary.vb">
+    <Compile Include="FrmSummary.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="F_NDBMessage.Designer.vb">
+      <DependentUpon>F_NDBMessage.vb</DependentUpon>
+    </Compile>
+    <Compile Include="F_NDBMessage.vb">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Printers.Designer.vb">
@@ -185,6 +191,12 @@
     <EmbeddedResource Include="FrmSettings.resx">
       <DependentUpon>FrmSettings.vb</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="FrmSummary.resx">
+      <DependentUpon>FrmSummary.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="F_NDBMessage.resx">
+      <DependentUpon>F_NDBMessage.vb</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Printers.resx">
       <DependentUpon>Printers.vb</DependentUpon>
     </EmbeddedResource>
@@ -211,6 +223,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Rapid Test Logo.ico" />
+    <None Include="Resources\Symbol-Error.png" />
+    <None Include="Resources\Symbol-Information.png" />
+    <None Include="Resources\Delete.png" />
     <None Include="Resources\RT_End.wav" />
     <None Include="Resources\sliderProd.jpg" />
     <None Include="Resources\sliderDev.jpg" />
