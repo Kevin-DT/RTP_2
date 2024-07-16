@@ -562,7 +562,68 @@ Public Class Pack
     End Sub
 
     Private Sub Pack_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        PackRunningTotal = 0
+        CIBF_Count = 0
+        MC8F_Count = 0
+        CIB_Count = 0
+        MC8_Count = 0
+        MASTERM_Count = 0
+        MC8F5_Count = 0
+        MASTER_Count = 0
+        '***************************************** Grid layout ***************
 
+        Dim colCount As Integer = 0
+        Me.DG_Packing.ColumnCount = 7
+        With Me.DG_Packing.Columns(colCount)
+            .HeaderText = "ID"
+            .Width = 80
+        End With
+        colCount += 1
+        With Me.DG_Packing.Columns(colCount)
+            .HeaderText = "Type"
+            .Width = 150
+        End With
+        colCount += 1
+        With Me.DG_Packing.Columns(colCount)
+            .HeaderText = "Checked by"
+            .Width = 120
+        End With
+        colCount += 1
+        With Me.DG_Packing.Columns(colCount)
+            .HeaderText = "Original PO"
+            .Width = 150
+        End With
+        colCount += 1
+        With Me.DG_Packing.Columns(colCount)
+            .HeaderText = "Purchaser"
+            .Width = 120
+        End With
+        colCount += 1
+        With Me.DG_Packing.Columns(colCount)
+            .HeaderText = "Details"
+            .Width = 250
+        End With
+        colCount += 1
+        With Me.DG_Packing.Columns(colCount)
+            .HeaderText = "Qty"
+            .Width = 80
+        End With
+
+        '****** ARRAY for list of Modules
+        '*** Empty array whenever form loads
+        Dim I_UpperLimit1 As Integer = UBound(FrmMain.S_Pack_Master, 1)
+        Dim I_UpperLimit2 As Integer = UBound(FrmMain.S_Pack_Master, 2)
+        For x = 0 To I_UpperLimit1
+            For y = 0 To I_UpperLimit2
+                FrmMain.S_Pack_Master(x, y) = ""
+                FrmMain.S_Pack_MC8F5(x, y) = ""
+                FrmMain.S_Pack_MasterM(x, y) = ""
+                FrmMain.S_Pack_MC8(x, y) = ""
+                FrmMain.S_Pack_CIB(x, y) = ""
+                FrmMain.S_Pack_MC8SS(x, y) = ""
+                FrmMain.S_Pack_CIBSS(x, y) = ""
+            Next
+        Next
     End Sub
 
     Private Sub Pack_KeyPress(sender As Object, e As KeyPressEventArgs) Handles Me.KeyPress

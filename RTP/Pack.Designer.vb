@@ -400,6 +400,7 @@ Partial Class Pack
         Me.Controls.Add(Me.BtnReloadPO)
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
         Me.Name = "Pack"
+        Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent
         Me.Text = "Pack"
         CType(Me.DG_Packing, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)

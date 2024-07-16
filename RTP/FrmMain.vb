@@ -5,10 +5,12 @@ Imports System.Drawing.Printing
 Imports Ats.RapidTest.DataConfiguration
 Imports Ats.RapidTest.DataConfiguration.Model
 Imports System.Net.Mail
-Imports System.ComponentModel
-Imports System.Net
-Imports System.Text
-Imports System.Runtime.InteropServices
+'Imports System.ComponentModel
+'Imports System.Net
+'Imports System.Text
+'Imports System.Runtime.InteropServices
+'Imports System.Runtime.Serialization
+'Imports System.ComponentModel
 Public Class FrmMain
     '*** Publishing
     'Username: dtsuperuser1
@@ -33,7 +35,7 @@ Public Class FrmMain
     Public connectionString As String = ""
 
     '*** Wifi 
-    Public MyWiFi As New Wifi()
+    Public MyWiFi As New SimpleWifi.Wifi()
     Public SConnectedWiFi As String = ""
     Public StrRTpassword As String = "rapidtest"
 
@@ -46,8 +48,8 @@ Public Class FrmMain
     Shared stream As NetworkStream
 
     '*** Device details
-    Public iVersionMinor As Integer
-    Public iVersionMajor As Integer
+    Public iVersionMinor As Integer = 0
+    Public iVersionMajor As Integer = 0
     Public IntResponseLength As Integer
     Public IntMasterType As Integer = 0
     Const MC8F5 As Integer = 1
@@ -116,7 +118,7 @@ Public Class FrmMain
     '*** Debug
     Public S_LogFileText As String = ""
     Public BSuppressTimeWarning As Boolean
-    Public SMasterType As String
+    Public SMasterType As String = "UNKNOWN"
 
     Private Sub ExitToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ExitToolStripMenuItem.Click
         Me.Close()
@@ -274,6 +276,7 @@ Public Class FrmMain
         If ChkSkipMaster.Checked Then
             StrCurrentSSID = Trim(TxtMasterSSID.Text)
             TxtMasterSSID.Text = StrDefaultMaster
+            TxtMasterManCode.Text = "Programming"
             ChkConnectToID.Checked = True
             GrpMaster.Enabled = False
             ChkSkipCIB.Checked = False
@@ -323,7 +326,10 @@ Public Class FrmMain
         PrintLine(AutoSaveFileNumber, "CIBLbl" & "," & ChkCIBLbl.Checked.ToString)
         PrintLine(AutoSaveFileNumber, "AutoPrint" & "," & ChkAutoPrint.Checked.ToString)
         PrintLine(AutoSaveFileNumber, "AutoStep" & "," & ChkAutoStep.Checked.ToString)
-        '*** Close file
+        PrintLine(AutoSaveFileNumber, "PlaySound" & "," & ChkSound.Checked.ToString)
+        PrintLine(AutoSaveFileNumber, "LockControls" & "," & ChkManCntrls.Checked.ToString)
+        '
+        '*** Close file 
 
         FileClose(AutoSaveFileNumber)
         Return ReturnData
@@ -336,9 +342,12 @@ Public Class FrmMain
         Dim RowCount As Integer = 1
         Dim ReturnData As Integer = 1
         '*** Get data
+        Dim TmpChkMaster As String = ""
+        Dim StrTempSSID As String = ""
+        Dim TmpChkCIB As String = ""
+        Dim StrTempCIB As String = ""
+
         Try
-            Dim StrTempSSID As String = ""
-            Dim StrTempCIB As String = ""
             Using MyReader As New Microsoft.VisualBasic.FileIO.TextFieldParser(DataFile)
                 MyReader.TextFieldType = FileIO.FieldType.Delimited
                 MyReader.SetDelimiters(",")
@@ -357,23 +366,27 @@ Public Class FrmMain
                             If RowCount = 2 And fieldCount = 1 Then TxtOrderRef.Text = currentField
                             If RowCount = 3 And fieldCount = 1 Then TxtPurchaser.Text = currentField
                             'Master info
-                            If RowCount = 4 And fieldCount = 1 Then ChkSkipMaster.Checked = CBool(currentField)
+                            If RowCount = 4 And fieldCount = 1 Then TmpChkMaster = currentField
                             If RowCount = 5 And fieldCount = 1 Then StrTempSSID = currentField
                             If RowCount = 6 And fieldCount = 1 Then ChkConnectToID.Checked = CBool(currentField)
                             If RowCount = 7 And fieldCount = 1 Then TxtMasterManCode.Text = currentField
                             'CIB info
-                            If RowCount = 8 And fieldCount = 1 Then ChkSkipCIB.Checked = CBool(currentField)
+                            If RowCount = 8 And fieldCount = 1 Then TmpChkCIB = currentField
                             If RowCount = 9 And fieldCount = 1 Then StrTempCIB = currentField
                             If RowCount = 10 And fieldCount = 1 Then ChkCIBidOnly.Checked = CBool(currentField)
                             If RowCount = 11 And fieldCount = 1 Then TxtCIBManCode.Text = currentField
                             '*** Labels
                             If RowCount = 12 And fieldCount = 1 Then ChkNHP.Checked = CBool(currentField)
+                            Application.DoEvents()
                             If RowCount = 13 And fieldCount = 1 Then ChkInventoryLbl.Checked = CBool(currentField)
                             If RowCount = 14 And fieldCount = 1 Then ChkMasterLbl.Checked = CBool(currentField)
                             If RowCount = 15 And fieldCount = 1 Then ChkCIBLbl.Checked = CBool(currentField)
                             If RowCount = 16 And fieldCount = 1 Then ChkAutoPrint.Checked = CBool(currentField)
                             If RowCount = 17 And fieldCount = 1 Then ChkAutoStep.Checked = CBool(currentField)
-
+                            '**** Sound / General
+                            If RowCount = 18 And fieldCount = 1 Then ChkSound.Checked = CBool(currentField)
+                            If RowCount = 19 And fieldCount = 1 Then ChkManCntrls.Checked = CBool(currentField)
+                            'ChkManCntrls
                             fieldCount = +1
                         Next
                         RowCount += 1
@@ -386,15 +399,18 @@ Public Class FrmMain
                     End Try
                 End While
             End Using
-            'Update SSID text here so the NHP label check doesn't get triggered
-            Application.DoEvents()
-            TxtMasterSSID.Text = StrTempSSID
-            TxtCIBid.Text = StrTempCIB
         Catch fileNotFound As System.IO.FileNotFoundException
             'Error handling here. Load default values etc
             MsgBox("No printer selected." & vbNewLine & "Please select a printer before continuing.", vbCritical + vbOKOnly, "File not found")
         End Try
-        '*** END get printer
+        '*** END get data
+        Application.DoEvents()
+        'Update SSID text here so the NHP label check doesn't get triggered
+        Application.DoEvents()
+        ChkSkipMaster.Checked = CBool(TmpChkMaster)
+        TxtMasterSSID.Text = StrTempSSID
+        ChkSkipCIB.Checked = CBool(TmpChkCIB)
+        TxtCIBid.Text = StrTempCIB
 
         Return ReturnData
     End Function
@@ -424,14 +440,17 @@ Public Class FrmMain
 
                 For Each item In MyWifiList
                     Dim S_Item As String = ""
-                    If item.Name = "" Then S_Item = "Hidden" Else S_Item = item.Name
-
-                    '***
-                    If Strings.Left(S_Item, 3) = "RT_" Then
-                        LstWiFi.Items.Add(S_Item)
-                        ' Allow the ListBox to repaint and display the new items.
-                        LstWiFi.EndUpdate()
-                        '*****
+                    If item.Name = "" Then
+                        S_Item = "Hidden"
+                    Else
+                        S_Item = item.Name
+                        '***
+                        If Strings.Left(S_Item, 3) = "RT_" Then
+                            LstWiFi.Items.Add(S_Item)
+                            ' Allow the ListBox to repaint and display the new items.
+                            LstWiFi.EndUpdate()
+                            '*****
+                        End If
                     End If
                     '  Debug.Print(S_Item & " " & item.IsConnected)
                     If item.IsConnected = True Then SConnectedWiFi = S_Item
@@ -462,24 +481,29 @@ Public Class FrmMain
         '    Debug.Print("****************************** Timer Loop Count: " & TimerLoopCount.ToString)
     End Sub
 
-    Private Sub FrmMain_Closing(sender As Object, e As CancelEventArgs) Handles Me.Closing
-
-        TmrWifi.Enabled = False
-    End Sub
 
     Private Function GetMasterVersion()
         '*** Make sure port is closed
+        LblStatus.Text = "Clearing Port"
+        Application.DoEvents()
         MakeConnection(sIP, False, iPort)
 
         '*** Enable connection
+        LblStatus.Text = "Openning Connection"
+        Application.DoEvents()
         MakeConnection(sIP, True, iPort)
 
+        LblStatus.Text = "Getting Version"
+        Application.DoEvents()
         GetMasterVersion = GetVersion()
 
         '*** allow app to Update graphics
         Application.DoEvents()
 
         '*** Disconnect
+        '*** Make sure port is closed
+        LblStatus.Text = "Closing Port"
+        Application.DoEvents()
         MakeConnection(sIP, False, iPort)
 
     End Function
@@ -706,6 +730,7 @@ Public Class FrmMain
                 Dim sleepDelay As Integer = replySize * 20
                 Debug.Print("Calculated Delay " & sleepDelay.ToString)
                 If sleepDelay < 1200 Then sleepDelay = 1200
+                ' If sleepDelay < 200 Then sleepDelay = 200
                 If sleepDelay > 5000 Then sleepDelay = 5000
                 Debug.Print("Reply Size " & replySize.ToString)
 
@@ -817,7 +842,11 @@ Public Class FrmMain
                         Dim iCurData As Integer = 0
                         Dim tmpData As String = data(10).ToString("X2") & data(9).ToString("X2")
                         Dim RealResult As Long = Convert.ToUInt64(tmpData, 16)
-                        sCurrent = (RealResult / 10).ToString
+                        If FrmMain.SMasterType = "RTMC8F5" Then
+                            sCurrent = (RealResult / 10).ToString
+                        Else
+                            sCurrent = RealResult.ToString
+                        End If
 
                         '*** Command errors if any
                         Select Case data(5)
@@ -1209,7 +1238,16 @@ Public Class FrmMain
                 Debug.Print(CMD & " or EB Should equal " & StrResultArray(5))
                 TxtDebug.Text = "Read Config Result"
                 Dim TmpString As String = ""
-                Dim IntResponseLength As Integer = CInt("&H" & (Trim(StrResultArray(3)))) - 1 '2
+                Dim IntResponseLength As Integer = 0
+                For x = 0 To 250
+                    Debug.Print(x.ToString & " >" & StrResultArray(x) & "<")
+                Next
+                Try
+                    IntResponseLength = CInt("&H" & (Trim(StrResultArray(3)))) - 1 '2
+                Catch
+                    MsgBox("Byte 3 is >" & Trim(StrResultArray(3)) & "<", vbOKOnly, "byte 3 Error")
+                End Try
+
                 For x = 1 To IntResponseLength
                     TmpString += StrResultArray(x)
                 Next
@@ -1224,6 +1262,8 @@ Public Class FrmMain
                     Case Else
                         LblType.Text = "Type: MC8"
                         IntMasterType = MC8
+                        IntMaxChannel = CInt("&H" & (Trim(StrResultArray(8))))
+                        LblChLimit.Text = IntMaxChannel.ToString
                 End Select
 
                 RT_Decode = "Response to command " & Trim(StrResultArray(5)) & " = " & TmpString
@@ -1584,25 +1624,56 @@ Public Class FrmMain
         BtnBusPwr.Enabled = True
     End Function
     Private Function WiFiAutoConnect(AP_Name As String, AP_Password As String) As Integer
-        TmrWifi.Enabled = False
+        '  TmrWifi.Enabled = False
 
         Dim RetValue As Integer = 0
-        Dim auth_request As AuthRequest
-
+        '  Dim auth_request As AuthRequest
+        SConnectedWiFi = "Not Connected"
         Try
             Dim MyWifiList As List(Of AccessPoint) = MyWiFi.GetAccessPoints()
             If Not MyWiFi.NoWifiAvailable Then
                 For Each item In MyWifiList
+
                     Dim S_Item As String = ""
-                    If item.Name = "" Then S_Item = " Hidden" Else S_Item = item.Name
-                    If item.Name = AP_Name Then
-                        auth_request = New AuthRequest(item) With {
+                    If item.Name = "" Then S_Item = "Hidden" Else S_Item = item.Name
+
+                    Debug.Print("Outside " & S_Item & " " & AP_Name & " " & AP_Password)
+                    If item.Name = AP_Name And item IsNot Nothing Then
+
+                        Debug.Print("Inside " & S_Item & " " & AP_Name & " " & AP_Password)
+                        Debug.Print("Signal " & item.SignalStrength.ToString)
+                        Debug.Print("Secure " & item.IsSecure.ToString)
+                        Debug.Print("Connected? " & item.IsConnected)
+
+                        Dim auth_request = New AuthRequest(item) With {
                             .Password = AP_Password
                         }
-                        item.ConnectAsync(auth_request, False)
-                        RetValue = 1
+                        ' item.Connect(auth_request)
+                        item.ConnectAsync(auth_request) ', False)
+                        ' Threading.Thread.Sleep(500)
+                        Debug.Print("********************* In WiFiAutoConnect " & S_Item)
                         Application.DoEvents()
+                        Select Case UCase(MyWiFi.ConnectionStatus.ToString)
+                            Case "CONNECTED"
+                                SConnectedWiFi = S_Item
+                                LblWifi.ForeColor = Color.LightGreen
+                                LblWifi.Text = "WiFi " & MyWiFi.ConnectionStatus.ToString & " to " & SConnectedWiFi
+                                Debug.Print("********************* CONNECTED WiFiAutoConnect *********************")
+                                Application.DoEvents()
+                                RetValue = 1
+                                Exit For
+                            Case Else
+                                LblWifi.ForeColor = Color.Red
+                                LblWifi.Text = "WiFi " & MyWiFi.ConnectionStatus.ToString
+                                Debug.Print("********************* " & MyWiFi.ConnectionStatus.ToString & " WiFiAutoConnect *********************")
+                                Application.DoEvents()
+                                RetValue = 0
+                                Exit For
+                        End Select
+                    Else
+                        Debug.Print("Outside NO MATCH " & S_Item & " " & AP_Name & " " & AP_Password)
                     End If
+                    Application.DoEvents()
                 Next
             End If
         Catch Err As Exception
@@ -1610,12 +1681,12 @@ Public Class FrmMain
             LblWifi.ForeColor = Color.Red
             LblWifi.Text = " No WiFi Card Detected"
         End Try
-        TmrWifi.Enabled = True
         Application.DoEvents()
-        Threading.Thread.Sleep(1000)
+        'Threading.Thread.Sleep(500)
 
         Debug.Print("WiFiAutoConnect " & SConnectedWiFi & " - " & RetValue.ToString)
         Application.DoEvents()
+        '    TmrWifi.Enabled = True
         Return RetValue
         ' Use: MyWiFi.Disconnect()
         ' To close the current connection.
@@ -1623,6 +1694,8 @@ Public Class FrmMain
     End Function
     Function ConnectWiFi(Ignore001 As Boolean) As Integer
         Dim StrConnectionID As String
+        ConnectWiFi = 0
+
         If ChkConnectToID.Checked Then
             '*** connect to dispalyed SSID instead of RT_001
             StrConnectionID = "RT_" & Trim(TxtMasterSSID.Text)
@@ -1635,7 +1708,21 @@ Public Class FrmMain
                 StrConnectionID = "RT_001"
             End If
         End If
-        ConnectWiFi = WiFiAutoConnect(StrConnectionID, StrRTpassword)
+
+        TmrWifi.Enabled = False
+        For x = 0 To 0
+            LblStatus.Text = "Trying to connect to " & StrConnectionID & " (" & (x + 1).ToString & ")"
+            Application.DoEvents()
+            ConnectWiFi = WiFiAutoConnect(StrConnectionID, StrRTpassword)
+            If ConnectWiFi = 1 Then
+                Exit For
+            Else
+                ConnectWiFi = 0
+            End If
+            Threading.Thread.Sleep(2000)
+            Application.DoEvents()
+        Next
+        TmrWifi.Enabled = True
     End Function
     Private Sub BtnWifiConnect_Click(sender As Object, e As EventArgs) Handles BtnWifiConnect.Click
 
@@ -1644,6 +1731,7 @@ Public Class FrmMain
         Else
 
         End If
+        LblStatus.Text = "Ready"
     End Sub
     Private Function ReadTopology()
         '*** Connect to device
@@ -1791,6 +1879,7 @@ Public Class FrmMain
         Dim iResult As String = 0
         Dim iSelectedChannel As Integer = Microsoft.VisualBasic.Val(LblChannel.Text)
         Dim iChannelLimit As Integer = Microsoft.VisualBasic.Val(LblChLimit.Text) ' - 1
+        Dim UseMicroAmp As Boolean = True
 
         '*** If channel number is valid
         If IsNumeric(LblChannel.Text) Then
@@ -1837,15 +1926,15 @@ Public Class FrmMain
                     shtCurrent = 3  'mA
                 End If
 
-                '*** 12/06/2024 - Always microamp
-                '  If UseMicroAmp Then
-                '****
-                '**** 18/03/2020  Disable override for testing
-                '   shtMulti = 1
-                shtCurrent = shtCurrent / shtMulti
-                '****
-                shtCurrent *= 10
-                ' End If
+                If SMasterType = "RTMC8" Then UseMicroAmp = False
+                If UseMicroAmp Then
+                    '****
+                    '**** 18/03/2020  Disable override for testing
+                    '   shtMulti = 1
+                    shtCurrent = shtCurrent / shtMulti
+                    '****
+                    shtCurrent *= 10
+                End If
 
 
                 ''** Also standard MC8 with fuse option
@@ -2060,6 +2149,7 @@ Public Class FrmMain
                         LblStatus.Text = "Already connected"
                     Else
                         If SConnectedWiFi <> "RT_001" Then '*** Skip connection if already on RT_001
+                            LblStatus.Text = "Connecting . . ."
                             While IntConWifi = 0
                                 IntConWifi = ConnectWiFi(False) '*** Connect to master - do not override checkbox
                                 If IntConWifi = 1 Then Threading.Thread.Sleep(1000)
@@ -2073,7 +2163,7 @@ Public Class FrmMain
                             End While
                         End If
                     End If
-                        Application.DoEvents()
+                    Application.DoEvents()
 
                     If IntConnectCount = IntConnectLimit Then
                         MsgBox("Could not connect. " & IntConnectCount.ToString, vbCritical + vbOKOnly, "Connection issue.")
@@ -2222,7 +2312,7 @@ Public Class FrmMain
 
                 '***** WRITE MASTER GUID
                 Dim G As Guid
-                Dim GuidString As String = g.ToString
+                Dim GuidString As String = G.ToString
                 GuidString = Microsoft.VisualBasic.Left("MR5FMC8MasterModule_" & Trim(TxtMasterSSID.Text) & "_" & Format(Now(), "ddMMyyyy"), 36)
 
                 '*** Log activity
@@ -2235,7 +2325,7 @@ Public Class FrmMain
 
                 '*** Write GUID
                 WriteGUID(GuidString, "0")
-                StrTextToLog = "Writing " & guidString
+                StrTextToLog = "Writing " & GuidString
                 debugTime = Format(Now(), "hh:mm:ss")
                 PrintLine(debugFileNumber, debugTime & " " & StrTextToLog)
 
@@ -2249,7 +2339,7 @@ Public Class FrmMain
                 '*** 
 
                 '**** COMPARE Before & After GUIDS
-                If S_MasterGUID = guidString Then
+                If S_MasterGUID = GuidString Then
 
                     LblStatus.Text = "GUIDS Match"
                     '*** Log data
@@ -2560,6 +2650,8 @@ Public Class FrmMain
                     If sCB_OriginalGUID = GuidString Then
 
                         LblStatus.Text = "GUIDS Match"
+                        Application.DoEvents()
+
                         '*** Log data
                         debugTime = Format(Now(), "hh:mm:ss")
                         StrTextToLog = "GUIDS Match"
@@ -2740,9 +2832,13 @@ Public Class FrmMain
 
                 LblStatus.Text = "Finished"
                 If ChkSound.Checked Then
-                    If ChkAutoStep.Checked Then My.Computer.Audio.Play(My.Resources.RT_End, AudioPlayMode.Background)
+                    If ChkAutoStep.Checked Then
+                        '*** Show tick
+                        PicTick.Visible = True
+                        Application.DoEvents()
+                        My.Computer.Audio.Play(My.Resources.RT_End, AudioPlayMode.Background)
+                    End If
                 End If
-
 
         End Select
         Debug.Print("Finished " & ICurrentStep.ToString)
@@ -2947,11 +3043,25 @@ Public Class FrmMain
         LblMguid.Visible = False
         LblCIBguid.Visible = False
         RtUnitChannel = 0
+        If Not ChkSkipMaster.Checked Then
+            TxtMasterSSID.Text = ""
+            TxtMasterManCode.Text = ""
+            TxtMasterSSID.Focus()
+        Else
+            TxtCIBid.Focus()
+        End If
+        If Not ChkSkipCIB.Checked Then
+            TxtCIBid.Text = ""
+            TxtCIBManCode.Text = ""
+        End If
+
         ClearResults()
         '*** Update step Label
         lblCurrentStep.Text = String.Format("Step {0} of {1}", ICurrentStep, IntMaxStep)
     End Sub
     Private Sub ClearResults()
+        '*** Hide tick
+        PicTick.Visible = False
 
         For Each cntrl As Control In Me.GrpMaster.Controls
             'Debug.Print(cntrl.Name)
@@ -3649,33 +3759,33 @@ FROM            dbo.NDB_Board INNER JOIN
 
 
                                     If Strings.Left(S_TempModule, 2) = "MC" Then
-                                                For y = 0 To 500
-                                                    If S_po_MC8(y, 0) = "" Then
-                                                        S_po_MC8(0, 2) = Val(S_po_MC8(0, 2)) + 1
-                                                        S_po_MC8(I_MC8Index, 0) = S_TempModule
-                                                        S_po_MC8(I_MC8Index, 1) = S_TempDate
-                                                        I_MC8Index += 1 ' Increment SS index for MC8
-                                                        Exit For
-                                                    Else
-                                                        If S_po_MC8(y, 0) = S_TempModule Then Exit For
-                                                    End If
-
-                                                Next
-                                            ElseIf Strings.Left(S_TempModule, 1) = "C" Then   '*** Not MC8 or Master must be CIB
-                                                For y = 0 To 500
-                                                    If S_po_CIB(y, 0) = "" Then
-                                                        '** CIB
-                                                        S_po_CIB(0, 2) = Val(S_po_CIB(0, 2)) + 1
-                                                        S_po_CIB(I_CIBIndex, 0) = S_TempModule
-                                                        S_po_CIB(I_CIBIndex, 1) = S_TempDate
-                                                        I_CIBIndex += 1 ' Increment SS index for CIB
-                                                        Exit For
-                                                    Else
-                                                        If S_po_CIB(y, 0) = S_TempModule Then Exit For
-                                                    End If
-                                                Next
-
+                                        For y = 0 To 500
+                                            If S_po_MC8(y, 0) = "" Then
+                                                S_po_MC8(0, 2) = Val(S_po_MC8(0, 2)) + 1
+                                                S_po_MC8(I_MC8Index, 0) = S_TempModule
+                                                S_po_MC8(I_MC8Index, 1) = S_TempDate
+                                                I_MC8Index += 1 ' Increment SS index for MC8
+                                                Exit For
+                                            Else
+                                                If S_po_MC8(y, 0) = S_TempModule Then Exit For
                                             End If
+
+                                        Next
+                                    ElseIf Strings.Left(S_TempModule, 1) = "C" Then   '*** Not MC8 or Master must be CIB
+                                        For y = 0 To 500
+                                            If S_po_CIB(y, 0) = "" Then
+                                                '** CIB
+                                                S_po_CIB(0, 2) = Val(S_po_CIB(0, 2)) + 1
+                                                S_po_CIB(I_CIBIndex, 0) = S_TempModule
+                                                S_po_CIB(I_CIBIndex, 1) = S_TempDate
+                                                I_CIBIndex += 1 ' Increment SS index for CIB
+                                                Exit For
+                                            Else
+                                                If S_po_CIB(y, 0) = S_TempModule Then Exit For
+                                            End If
+                                        Next
+
+                                    End If
 
                                 End If
 
@@ -4102,9 +4212,7 @@ FROM            dbo.NDB_Board INNER JOIN
                     ImoduleFound = CheckNDBData(Trim(sScannerString), False)
                     Select Case ImoduleFound
                         Case 0
-                        Case 1
-                            '**** Show warning
-                            F_NDBMessage.LBLMessage.Text = "Exisitng Master found in database." & sScannerString & vbCrLf & "Only continue if reprogramming."
+                            F_NDBMessage.LBLMessage.Text = "Exisitng Master found in database. " & sScannerString & vbCrLf & "Only continue if reprogramming."
                             F_NDBMessage.PictureBox1.BackgroundImage = My.Resources.Symbol_Information
                             F_NDBMessage.ShowDialog()
                         Case Else
@@ -4133,7 +4241,7 @@ FROM            dbo.NDB_Board INNER JOIN
                     TxtMasterManCode.Focus()
                 End If
             Case 7
-
+                '** Filter out nonstandard masters (Masters are in the format M50123)
                 If Strings.Left(sScannerString, 2) = "MC" Then
                     ImoduleFound = CheckNDBData(Trim(sScannerString), False)
                     Select Case ImoduleFound
@@ -4145,7 +4253,14 @@ FROM            dbo.NDB_Board INNER JOIN
                             F_NDBMessage.ShowDialog()
                         Case 3, 8, 11
                             '**** Show warning for standard MC8 or Fused if already programmed
-                            F_NDBMessage.LBLMessage.Text = "Exisitng Master found in database." & sScannerString & vbCrLf & "Only continue if reprogramming."
+                            '**** Show warning if not workshop master MC10024
+                            If sScannerString <> "MC10024" Then
+                                F_NDBMessage.LBLMessage.Text = "Exisitng Master found in database. " & sScannerString & vbCrLf & "Only continue if reprogramming."
+                                F_NDBMessage.PictureBox1.BackgroundImage = My.Resources.Symbol_Information
+                                F_NDBMessage.ShowDialog()
+                            End If
+                        Case 1
+                            F_NDBMessage.LBLMessage.Text = "Exisitng Master found in database. " & sScannerString & vbCrLf & "Only continue if reprogramming."
                             F_NDBMessage.PictureBox1.BackgroundImage = My.Resources.Symbol_Information
                             F_NDBMessage.ShowDialog()
                         Case Else
@@ -4174,10 +4289,12 @@ FROM            dbo.NDB_Board INNER JOIN
                                 End If
                             Case Else
                                 '**** RT Direct sales unit
-                                If ChkNHP.Checked = True Then
-                                    MsgBox("Master Unit Number range indicates RT supplied product but NHP checkbox is selected", vbOKOnly + vbCritical, "ALERT")
+                                '**** Show warning if not workshop master MC10024
+                                If sScannerString <> "MC10024" Then
+                                    If ChkNHP.Checked = True Then
+                                        MsgBox("Master Unit Number range indicates RT supplied product but NHP checkbox is selected", vbOKOnly + vbCritical, "ALERT")
+                                    End If
                                 End If
-
                         End Select
                     End If
                     TxtMasterManCode.Focus()
@@ -4210,8 +4327,8 @@ FROM            dbo.NDB_Board INNER JOIN
                             Case 0
                             Case 2, 9, 10
 
-                                '**** Show warning
-                                F_NDBMessage.LBLMessage.Text = "Exisitng Channel Board found in database." & sScannerString & vbCrLf & "Only continue if reprogramming."
+                                '**** Show warning 
+                                F_NDBMessage.LBLMessage.Text = "Exisitng Channel Board found in database. " & sScannerString & vbCrLf & "Only continue if reprogramming."
                                 F_NDBMessage.PictureBox1.BackgroundImage = My.Resources.Symbol_Information
                                 F_NDBMessage.ShowDialog()
                             Case 5
@@ -4432,4 +4549,413 @@ FROM            dbo.NDB_Board INNER JOIN
         LblEmail.Visible = False
         Return EmailResult
     End Function
+
+    Private Sub PrintDocument6_PrintPage(sender As Object, e As PrintPageEventArgs) Handles PrintDocument6.PrintPage
+        '** The product labels
+
+        '*** Print channel board Info
+        Dim stdFont = New Font("Arial", 10)
+        Dim TinyFont = New Font("Arial", 8, FontStyle.Regular)
+        Dim smallFont = New Font("Arial", 8)
+        Dim boldFont = New Font("Arial", 14, FontStyle.Bold)
+        Dim italicFont = New Font("Arial", 10, FontStyle.Italic)
+        Dim underlineFont = New Font("Arial", 14, FontStyle.Underline)
+        Dim heading01Font = New Font("Arial", 14, FontStyle.Bold)
+        Dim BarCodeFont As New Font("IDAHC39M Code 39 Barcode", 16, FontStyle.Regular)
+        Dim centeredText As StringFormat
+        Dim leftText As StringFormat
+        Dim rightText As StringFormat
+
+        Dim labelHeading As String = S_LabelHeading
+
+        centeredText = New StringFormat With {
+            .Alignment = StringAlignment.Center,
+            .LineAlignment = StringAlignment.Center
+        }
+        leftText = New StringFormat With {
+            .Alignment = StringAlignment.Near,
+            .LineAlignment = StringAlignment.Near
+        }
+
+        rightText = New StringFormat With {
+            .Alignment = StringAlignment.Far,
+            .LineAlignment = StringAlignment.Far
+        }
+
+        Dim printLine As Integer = 45
+        Dim pLogo As New RectangleF(New PointF(300.0F, 10.0F), New SizeF(64.0F, 50.0F))
+
+        e.Graphics.DrawImage(Image.FromFile("C:\Temp\RT.png"), pLogo)
+
+        e.Graphics.DrawString("Rapid Test Systems Pty Ltd", heading01Font, Brushes.Black, 10, 20, leftText)
+
+        e.Graphics.DrawString(labelHeading, stdFont, Brushes.Black, 10, printLine, leftText)
+        printLine += 15
+        e.Graphics.DrawString("Part: " & S_PartNumber, stdFont, Brushes.Black, 10, printLine, leftText)
+        printLine += 20
+        e.Graphics.DrawString("Order Reference: " & TxtOrderRef.Text, stdFont, Brushes.Black, 10, printLine, leftText)
+        printLine += 25
+        e.Graphics.DrawString("Description: " & vbCrLf & S_PartDesc, smallFont, Brushes.Black, 10, printLine, leftText)
+        'Place QR Code
+        Dim QRCode As New RectangleF(New PointF(300.0F, 120.0F), New SizeF(60.0F, 60.0F))
+        If S_PartNumber = "VTL" Or S_PartNumber = "VTS" Then
+            e.Graphics.DrawImage(Image.FromFile("C:\Temp\VTLIM.png"), QRCode)
+            e.Graphics.DrawString("Verification Manual", TinyFont, Brushes.Black, 280, 180, leftText)
+        Else
+            e.Graphics.DrawImage(Image.FromFile("C:\Temp\RTQR.png"), QRCode)
+            e.Graphics.DrawString("Installation Manual", TinyFont, Brushes.Black, 280, 180, leftText)
+
+        End If
+
+        'FL_Custom
+        If Strings.Left(S_PartNumber, 9) = "FL_Custom" Then S_PartNumber = "FL_Custom"
+        Dim S_TempPart As String = S_PartNumber
+        If S_PartNumber = "FL100" Then S_TempPart = "FL100x"
+        If S_PartNumber = "FL300" Then S_TempPart = "FL300x"
+        If S_PartNumber = "USBL" Then S_TempPart = "LUSB"
+        e.Graphics.DrawString("*" & S_TempPart & "*", BarCodeFont, Brushes.Black, 10, printLine + 55, leftText)
+    End Sub
+
+    Private Sub PrintDocument13_PrintPage(sender As Object, e As PrintPageEventArgs) Handles PrintDocument13.PrintPage
+        '** The product labels
+
+        '*** Print channel board Info
+        Dim stdFont = New Font("Arial", 10)
+        Dim smallFont = New Font("Arial", 8)
+        Dim boldFont = New Font("Arial", 11, FontStyle.Bold)
+        Dim italicFont = New Font("Arial", 10, FontStyle.Italic)
+        Dim underlineFont = New Font("Arial", 14, FontStyle.Underline)
+        Dim heading01Font = New Font("Arial", 14, FontStyle.Bold)
+        Dim XtraLargeFont = New Font("Arial", 30, FontStyle.Bold)
+        Dim BarCodeFont As New Font("IDAHC39M Code 39 Barcode", 16, FontStyle.Regular)
+        Dim centeredText As StringFormat
+        Dim leftText As StringFormat
+        Dim rightText As StringFormat
+
+        Dim labelHeading As String = S_LabelHeading
+
+        centeredText = New StringFormat With {
+            .Alignment = StringAlignment.Center,
+            .LineAlignment = StringAlignment.Center
+        }
+        leftText = New StringFormat With {
+            .Alignment = StringAlignment.Near,
+            .LineAlignment = StringAlignment.Near
+        }
+
+        rightText = New StringFormat With {
+            .Alignment = StringAlignment.Far,
+            .LineAlignment = StringAlignment.Far
+        }
+
+        Dim printLine As Integer = 45
+        Dim pLogo As New RectangleF(New PointF(300.0F, 10.0F), New SizeF(64.0F, 50.0F))
+
+        e.Graphics.DrawImage(Image.FromFile("C:\Temp\RT.png"), pLogo)
+
+        e.Graphics.DrawString("Rapid Test Systems Pty Ltd", heading01Font, Brushes.Black, 10, 20, leftText)
+
+        e.Graphics.DrawString(labelHeading, stdFont, Brushes.Black, 10, printLine, leftText)
+        printLine += 15
+        e.Graphics.DrawString("Part: " & S_PartNumber, stdFont, Brushes.Black, 10, printLine, leftText)
+        printLine += 20
+        e.Graphics.DrawString("Order Reference: " & TxtOrderRef.Text, stdFont, Brushes.Black, 10, printLine, leftText)
+        printLine += 25
+        e.Graphics.DrawString("Details: " & vbCrLf & "Quantity included in this package >>", boldFont, Brushes.Black, 10, printLine, leftText)
+
+        ' IntSummaryNoToPrint
+        e.Graphics.DrawString(IntSummaryNoToPrint, XtraLargeFont, Brushes.Black, 280, printLine, leftText)
+
+        'FL_Custom
+        If Strings.Left(S_PartNumber, 9) = "FL_Custom" Then S_PartNumber = "FL_Custom"
+        Dim S_TempPart As String = S_PartNumber
+        If S_PartNumber = "FL100" Then S_TempPart = "FL100x"
+        If S_PartNumber = "FL300" Then S_TempPart = "FL300x"
+        If S_PartNumber = "USBL" Then S_TempPart = "LUSB"
+        e.Graphics.DrawString("*" & S_TempPart & "*", BarCodeFont, Brushes.Black, 10, printLine + 55, leftText)
+    End Sub
+
+    Private Sub btnClearGUID_Click(sender As Object, e As EventArgs) Handles btnClearGUID.Click
+        Me.TxtGUID.Text = String.Empty
+    End Sub
+
+    Private Sub Button17_Click(sender As Object, e As EventArgs) Handles Button17.Click
+        Dim g As Guid
+        ' Create and display the value of two GUIDs.
+        g = Guid.NewGuid()
+        Dim guidString As String = g.ToString
+        TxtGUID.Text = guidString
+    End Sub
+
+    Private Sub Btn_Override_Click(sender As Object, e As EventArgs) Handles Btn_Override.Click
+        If Btn_Override.Text = "Override" Then
+            Debug.Print("Override mode is Master OVERRIDE")
+            SMasterType = "RTMC8F5"
+            LblType.Text = "Master is " & SMasterType
+        Else    'Import mode
+            Debug.Print("Override mode is IMPORT")
+            OpenImportFileDialog.Filter = "csv files (*.csv)|*.csv|All files (*.*)|*.*"
+            OpenImportFileDialog.FilterIndex = 1
+            OpenImportFileDialog.RestoreDirectory = True
+
+            '** Open file dialog to select import file
+            OpenImportFileDialog.InitialDirectory = "C:\temp\"
+
+            Dim DR_Result As DialogResult = OpenImportFileDialog.ShowDialog()
+
+            If (DR_Result = DialogResult.OK) Then
+                ' Open the file, copy the contents of memoryStream to fileStream,
+                ' and close fileStream. Set the memoryStream.Position value to 0 to 
+                ' copy the entire stream. 
+                Dim S_FileToImport = OpenImportFileDialog.FileName
+                Dim tmpGUID As String = ""
+                Dim tmpID As String = ""
+                Dim tmpType As String = ""
+                Dim tmpChannels As Integer = 0
+                Dim tmpDate As Date = Now()
+                Dim tmpUser As String = ""
+                Dim tmpPurchase As String = ""
+                Dim tmpPO As String = ""
+                Dim tmpManCode As String = ""
+                Dim NDBUpdateResult As Integer = 0
+                Dim rowCount As Integer = 0
+
+                Try
+                    Using MyReader As New Microsoft.VisualBasic.FileIO.TextFieldParser(S_FileToImport)
+                        MyReader.TextFieldType = FileIO.FieldType.Delimited
+                        MyReader.SetDelimiters(",")
+
+                        Dim currentRow As String()
+                        Dim fieldCount As Integer = 0
+
+                        While Not MyReader.EndOfData
+                            Try
+                                currentRow = MyReader.ReadFields()
+
+                                Dim currentField As String
+                                For Each currentField In currentRow
+                                    If rowCount > 0 Then
+                                        If fieldCount = 0 Then tmpGUID = currentField
+                                        If fieldCount = 1 Then tmpID = currentField
+                                        If fieldCount = 2 Then tmpType = currentField
+                                        If fieldCount = 3 Then tmpChannels = currentField
+                                        If fieldCount = 4 Then tmpDate = currentField
+                                        If fieldCount = 5 Then tmpUser = currentField
+                                        If fieldCount = 6 Then tmpPurchase = currentField
+                                        If fieldCount = 7 Then tmpPO = currentField
+                                        If fieldCount = 8 Then tmpManCode = currentField
+                                    End If
+                                    fieldCount += 1
+                                Next
+                                Debug.Print(tmpID & " " & tmpDate)
+                                If rowCount > 0 Then NDBUpdateResult = ManuallyUpdateNDB(tmpGUID, tmpID, tmpType, tmpChannels, tmpDate, tmpUser, tmpPurchase, tmpPO, tmpManCode)
+                                If NDBUpdateResult <> 0 And rowCount > 0 Then
+                                    MsgBox("NDB Update Error on line " & rowCount, vbCritical + vbOKOnly, "Update Error")
+                                End If
+                                rowCount += 1
+                                fieldCount = 0
+                            Catch ex As _
+                            Microsoft.VisualBasic.FileIO.MalformedLineException
+                                MsgBox("Line " & ex.Message &
+                                "is not valid and will be skipped.")
+
+                            End Try
+                        End While
+                    End Using
+                Catch fileNotFound As System.IO.FileNotFoundException
+                    'Error handling here. Load default values etc
+                    Debug.Print("Got error")
+                End Try
+                '*** END get data
+                MsgBox((rowCount - 1).ToString & " Records processed", vbOK, "Result")
+            End If
+            '** Process each individual line. Stop if an error is returned from the processing
+
+        End If
+    End Sub
+    Private Function ManuallyUpdateNDB(S_GUID As String, S_ID As String, type As String, I_channels As Integer, D_TestedDate As Date, TestBy As String, PurchaseBy As String, OrdNum As String, S_ManCode As String) As Integer
+
+        '*** This section writes configuration details for the masters and channel boards into the NDB using a OneBit DLL
+        '** This function is used by the manual import hidden feature only.
+
+        Dim configuration As New BoardConfiguration()
+        Dim I_resultCode As Integer = 0
+
+        With configuration
+            .EnableLinkConfirmed = True
+            .ModuleGUID = Trim(S_GUID)              '** String containing SS details
+            .ModuleID = Trim(S_ID)                  '** ID like MC500083 or C15054
+            .ModuleType = type                      '** Device type Master, CIB, MC8, MC8SS & CIBSS
+            .NumberOfChannelsTested = I_channels    '** Number of channels 8 or 24
+            .QATestedDate = D_TestedDate            '** Current Date & Time
+            .QATestedBy = TestBy                    '** Name of person programming units
+            .Purchaser = PurchaseBy                 '** Company purchasing device
+            .OrderNumber = OrdNum                   '** PO Number
+            .ManufacturerCode = S_ManCode   '** Manufacturing code - Serial Number, model & batch date
+        End With
+
+        Try
+            Dim configurationSaver As New ConfigurationSaver(connectionString)
+            configurationSaver.SaveBoardConfiguration(configuration)
+
+        Catch ex As Exception
+            Debug.Print("ERROR " & ex.ToString)
+            I_resultCode = -1
+        End Try
+
+        Return I_resultCode
+
+    End Function
+
+    Private Sub TxtGUID_TextChanged(sender As Object, e As EventArgs) Handles TxtGUID.TextChanged
+        Me.lblGUIDLength.Text = Len(Me.TxtGUID.Text).ToString
+
+        Select Case lblGUIDLength.Text
+            Case 0, 36
+                Label5.ForeColor = Color.White
+                lblGUIDLength.ForeColor = Color.White
+                TxtGUID.ForeColor = Color.Black
+            Case Else
+                Label5.ForeColor = Color.Red
+                lblGUIDLength.ForeColor = Color.Red
+                TxtGUID.ForeColor = Color.Red
+        End Select
+        '** Manage override
+        Select Case UCase(TxtGUID.Text)
+            Case "OVERRIDE"
+                Btn_Override.Text = "Override"
+                Btn_Override.Visible = True
+                Debug.Print("Master type is " & SMasterType)
+            Case "IMPORT"
+                Btn_Override.Text = "Import"
+                Btn_Override.Visible = True
+                'Case "SOAK"
+                '    BtnSoakTest.Visible = True
+                '    TxtCycleDelay.Visible = True
+                '    TxtTestDuration.Visible = True
+                '    LblDelay.Visible = True
+                '    LblTestDuration.Visible = True
+                '    LblDuration.Visible = True
+                '    Btn_Override.Text = "Soak Available"
+                '    Btn_Override.Visible = True
+            Case Else
+                Btn_Override.Visible = False
+                '** reset override
+                'SMasterType = "Unknown"
+                'lblMaster.Text = "Master is " & SMasterType
+                'Chk_SSMaster.Checked = False
+                'Chk_FuseMaster.Checked = False
+                ''Chk_SSMaster.Enabled = False
+                'BtnSoakTest.Visible = False
+                'TxtCycleDelay.Visible = False
+                'TxtTestDuration.Visible = False
+                'LblDelay.Visible = False
+                'LblTestDuration.Visible = False
+                'LblDuration.Visible = False
+        End Select
+
+    End Sub
+    Private Sub DoSingleTest()
+        Dim StartDuration As Date
+        Dim StopDuration As Date
+        '*** Reset relay test mode
+        B_RelayCheck = False
+
+        Debug.Print("================================================== Start Testing " & Now())
+        StartDuration = Now()
+
+        'Debug.Print("Selected master = " & sMasterType)
+        If UCase(SMasterType) <> "UNKNOWN" Then
+            Try
+                '*** 07/06/2018
+                '*** Changes to enable test button to connect & reconnect
+                '*** Add auto sequence to step through configured channels
+                '*** Get the maximum step number allowed - New limit for Auto only
+                '** Modofied to use new step limit as requested to save time - Donno, Wayne & Rodney
+                '*** If master is MC8 only test up to channel 9 to tset the comms on the master
+                'Dim iMaxChannel As Integer = Val(TxtChannelLimit.Text) - 1
+                'Dim iMaxChannel As Integer = Val(TxtChTestLimit.Text) - 1
+                'Dim iCurrentChannel As Integer = Val(TxtChannel.Text)
+                'bAutoEnabled = False
+                'chkAuto.Text = "Auto OFF"
+                'chkAuto.Checked = False
+
+                ''** Change test button colour / text
+                'UpdateTestButton(1)
+                'Me.Button5.Enabled = False
+                '*** Make sure it is disconnected
+                MakeConnection(sIP, False, iPort)
+
+                '** Clear debug window
+                Me.TxtDebug.Text = ""
+
+                '*** Enable connection and disable manual connection button
+                MakeConnection(sIP, True, iPort)
+
+                '** Perform test on the selected channel
+                Dim StrResult As String = DoTest()
+
+                '*** allow app to update graphics
+                Application.DoEvents()
+
+                Dim Decoded As String = RT_Decode("80", StrResult)
+                '*** Disconnect and re-enable manual connect button.
+                MakeConnection(sIP, False, iPort)
+                '*** From old app
+                ' Dim CoolingDelay As Integer = HighPowerDelay()
+                '*** From old app
+                ' UpdateTestButton(0)
+            Catch Err As Exception
+                MessageBox.Show(Err.Message & vbCrLf & Err.Source)
+            End Try
+
+        Else
+            MsgBox("Please discover topology", vbOKOnly + vbCritical, "Cannot Test")
+        End If
+
+        Debug.Print("================================================== Stop Testing - DoSingleTest SUB" & Now())
+        StopDuration = Now()
+        Dim OverallSDuration As TimeSpan = StopDuration - StartDuration
+        Debug.Print("================================================== Duration Testing - DoSingleTest SUB" & OverallSDuration.ToString)
+    End Sub
+    Private Sub SetChannel(ChannelNumber As Integer)
+        LblChannel.Text = ChannelNumber.ToString 'Zero based channels
+        DoSingleTest()
+    End Sub
+    Private Sub PicStatM1_DoubleClick(sender As Object, e As EventArgs) Handles PicStatM1.DoubleClick
+        SetChannel(1)
+    End Sub
+
+    Private Sub PicStatM2_DoubleClick(sender As Object, e As EventArgs) Handles PicStatM2.DoubleClick
+        SetChannel(2)
+    End Sub
+
+    Private Sub PicStatM3_DoubleClick(sender As Object, e As EventArgs) Handles PicStatM3.DoubleClick
+        SetChannel(3)
+    End Sub
+    Private Sub PicStatM4_DoubleClick(sender As Object, e As EventArgs) Handles PicStatM4.DoubleClick
+        SetChannel(4)
+    End Sub
+    Private Sub PicStatM5_DoubleClick(sender As Object, e As EventArgs) Handles PicStatM5.DoubleClick
+        SetChannel(5)
+    End Sub
+    Private Sub PicStatM6_DoubleClick(sender As Object, e As EventArgs) Handles PicStatM6.DoubleClick
+        SetChannel(6)
+    End Sub
+    Private Sub PicStatM7_DoubleClick(sender As Object, e As EventArgs) Handles PicStatM7.DoubleClick
+        SetChannel(7)
+    End Sub
+    Private Sub PicStatM8_DoubleClick(sender As Object, e As EventArgs) Handles PicStatM8.DoubleClick
+        SetChannel(8)
+    End Sub
+
+    Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
+        LblChannel.Text = "1"
+        RtUnitChannel = 0 'Zero based
+    End Sub
+
+    Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
+        LblChannel.Text = "9"
+        RtUnitChannel = 8 'Zero based
+    End Sub
 End Class

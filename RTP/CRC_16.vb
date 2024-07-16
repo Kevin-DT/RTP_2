@@ -125,8 +125,13 @@
     End Sub
 
     Public Sub GetMasterTopology(iMasterModel)
+        Select Case iMasterModel
+            Case 3
+                FrmMain.SMasterType = "RTMC8"
+            Case Else
+                FrmMain.SMasterType = "RTMC8F5"
+        End Select
 
-        FrmMain.sMasterType = "RTMC8F5"
 
         '        FrmMain.lblMaster.Text = "Master is " & FrmMain.sMasterType
     End Sub
