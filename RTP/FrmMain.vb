@@ -54,6 +54,7 @@ Public Class FrmMain
     Public IntMasterType As Integer = 0
     Const MC8F5 As Integer = 1
     Const MC8 As Integer = 2
+    Const STANDARD As Integer = 3
     Public S_MasterGUID As String
     Public sCB_OriginalGUID As String = ""
     Public sNewGUID As String = ""
@@ -1254,6 +1255,12 @@ Public Class FrmMain
                 TxtDebug.Text += vbNewLine & "Configuration " & TmpString
                 '*** decode some info
                 Select Case Trim(StrResultArray(9))
+                    Case "1"
+                        LblType.Text = "Type: STANDARD"
+                        IntMasterType = STANDARD
+                        IntMaxChannel = 0
+                        LblChLimit.Text = "0"
+                        MsgBox("Incompatible device detected. Please use RT Auto Config to program this device.", vbCritical + vbOKOnly, "Error - Cannot proceed.")
                     Case "9"
                         LblType.Text = "Type: MC8F5"
                         IntMasterType = MC8F5
@@ -2993,15 +3000,19 @@ Public Class FrmMain
         MakeConnection(sIP, False, iPort)
     End Sub
     Private Sub BtnNext_Click(sender As Object, e As EventArgs) Handles BtnNext.Click
-        Dim IntValidation As Integer = ValidatePage()
-        '*** Check required fields are filled out
-        If IntValidation > 0 Then
-            MsgBox("Please complete all required fields. [" & IntValidation.ToString & "]", vbCritical + vbOKOnly, "Computer says NO")
+        If IntMasterType = STANDARD Then
+
+            MsgBox("Incompatible device detected. Please use RT Auto Config to program this device.", vbCritical + vbOKOnly, "Error - Cannot proceed.")
         Else
-            Dim IntTestStep As Integer = TestStep()
+            Dim IntValidation As Integer = ValidatePage()
+            '*** Check required fields are filled out
+            If IntValidation > 0 Then
+                MsgBox("Please complete all required fields. [" & IntValidation.ToString & "]", vbCritical + vbOKOnly, "Computer says NO")
+            Else
+                Dim IntTestStep As Integer = TestStep()
 
+            End If
         End If
-
     End Sub
     Private Sub WriteNDB(S_GUID As String, S_ID As String, type As String, I_channels As Integer, S_ManCode As String)
 
