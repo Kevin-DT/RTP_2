@@ -176,6 +176,7 @@ Partial Class FrmMain
         Me.LblPrompt = New System.Windows.Forms.Label()
         Me.PicRTbarcode = New System.Windows.Forms.PictureBox()
         Me.TabUtil = New System.Windows.Forms.TabPage()
+        Me.TxtIpAddress = New System.Windows.Forms.MaskedTextBox()
         Me.btnClearGUID = New System.Windows.Forms.Button()
         Me.Btn_Override = New System.Windows.Forms.Button()
         Me.Button17 = New System.Windows.Forms.Button()
@@ -1939,6 +1940,7 @@ Partial Class FrmMain
         '
         'TabUtil
         '
+        Me.TabUtil.Controls.Add(Me.TxtIpAddress)
         Me.TabUtil.Controls.Add(Me.btnClearGUID)
         Me.TabUtil.Controls.Add(Me.Btn_Override)
         Me.TabUtil.Controls.Add(Me.Button17)
@@ -1970,6 +1972,15 @@ Partial Class FrmMain
         Me.TabUtil.TabIndex = 1
         Me.TabUtil.Text = "Utilities"
         Me.TabUtil.UseVisualStyleBackColor = True
+        '
+        'TxtIpAddress
+        '
+        Me.TxtIpAddress.Location = New System.Drawing.Point(22, 539)
+        Me.TxtIpAddress.Mask = "000.000.000.000"
+        Me.TxtIpAddress.Name = "TxtIpAddress"
+        Me.TxtIpAddress.Size = New System.Drawing.Size(184, 26)
+        Me.TxtIpAddress.TabIndex = 144
+        Me.TxtIpAddress.Text = "192168000045"
         '
         'btnClearGUID
         '
@@ -2642,4 +2653,5 @@ Partial Class FrmMain
     Friend WithEvents Button2 As Button
     Friend WithEvents Button1 As Button
     Friend WithEvents Label10 As Label
+    Friend WithEvents TxtIpAddress As MaskedTextBox
 End Class

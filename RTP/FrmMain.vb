@@ -40,7 +40,11 @@ Public Class FrmMain
     Public StrRTpassword As String = "rapidtest"
 
     '** device IP address and port
-    Public sIP As String = "192.168.0.1"  '*** Change as required for LAN testing
+    '*** Device UART comms speed must be 9600
+    '*** Add text box to utilities to set LAN mode IP when checkbox is selected
+    '***    Add to save & load
+    Public DefaultSip As String = "192.168.0.1"  '*** Change as required for LAN testing Default = "192.168.0.1"
+    Public sIP As String = DefaultSip
     Public iPort As Integer = 12000
 
     '*** Shared elements for the ethernet
@@ -3020,6 +3024,10 @@ Public Class FrmMain
         '*** This function is used by the automatic NDB update used during programming of modules.
 
         Dim Configuration As New BoardConfiguration()
+        '** Add note if CIB programmed with config only
+        If ChkCIBidOnly.Checked Then
+            S_ManCode = S_ManCode & " [Config Only]"
+        End If
 
         With Configuration
             .EnableLinkConfirmed = True
@@ -4968,5 +4976,30 @@ FROM            dbo.NDB_Board INNER JOIN
     Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
         LblChannel.Text = "9"
         RtUnitChannel = 8 'Zero based
+    End Sub
+
+    Private Sub ChkLAN_CheckedChanged(sender As Object, e As EventArgs) Handles ChkLAN.CheckedChanged
+        If ChkLAN.Checked Then
+            sIP = TxtIpAddress.Text
+
+            Dim pingNum As Integer = 0
+            Dim pingNumEnd As Integer = 0
+            Dim dotPOSstart As Integer = InStrRev(TxtIpAddress.Text, ".")
+            pingNum = Microsoft.VisualBasic.Val(Microsoft.VisualBasic.Right(TxtIpAddress.Text, Len(TxtIpAddress.Text) - dotPOSstart))
+
+            Dim tempNum As Integer = 0
+            tempNum = Microsoft.VisualBasic.Val(Microsoft.VisualBasic.Left(TxtIpAddress.Text, 3)) 'first octet
+            Dim pingString As String = Microsoft.VisualBasic.Val(tempNum)
+            tempNum = Microsoft.VisualBasic.Val(Microsoft.VisualBasic.Mid(TxtIpAddress.Text, 5, 3))   ' second octet
+            pingString = pingString & "." & Microsoft.VisualBasic.Val(tempNum)
+            tempNum = Microsoft.VisualBasic.Val(Microsoft.VisualBasic.Mid(TxtIpAddress.Text, 9, 3))   'third octet
+            pingString = pingString & "." & Microsoft.VisualBasic.Val(tempNum) & "."
+
+            sIP = pingString & pingNum.ToString '*** Add last octet
+            Debug.Print(pingNum.ToString & " " & pingNumEnd.ToString & " " & sIP)
+        Else
+            sIP = DefaultSip
+        End If
+        Debug.Print(sIP)
     End Sub
 End Class
