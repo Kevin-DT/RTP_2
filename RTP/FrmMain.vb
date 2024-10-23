@@ -5,13 +5,10 @@ Imports System.Drawing.Printing
 Imports Ats.RapidTest.DataConfiguration
 Imports Ats.RapidTest.DataConfiguration.Model
 Imports System.Net.Mail
-'Imports System.ComponentModel
-'Imports System.Net
-'Imports System.Text
-'Imports System.Runtime.InteropServices
-'Imports System.Runtime.Serialization
-'Imports System.ComponentModel
+Imports System.Net
+
 Public Class FrmMain
+
     '*** Publishing
     'Username: dtsuperuser1
     'Password: dataPublish1$
@@ -26,6 +23,7 @@ Public Class FrmMain
     Public StrDefaultMaster As String = ""
     Public StrLogPath As String = StrRootFolder
     Public StrTextToLog As String = ""
+    Public LogFileOpen As Boolean = False
 
     '*** Save temp value for Skip Master
     Public StrCurrentSSID As String = ""
@@ -49,7 +47,7 @@ Public Class FrmMain
 
     '*** Shared elements for the ethernet
     Shared client As New TcpClient
-    Shared stream As NetworkStream
+    Shared NetStream As NetworkStream
 
     '*** Device details
     Public iVersionMinor As Integer = 0
@@ -81,6 +79,8 @@ Public Class FrmMain
     Public ResponseLength As Integer = 21
     Public IntMasterTestsDone As Integer = 0
     Public IntCIBTestsDone As Integer = 0
+    Public StrCommandInUse As String = "00"
+    Public BoolManTrip As Boolean = False
 
     '*** Channel details
     Public IntCurrentChannel As Integer = 1
@@ -156,6 +156,7 @@ Public Class FrmMain
             TSPrinterName.ForeColor = Color.Red
             TSPrinterName.Text = "No Printer"
         End If
+        '** Read setting sfile
         GetSettings()
         If StrDefaultMaster <> "" Then ChkSkipMaster.Text = "Skip Master (Use " & StrDefaultMaster & ")"
         TSLogPath.Text = StrLogPath
@@ -165,6 +166,7 @@ Public Class FrmMain
         TmrWifi.Enabled = True
     End Sub
     Private Sub Initialise()
+        IntCurrentChannel = 1
         RtUnitChannel = IntCurrentChannel - 1 '*** Remove offset of 1 for 0 based unit channels
         LblChannel.Text = IntCurrentChannel.ToString
 
@@ -312,6 +314,8 @@ Public Class FrmMain
         Dim ReturnData As Integer = 1
         '*** Get availabel file number
         Dim AutoSaveFileNumber As Integer = FreeFile()
+        'set Default IP address
+        If TxtIpAddress.Text = "" Then TxtIpAddress.Text = "192.168.000.001"
         '*** Write data to file
         FileOpen(AutoSaveFileNumber, DataFile, OpenMode.Output)
         PrintLine(AutoSaveFileNumber, "User" & "," & TxtUser.Text)
@@ -333,7 +337,11 @@ Public Class FrmMain
         PrintLine(AutoSaveFileNumber, "AutoStep" & "," & ChkAutoStep.Checked.ToString)
         PrintLine(AutoSaveFileNumber, "PlaySound" & "," & ChkSound.Checked.ToString)
         PrintLine(AutoSaveFileNumber, "LockControls" & "," & ChkManCntrls.Checked.ToString)
-        '
+        PrintLine(AutoSaveFileNumber, "LAN" & "," & ChkLAN.Checked.ToString)
+        PrintLine(AutoSaveFileNumber, "LastIP" & "," & TxtIpAddress.Text)
+        PrintLine(AutoSaveFileNumber, "BLE" & "," & ChkBLE.Checked.ToString)
+
+        'ChkBLE
         '*** Close file 
 
         FileClose(AutoSaveFileNumber)
@@ -351,6 +359,7 @@ Public Class FrmMain
         Dim StrTempSSID As String = ""
         Dim TmpChkCIB As String = ""
         Dim StrTempCIB As String = ""
+        Dim StrTempIPAddress As String = ""
 
         Try
             Using MyReader As New Microsoft.VisualBasic.FileIO.TextFieldParser(DataFile)
@@ -391,6 +400,10 @@ Public Class FrmMain
                             '**** Sound / General
                             If RowCount = 18 And fieldCount = 1 Then ChkSound.Checked = CBool(currentField)
                             If RowCount = 19 And fieldCount = 1 Then ChkManCntrls.Checked = CBool(currentField)
+                            '*** LAN & BLE
+                            If RowCount = 20 And fieldCount = 1 Then ChkLAN.Checked = CBool(currentField)
+                            If RowCount = 21 And fieldCount = 1 Then StrTempIPAddress = currentField
+                            If RowCount = 22 And fieldCount = 1 Then ChkBLE.Checked = CBool(currentField)
                             'ChkManCntrls
                             fieldCount = +1
                         Next
@@ -416,10 +429,14 @@ Public Class FrmMain
         TxtMasterSSID.Text = StrTempSSID
         ChkSkipCIB.Checked = CBool(TmpChkCIB)
         TxtCIBid.Text = StrTempCIB
+        TxtIpAddress.Text = StrTempIPAddress
+        '*** If LAN checked update IP address
+        If ChkLAN.Checked Then SetIP()
 
         Return ReturnData
     End Function
     Private Sub BtnReload_Click(sender As Object, e As EventArgs) Handles BtnReload.Click
+        Debug.Print("Reloading Saved Data")
         Dim ReloadData As Integer = ReloadDataFile()
     End Sub
 
@@ -558,34 +575,50 @@ Public Class FrmMain
     End Function
 
     Shared Sub MakeConnection(server As [String], isAlive As Boolean, port As Int32)
-        Debug.Print("Working on connection...")
+        '*** Check IP if opening port
+        '  If isAlive Then
+        FrmMain.SetIP()
+        server = FrmMain.sIP
         Dim myCRC_16 As New CRC_16()
         Dim ShowResult As Integer
         Try
             '  Dim port As Int32 = ' 80 '12000
             If isAlive Then
+                Debug.Print(Format(Now(), "hh:MM.ss") & " Working on Connecting...")
                 client = New TcpClient(server, port)
+                Debug.Print("****************** IP Address of Server = " & server)
                 If client.Connected Then
-                    Debug.Print("Connected.")
-                    ShowResult = myCRC_16.DisplayResult("Connected", 1, 0, 0)
+                    Debug.Print(Format(Now(), "hh:MM.ss") & " Connected.")
+                    ShowResult = myCRC_16.DisplayResult(Format(Now(), "hh:MM.ss") & " Connected", 1, 0, 0)
                 Else
-                    Debug.Print("Not Connected.")
-                    ShowResult = myCRC_16.DisplayResult("Not Connected.", 1, 0, 0)
+                    Debug.Print(Format(Now(), "hh:MM.ss") & " Not Connected.")
+                    ShowResult = myCRC_16.DisplayResult(Format(Now(), "hh:MM.ss") & " Not Connected.", 1, 0, 0)
                 End If
             Else
+                Debug.Print(Format(Now(), "hh:MM.ss") & " Closing Connection...")
                 Try
-                    ' If stream. Then stream.Close()  '*** crashes if the stream is not open. seems to be closed with the client anyway
-                    If client.Connected Then client.Close()
-                    Debug.Print("Not Connected - Else.")
-                    ShowResult = myCRC_16.DisplayResult("Connection closed.", 1, 0, 0)
+                    ' If stream. Then stream.Close()  '*** crashes if the stream is not open. 
+                    'seems to be closed with the client anyway
+                    If client Is Nothing Then
+                        'Else
+
+                        If client.Connected Then
+                            client.Close()
+                        End If
+                        Debug.Print(Format(Now(), "hh:MM.ss") & " Not Connected - Else.")
+                        ShowResult = myCRC_16.DisplayResult(Format(Now(), "hh:MM.ss") & " Connection closed.", 1, 0, 0)
+                    End If
                 Catch ex As NullReferenceException
-                    Debug.Print("Make Connection - Null Reference Exception caught.")
+                    Debug.Print(Format(Now(), "hh:MM.ss") & " Make Connection - Null Reference Exception caught.")
                 End Try
             End If
-            Debug.Print("Done...")
+            Debug.Print(Format(Now(), "hh:MM.ss") & " Done...")
         Catch ex As SocketException
-            Debug.Print("Socket Error " & ex.NativeErrorCode & " " & ex.SocketErrorCode & " " & ex.Message)
+            Debug.Print(Format(Now(), "hh:MM.ss") & " Socket Error " & ex.NativeErrorCode & " " & ex.SocketErrorCode & " " & ex.Message)
 
+            If client.Connected Then
+                client.Close()
+            End If
         End Try
 
     End Sub
@@ -593,31 +626,25 @@ Public Class FrmMain
         '*** Disable manual version button
         BtnFirmware.Enabled = False
         TxtDebug.Text = ""
-
+        Dim BtnLogFileOpen As Boolean = False
         '*** Log activity
+        Dim LogSaved As Integer = 0
         StrTextToLog = "Get Firmware"
-        Dim debugFilename As String = StrLogPath & "Debug " & Format(Now(), "yyyyMMdd") & "_" & Trim(TxtOrderRef.Text) & "_" & TxtMasterSSID.Text & ".log"
-        Dim debugFileNumber As Integer = FreeFile()
-        FileOpen(debugFileNumber, debugFilename, OpenMode.Append)
-        Dim debugTime As String = Format(Now(), "hh:mm:ss")
-        PrintLine(debugFileNumber, debugTime & " " & StrTextToLog)
-
+        LogSaved = WriteLogFile(StrTextToLog)
+        StrCommandInUse = "92"
         Dim StrResult As String = GetMasterVersion()
 
         '*** If logging to this file is needed in other areas either replicate the file name or make it global
         '*** OK here only for now.
         '*** Log data
-        debugTime = Format(Now(), "hh:mm:ss")
         StrTextToLog = StrResult
-        PrintLine(debugFileNumber, debugTime & " " & StrTextToLog)
+        LogSaved = WriteLogFile(StrTextToLog)
 
-        Dim Decoded As String = RT_Decode("92", StrResult)
-
+        Dim Decoded As String = RT_Decode(StrCommandInUse, StrResult)
+        StrCommandInUse = "00"
         '*** Log data
         StrTextToLog = Decoded
-        PrintLine(debugFileNumber, debugTime & " " & StrTextToLog)
-        FileClose(debugFileNumber)
-
+        LogSaved = WriteLogFile(StrTextToLog)
         '*** Enable button
         BtnFirmware.Enabled = True
 
@@ -635,18 +662,29 @@ Public Class FrmMain
         Dim debugMode As Boolean = False
         Dim debugFilename As String = FrmMain.StrRootFolder & "Debug RT_" & Format(Now(), "yyyyMMdd") & "_" & Trim(OrderRefText) & MasterChannel & ".log"
         Dim debugFileNumber As Integer = FreeFile()
-        Dim debugTime As String = Format(Now(), "hh:mm:ss")
         Dim IUnderscore As Integer = InStrRev(MasterChannel, "_")
         Dim SMasterID As String = Microsoft.VisualBasic.Mid(MasterChannel, 2, IUnderscore - 2)
         Dim SChannelID As String = ""
 
-
         If Len(MasterChannel) > 2 Then SChannelID = Microsoft.VisualBasic.Right(MasterChannel, Len(MasterChannel) - IUnderscore)
         Debug.Print("IO's " & SMasterID & " - " & SChannelID)
+
+        Dim debugTime As String = Format(Now(), "hh:mm:ss")
         Try
 
-            'Open log file
-            FileOpen(debugFileNumber, debugFilename, OpenMode.Append)
+            'Open DEBUG log file
+            '*** Working Here
+            '*** Change printlines to individual WriteDebugLogFile function calls
+            '****   WriteDebugLogFile(Data)
+
+            '==========================================================
+            '**** EG WriteDebugLogFile(": Disabled Wi-Fi")
+            '**** Open and close file each time
+            '==========================================================
+            If Not FrmMain.LogFileOpen Then
+                FileOpen(debugFileNumber, debugFilename, OpenMode.Append)
+                FrmMain.LogFileOpen = True
+            End If
             PrintLine(debugFileNumber, debugTime & " " & FrmMain.StrTextToLog)
             data2SendFormatted = ""
             For x = 1 To Len(message)
@@ -716,35 +754,42 @@ Public Class FrmMain
             '*** Test Reply should be 55 aa 08 00 da 01 8c dd to 0xDA Read Test Bus Powered
 
             ' Get a client stream for reading and writing.
-            'Dim stream As NetworkStream = client.GetStream()
+            ' Dim stream As NetworkStream = client.GetStream()
             If client.Connected Then
 
                 '***********************************************
                 '*** SEND COMMAND FROM HERE
                 '***********************************************
-                stream = client.GetStream()
+                NetStream = client.GetStream()
 
                 '** Delay to open stream
                 Threading.Thread.Sleep(Microsoft.VisualBasic.Val(100))
 
                 ' Send the message to the connected TcpServer. 
-                stream.Write(data, 0, data.Length)
+                NetStream.Write(data, 0, data.Length)
                 Application.DoEvents()
 
                 '*** Delay reading response buffer
-                Dim sleepDelay As Integer = replySize * 20
-                Debug.Print("Calculated Delay " & sleepDelay.ToString)
-                If sleepDelay < 1200 Then sleepDelay = 1200
-                ' If sleepDelay < 200 Then sleepDelay = 200
-                If sleepDelay > 5000 Then sleepDelay = 5000
-                Debug.Print("Reply Size " & replySize.ToString)
+                Dim sleepDelay As Integer = 1500
 
+                Select Case FrmMain.StrCommandInUse
+                    Case "81", "92", "DA", "EB"
+                        sleepDelay = 1500
+                    Case "EA"   'Long delay to account for reading from CIB - time delay for additional comms hop
+                        sleepDelay = 4000
+                    Case "BE", "BD"
+                        sleepDelay = 2500
+                    Case "80"
+                        sleepDelay = 6000
+                    Case Else
+                        sleepDelay = 5000
+                End Select
                 '*** LAN ONLY CODE
                 '*** Calculate delay overide for LAN
                 If FrmMain.ChkLAN.Checked Then
                     Select Case data(4)
                         Case "234", "129"
-                            sleepDelay = 4500 '*** Only required for LAN version
+                            sleepDelay = 5000 '*** Only required for LAN version
                     End Select
                 End If
 
@@ -752,7 +797,6 @@ Public Class FrmMain
                 If FrmMain.ChkBLE.Checked Then
 
                 End If
-
                 Debug.Print("Final Delay " & sleepDelay.ToString)
                 System.Threading.Thread.Sleep(sleepDelay) '*
                 'System.Threading.Thread.Sleep(5000) '*
@@ -772,269 +816,264 @@ Public Class FrmMain
                 If replySize > 0 Then
                     Debug.Print("********** Checking for Data of Length " & data.Length.ToString)
 
-                    Dim bDataAvailable As Boolean = stream.DataAvailable
-                    Dim bytes As Integer = stream.Read(data, 0, data.Length) ' 
-                    Debug.Print("********** Data Checked " & bytes.ToString & " found.")
-                    Debug.Print("data available = " & bDataAvailable.ToString)
+                    Dim bDataAvailable As Boolean = NetStream.DataAvailable
+                    If bDataAvailable Then
+                        Dim bytes As Integer = NetStream.Read(data, 0, data.Length) ' 
+                        Threading.Thread.Sleep(1000)
+                        Application.DoEvents()
+                        Debug.Print("********** Data Checked " & bytes.ToString & " found.")
+                        Debug.Print("data available = " & bDataAvailable.ToString)
 
 
-                    responseData = System.Text.Encoding.ASCII.GetString(data, 0, bytes)
-                    Debug.Print("Received: {0}", responseData)
-                    Debug.Print(vbCrLf)
-                    '*** Check incomming checksum
-                    '*** Assign data only - no checksum
-                    '*** 0 based byte array = reply size - 3. 2 for checksum and 1 to offset to 0
-                    Dim dataByteCount As Integer = replySize - 3
-                    Dim dataOnly = New [Byte](dataByteCount) {}
-                    For x = 0 To dataByteCount
-                        dataOnly(x) = data(x)
+                        responseData = System.Text.Encoding.ASCII.GetString(data, 0, bytes)
+                        Debug.Print("Received: {0}", responseData)
+                        Debug.Print(vbCrLf)
+                        '*** Check incomming checksum
+                        '*** Assign data only - no checksum
+                        '*** 0 based byte array = reply size - 3. 2 for checksum and 1 to offset to 0
+                        Dim dataByteCount As Integer = replySize - 3
+                        Dim dataOnly = New [Byte](dataByteCount) {}
+                        For x = 0 To dataByteCount
+                            dataOnly(x) = data(x)
 
-                        Debug.Print("Data Only " & Hex(dataOnly(x)))
+                            Debug.Print("Data Only " & Hex(dataOnly(x)))
 
-                    Next
+                        Next
 
-                    Dim csumOnly = New [Byte](2) {}
-                    csumOnly(0) = data(dataByteCount + 1)
-                    csumOnly(1) = data(dataByteCount + 2)
+                        Dim csumOnly = New [Byte](2) {}
+                        csumOnly(0) = data(dataByteCount + 1)
+                        csumOnly(1) = data(dataByteCount + 2)
 
-                    '*** Calculate checksum for comparisson
-                    Dim myCRC_16_2 As New CRC_16()
+                        '*** Calculate checksum for comparisson
+                        Dim myCRC_16_2 As New CRC_16()
 
-                    Dim showSendnData As Integer = myCRC_16_2.DisplayResult("Sending packet >" & data2SendFormatted & "< ", 0, 0, 0)
+                        Dim showSendnData As Integer = myCRC_16_2.DisplayResult("Sending packet >" & data2SendFormatted & "< ", 0, 0, 0)
 
-                    Dim csum() As Byte = myCRC_16_2.ComputeChecksumBytes(dataOnly)
-                    Debug.Print("Calculated CheckSum " & Hex(csum(0)) & " " & Hex(csum(1)))
-                    Debug.Print("  Received CheckSum " & Hex(csumOnly(0)) & " " & Hex(csumOnly(1)))
-                    Dim checkSumIsOK As Boolean = False
-                    If Hex(csum(0)) = Hex(csumOnly(0)) And Hex(csum(1)) = Hex(csumOnly(1)) Then
-                        checkSumIsOK = True
-                    End If
-                    dataReceivedFormatted = [String].Empty
-                    For x = 0 To bytes - 1
-                        dataReceivedFormatted = dataReceivedFormatted & " " & Hex(data(x))
-                    Next
-
-                    '****************************************************
-                    '**** SAVE RESPONSE TO RETURN FROM FUNCTION
-                    '****************************************************
-                    Connect = dataReceivedFormatted
-                    '****************************************************
-
-                    '*** decode for result packet 0x81 = 129. This is the trip test result
-                    Dim sError As String = ""
-                    Dim sChannel As String = ""
-                    Dim sDuration As String = ""
-                    Dim sCurrent As String = ""
-                    Dim iChTested As Integer = 0
-                    '*** Fetch results 0x81
-                    If data(4) = 129 And replySize > 7 Then
-                        Debug.Print("Response processing...")
-
-                        '*** Channel Tested
-                        sChannel = "Channel " & (data(6) + 1).ToString
-                        '** Update Checkboxes on main form
-                        iChTested = data(6) + 1
-                        myCRC_16_2.DisplayTestResults(iChTested.ToString)
-
-                        '*** duration
-                        Dim iDurData As Integer = 0
-                        If data(8) > 0 Then iDurData = data(8) * 256 Else iDurData = 0
-                        iDurData += data(7)
-                        Dim sTemp As String = iDurData.ToString
-                        sDuration = "Duration = " & sTemp
-
-                        '*** Current  
-                        Dim iCurData As Integer = 0
-                        Dim tmpData As String = data(10).ToString("X2") & data(9).ToString("X2")
-                        Dim RealResult As Long = Convert.ToUInt64(tmpData, 16)
-                        If FrmMain.SMasterType = "RTMC8F5" Then
-                            sCurrent = (RealResult / 10).ToString
-                        Else
-                            sCurrent = RealResult.ToString
+                        Dim csum() As Byte = myCRC_16_2.ComputeChecksumBytes(dataOnly)
+                        Debug.Print("Calculated CheckSum " & Hex(csum(0)) & " " & Hex(csum(1)))
+                        Debug.Print("  Received CheckSum " & Hex(csumOnly(0)) & " " & Hex(csumOnly(1)))
+                        Dim checkSumIsOK As Boolean = False
+                        If Hex(csum(0)) = Hex(csumOnly(0)) And Hex(csum(1)) = Hex(csumOnly(1)) Then
+                            checkSumIsOK = True
                         End If
+                        dataReceivedFormatted = [String].Empty
+                        For x = 0 To bytes - 1
+                            dataReceivedFormatted = dataReceivedFormatted & " " & Hex(data(x))
+                        Next
 
-                        '*** Command errors if any
-                        Select Case data(5)
-                            Case 0
-                                sError = "No Error:"
-                                FrmMain.BSuppressTimeWarning = False
-                            Case Else
-                                Dim S_ErrorCode As String = Hex(data(5)).ToString
-                                Select Case S_ErrorCode
-                                    Case "10", "11", "12", "13"
-                                        sError = "ERROR " & S_ErrorCode & " - Invalid test parameter"
-                                        FrmMain.BSuppressTimeWarning = True
-                                    Case "20"
-                                        sError = "ERROR " & S_ErrorCode & " - Power on Test Bus before board powered"
-                                        FrmMain.BSuppressTimeWarning = True
-                                    Case "21"
-                                        sError = "ERROR " & S_ErrorCode & " - Power on Test Bus before enable"
-                                        FrmMain.BSuppressTimeWarning = True
-                                    Case "22"
-                                        sError = "ERROR " & S_ErrorCode & " - Power on Test Bus before channel Set"
-                                        FrmMain.BSuppressTimeWarning = True
-                                    Case "23"
-                                        sError = "ERROR " & S_ErrorCode & " - No response from set channel"
-                                        FrmMain.BSuppressTimeWarning = True
-                                    Case "24"
-                                        sError = "ERROR " & S_ErrorCode & " - Invalid Channel selected"
-                                        FrmMain.BSuppressTimeWarning = True
-                                    Case "25"
-                                        sError = "ERROR " & S_ErrorCode & " - Channel Conflict"
-                                        FrmMain.BSuppressTimeWarning = True
-                                    Case "26"
-                                        sError = "ERROR " & S_ErrorCode & " - No response to set power relay"
-                                        FrmMain.BSuppressTimeWarning = True
-                                    Case "27"
-                                        sError = "ERROR " & S_ErrorCode & " - Power on Test Bus relay set"
-                                        FrmMain.BSuppressTimeWarning = True
-                                    Case "28"
-                                        sError = "ERROR " & S_ErrorCode & " - No power before test"
-                                        FrmMain.BSuppressTimeWarning = True
-                                    Case "29"
-                                        sError = "ERROR " & S_ErrorCode & " - ADC not cleared - Master"
-                                        FrmMain.BSuppressTimeWarning = True
-                                    Case "30"
-                                        sError = "ERROR " & S_ErrorCode & " - Phase not detected - Master"
-                                        FrmMain.BSuppressTimeWarning = True
-                                    Case Else
-                                        sError = "ERROR " & S_ErrorCode & " - Undefined error code"
-                                        FrmMain.BSuppressTimeWarning = True
-                                End Select
+                        '****************************************************
+                        '**** SAVE RESPONSE TO RETURN FROM FUNCTION
+                        '****************************************************
+                        Connect = dataReceivedFormatted
+                        '****************************************************
 
-                                '** IF there are any erorrs ignore and time or current data
-                                iDurData = 0
-                                iCurData = 0
-                        End Select
+                        '*** decode for result packet 0x81 = 129. This is the trip test result
+                        Dim sError As String = ""
+                        Dim sChannel As String = ""
+                        Dim sDuration As String = ""
+                        Dim sCurrent As String = ""
+                        Dim iChTested As Integer = 0
+                        '*** Fetch results 0x81 
+                        If data(4) = 129 And replySize > 7 Then
+                            Debug.Print("Response processing...")
 
-                        Debug.Print(sError & " " & sChannel & " " & sDuration & " " & sCurrent)
-                        Connect += vbNewLine & sError & " " & sChannel & " " & sDuration & " " & "Current leaked " & sCurrent
-                        ' If debugGUID <> "" Then PrintLine(debugFileNumber, debugTime & "SSID [RT_" & debugSSID & "] GUID [" & debugGUID & "]")
-                    End If
+                            '*** Channel Tested
+                            sChannel = "Channel " & (data(6) + 1).ToString
+                            '** Update Checkboxes on main form
+                            iChTested = data(6) + 1
+                            myCRC_16_2.DisplayTestResults(iChTested.ToString)
 
-                    If data(4) = 146 Then
-                        myCRC_16_2.SetVersion(data(5), data(6))
-                        'PrintLine(debugFileNumber, debugTime & ": " & SMasterType)
-                    End If
-                    debugTime = Format(Now(), "hh:mm:ss")
-                    Debug.Print("Received packet >" & dataReceivedFormatted & "< checksum is " & checkSumIsOK.ToString & " for " &
-                            dataOnly.Length.ToString & " bytes" & " > " & debugTime)
-                    debugTime = (Format(Now(), "hh:mm:ss"))
-
-                    '*********************  DECODE results for logging
-
-                    Dim BoolTopologyError As Boolean
-
-                    Select Case data(4).ToString
-                        Case "32" '20 - Should never get a response to this. This is 0x20 sleep wifi
-                            PrintLine(debugFileNumber, debugTime & ": Disabled Wi-Fi - No Resposne")
-                        Case "128" '80 - Done
-                            PrintLine(debugFileNumber, debugTime & "  > Test started")
-                        Case "129" '81 - Done
-                            PrintLine(debugFileNumber, debugTime & ": Test Result:")
-                            PrintLine(debugFileNumber, debugTime & "  > " & sError)
-                            PrintLine(debugFileNumber, debugTime & "  > Channel = " & (data(6) + 1).ToString & " [" & data(6).ToString & "]")
+                            '*** duration
                             Dim iDurData As Integer = 0
                             If data(8) > 0 Then iDurData = data(8) * 256 Else iDurData = 0
                             iDurData += data(7)
-                            PrintLine(debugFileNumber, debugTime & "  > Duration (ms) = " & iDurData)  '*** duration is 2 bytes 
-                            Dim iCurData As Integer = 0
-                            If data(10) > 0 Then iCurData = data(9) * 256 Else iCurData = 0
-                            iCurData += data(9)
+                            Dim sTemp As String = iDurData.ToString
+                            sDuration = "Duration = " & sTemp
 
-                            '****
                             '*** Current  
-                            sCurrent = "0"
+                            Dim iCurData As Integer = 0
                             Dim tmpData As String = data(10).ToString("X2") & data(9).ToString("X2")
                             Dim RealResult As Long = Convert.ToUInt64(tmpData, 16)
-                            sCurrent = (RealResult / 10).ToString
-
-                            '****
-                            '*** 18/12/2019
-                            If sError <> "No Error" Then sCurrent = "0"
-                            ' PrintLine(debugFileNumber, debugTime & "  > Set Val (mA) = " & FrmMain.TxtSetCurrent.Text)
-                            PrintLine(debugFileNumber, debugTime & "  > Current (mA) = " & sCurrent & " (" & data(10).ToString & "," & data(9).ToString & ")") '** Current is 2 bytes
-                            'PrintLine(debugFileNumber, debugTime & "  > Current (mA) = " & iCurData & " (" & data(10).ToString & "," & data(9).ToString & ")") '** Current is 2 bytes
-                            If data(11) = 1 Then
-                                PrintLine(debugFileNumber, debugTime & "  > Tripped = Yes")
-                                'FrmMain.B_tripped = True
-                                'If FrmMain.B_RelayCheck Then
-                                '    PrintLine(debugFileNumber, debugTime & "  > SHOULD NOT TRIP - Relay Test Mode")
-                                '    ' MsgBox("Check channel - should not have returned as tripped.", MsgBoxStyle.Critical + MsgBoxStyle.OkOnly, "Something Fishy Here")
-                                'End If
-                                'Else
-                                '    PrintLine(debugFileNumber, debugTime & "  > Tripped = No")
-                                '    If FrmMain.B_RelayCheck Then
-                                '        PrintLine(debugFileNumber, debugTime & "  > Relay Test Mode")
-                                '    End If
-                                '    FrmMain.B_tripped = False
-                            End If
-                        Case "145" '91 - Done
-                            PrintLine(debugFileNumber, debugTime & ": Set Wi-Fi Settings [RT_" & SMasterID & "]")
-                        Case "146" '92 - Done
-                            PrintLine(debugFileNumber, debugTime & ": Firmware version is " & data(6).ToString & "." & data(5).ToString)
-                            PrintLine(debugFileNumber, "****************************************************")
-                        Case "186" 'BA - Done
-                            PrintLine(debugFileNumber, debugTime & ": Set single RCD for channel " & (data(6) + 1).ToString & " [" & data(6).ToString & "]")
-                            If data(5) = 0 Then
-                                PrintLine(debugFileNumber, debugTime & "  > RCD Mapping succeeded.")
+                            If FrmMain.SMasterType = "RTMC8F5" Then
+                                sCurrent = (RealResult / 10).ToString
                             Else
-                                PrintLine(debugFileNumber, debugTime & "  > RCD Mapping Error. Channel out of range.")
+                                sCurrent = RealResult.ToString
                             End If
 
-                        Case "187" 'BB - Done
-                            PrintLine(debugFileNumber, debugTime & ": RCD Mapping for channel " & (data(5) + 1).ToString & " [" & data(5).ToString & "]")
-                            PrintLine(debugFileNumber, debugTime & "  > RCD number = " & data(6).ToString)
-                        Case "188" 'BC 
-                            PrintLine(debugFileNumber, debugTime & ": Reading All RCD Mappings. >> " & dataReceivedFormatted)
-                        Case "189" 'BD - Done
-                            PrintLine(debugFileNumber, debugTime & "  > GUID set.")
-                        Case "190" 'BE - Read GUID
-                            Dim StempGUID As String = ""
-                            For x = 5 To 40
-                                StempGUID &= Chr(data(x))
-                            Next
-                            PrintLine(debugFileNumber, debugTime & "  > GUID = " & StempGUID)
-                            PrintLine(debugFileNumber, debugTime & "  > GUID Packet = >> " & dataReceivedFormatted)
-                            '*** Display ASCII version of the GUID
-                            'Dim I_showResult As Integer = myCRC_16_2.displayResult(vbCrLf & "Guid String = " & StempGUID & vbCrLf, 1, 1, 0)
-                            Dim I_showResult As Integer = myCRC_16_2.DisplayResult("Guid String = " & StempGUID & vbCrLf, 1, 1, 0)
-                        Case "218" 'DA
-                            PrintLine(debugFileNumber, debugTime & ": Bus Power Status.")
-                            If data(5) = 1 Then
-                                PrintLine(debugFileNumber, debugTime & "  > Bus is Live")
-                                '*** Display bus status
-                                Dim I_showResult As Integer = myCRC_16_2.DisplayResult(vbCrLf & "  > Bus is Live" & vbCrLf, 1, 1, 0)
-                            Else
-                                PrintLine(debugFileNumber, debugTime & "  > Bus is Safe")
-                                '*** Display bus status
-                                Dim I_showResult As Integer = myCRC_16_2.DisplayResult(vbCrLf & "  > Bus is Safe" & vbCrLf, 1, 1, 0)
-                            End If
-                        Case "234" 'EA - discover topoplgy. Response uses EB packet below
-                            PrintLine(debugFileNumber, debugTime & ": Discovering Topology.")
-                            If data(5) = 0 Then
-                                PrintLine(debugFileNumber, debugTime & "  > No Error.")
-                            Else
-                                PrintLine(debugFileNumber, debugTime & "  > Topology not yet discovered.")
-                            End If
-                            PrintLine(debugFileNumber, debugTime & "  > Number of boards detected = " & data(6).ToString)
-                            PrintLine(debugFileNumber, debugTime & "  > Number of Channels = " & data(7).ToString)
-                            If FrmMain.iVersionMajor >= 3 Then
-                                For x = 7 To 19
-                                    Select Case x
-                                        Case 7
-                                            myCRC_16_2.SetChannelCount(data(7))
-                                        Case 8  ' Master type
-                                            myCRC_16_2.GetMasterTopology(data(8))
-
+                            '*** Command errors if any
+                            Dim BoolSuppressResult As Boolean = False
+                            Select Case data(5)
+                                Case 0
+                                    sError = "No Error:"
+                                    FrmMain.BSuppressTimeWarning = False
+                                Case Else
+                                    Dim S_ErrorCode As String = Hex(data(5)).ToString
+                                    BoolSuppressResult = True
+                                    Select Case S_ErrorCode
+                                        Case "10", "11", "12", "13"
+                                            sError = "ERROR " & S_ErrorCode & " - Invalid test parameter"
+                                            FrmMain.BSuppressTimeWarning = True
+                                        Case "20"
+                                            sError = "ERROR " & S_ErrorCode & " - Power on Test Bus before board powered"
+                                            FrmMain.BSuppressTimeWarning = True
+                                        Case "21"
+                                            sError = "ERROR " & S_ErrorCode & " - Power on Test Bus before enable"
+                                            FrmMain.BSuppressTimeWarning = True
+                                        Case "22"
+                                            sError = "ERROR " & S_ErrorCode & " - Power on Test Bus before channel Set"
+                                            FrmMain.BSuppressTimeWarning = True
+                                        Case "23"
+                                            sError = "ERROR " & S_ErrorCode & " - No response from set channel"
+                                            FrmMain.BSuppressTimeWarning = True
+                                        Case "24"
+                                            sError = "ERROR " & S_ErrorCode & " - Invalid Channel selected"
+                                            FrmMain.BSuppressTimeWarning = True
+                                        Case "25"
+                                            sError = "ERROR " & S_ErrorCode & " - Channel Conflict"
+                                            FrmMain.BSuppressTimeWarning = True
+                                        Case "26"
+                                            sError = "ERROR " & S_ErrorCode & " - No response to set power relay"
+                                            FrmMain.BSuppressTimeWarning = True
+                                        Case "27"
+                                            sError = "ERROR " & S_ErrorCode & " - Power on Test Bus relay set"
+                                            FrmMain.BSuppressTimeWarning = True
+                                        Case "28"
+                                            sError = "ERROR " & S_ErrorCode & " - No power before test"
+                                            FrmMain.BSuppressTimeWarning = True
+                                        Case "29"
+                                            sError = "ERROR " & S_ErrorCode & " - ADC not cleared - Master"
+                                            FrmMain.BSuppressTimeWarning = True
+                                        Case "30"
+                                            sError = "ERROR " & S_ErrorCode & " - Phase not detected - Master"
+                                            FrmMain.BSuppressTimeWarning = True
+                                        Case Else
+                                            sError = "ERROR " & S_ErrorCode & " - Undefined error code"
+                                            FrmMain.BSuppressTimeWarning = True
                                     End Select
-                                Next
+
+                                    '** IF there are any erorrs ignore and time or current data
+                                    iDurData = 0
+                                    iCurData = 0
+                            End Select
+
+                            Debug.Print(sError & " " & sChannel & " " & sDuration & " " & sCurrent)
+                            If BoolSuppressResult Then
+                                Connect += vbNewLine & sError & " " & sChannel
                             Else
-                                If FrmMain.iVersionMajor = 2 And FrmMain.iVersionMinor < 6 Then
+                                Connect += vbNewLine & sError & " " & sChannel & " " & sDuration & " " & "Current leaked " & sCurrent
+                            End If
 
+                            ' If debugGUID <> "" Then PrintLine(debugFileNumber, debugTime & "SSID [RT_" & debugSSID & "] GUID [" & debugGUID & "]")
+                        End If
 
+                        If data(4) = 146 Then
+                            myCRC_16_2.SetVersion(data(5), data(6))
+                            'PrintLine(debugFileNumber, debugTime & ": " & SMasterType)
+                        End If
+                        debugTime = Format(Now(), "hh:mm:ss")
+                        Debug.Print("Received packet >" & dataReceivedFormatted & "< checksum is " & checkSumIsOK.ToString & " for " &
+                            dataOnly.Length.ToString & " bytes" & " > " & debugTime)
+                        debugTime = (Format(Now(), "hh:mm:ss"))
+
+                        '*********************  DECODE results for logging
+
+                        Dim BoolTopologyError As Boolean
+
+                        Select Case data(4).ToString
+                            Case "32" '20 - Should never get a response to this. This is 0x20 sleep wifi
+                                PrintLine(debugFileNumber, debugTime & ": Disabled Wi-Fi - No Resposne")
+                            Case "128" '80 - Done
+                                PrintLine(debugFileNumber, debugTime & "  > Test started")
+                            Case "129" '81 - Done
+                                PrintLine(debugFileNumber, debugTime & ": Test Result:")
+                                PrintLine(debugFileNumber, debugTime & "  > " & sError)
+                                PrintLine(debugFileNumber, debugTime & "  > Channel = " & (data(6) + 1).ToString & " [" & data(6).ToString & "]")
+                                Dim iDurData As Integer = 0
+                                If data(8) > 0 Then iDurData = data(8) * 256 Else iDurData = 0
+                                iDurData += data(7)
+                                PrintLine(debugFileNumber, debugTime & "  > Duration (ms) = " & iDurData)  '*** duration is 2 bytes 
+                                Dim iCurData As Integer = 0
+                                If data(10) > 0 Then iCurData = data(9) * 256 Else iCurData = 0
+                                iCurData += data(9)
+
+                                '****
+                                '*** Current  
+                                sCurrent = "0"
+                                Dim tmpData As String = data(10).ToString("X2") & data(9).ToString("X2")
+                                Dim RealResult As Long = Convert.ToUInt64(tmpData, 16)
+                                sCurrent = (RealResult / 10).ToString
+
+                                '****
+                                '*** 18/12/2019
+                                If sError <> "No Error" Then sCurrent = "0"
+                                ' PrintLine(debugFileNumber, debugTime & "  > Set Val (mA) = " & FrmMain.TxtSetCurrent.Text)
+                                PrintLine(debugFileNumber, debugTime & "  > Current (mA) = " & sCurrent & " (" & data(10).ToString & "," & data(9).ToString & ")") '** Current is 2 bytes
+                                'PrintLine(debugFileNumber, debugTime & "  > Current (mA) = " & iCurData & " (" & data(10).ToString & "," & data(9).ToString & ")") '** Current is 2 bytes
+                                If data(11) = 1 Then
+                                    PrintLine(debugFileNumber, debugTime & "  > Tripped = Yes")
+                                    'FrmMain.B_tripped = True
+                                    'If FrmMain.B_RelayCheck Then
+                                    '    PrintLine(debugFileNumber, debugTime & "  > SHOULD NOT TRIP - Relay Test Mode")
+                                    '    ' MsgBox("Check channel - should not have returned as tripped.", MsgBoxStyle.Critical + MsgBoxStyle.OkOnly, "Something Fishy Here")
+                                    'End If
+                                    'Else
+                                    '    PrintLine(debugFileNumber, debugTime & "  > Tripped = No")
+                                    '    If FrmMain.B_RelayCheck Then
+                                    '        PrintLine(debugFileNumber, debugTime & "  > Relay Test Mode")
+                                    '    End If
+                                    '    FrmMain.B_tripped = False
+                                End If
+                            Case "145" '91 - Done
+                                PrintLine(debugFileNumber, debugTime & ": Set Wi-Fi Settings [RT_" & SMasterID & "]")
+                            Case "146" '92 - Done
+                                PrintLine(debugFileNumber, debugTime & ": Firmware version is " & data(6).ToString & "." & data(5).ToString)
+                                PrintLine(debugFileNumber, "****************************************************")
+                            Case "186" 'BA - Done
+                                PrintLine(debugFileNumber, debugTime & ": Set single RCD for channel " & (data(6) + 1).ToString & " [" & data(6).ToString & "]")
+                                If data(5) = 0 Then
+                                    PrintLine(debugFileNumber, debugTime & "  > RCD Mapping succeeded.")
                                 Else
-                                    '** Master is new standard with microAmp
+                                    PrintLine(debugFileNumber, debugTime & "  > RCD Mapping Error. Channel out of range.")
+                                End If
+
+                            Case "187" 'BB - Done
+                                PrintLine(debugFileNumber, debugTime & ": RCD Mapping for channel " & (data(5) + 1).ToString & " [" & data(5).ToString & "]")
+                                PrintLine(debugFileNumber, debugTime & "  > RCD number = " & data(6).ToString)
+                            Case "188" 'BC 
+                                PrintLine(debugFileNumber, debugTime & ": Reading All RCD Mappings. >> " & dataReceivedFormatted)
+                            Case "189" 'BD - Done
+                                PrintLine(debugFileNumber, debugTime & "  > GUID set.")
+                            Case "190" 'BE - Read GUID
+                                Dim StempGUID As String = ""
+                                For x = 5 To 40
+                                    StempGUID &= Chr(data(x))
+                                Next
+                                PrintLine(debugFileNumber, debugTime & "  > GUID = " & StempGUID)
+                                PrintLine(debugFileNumber, debugTime & "  > GUID Packet = >> " & dataReceivedFormatted)
+                                '*** Display ASCII version of the GUID
+                                'Dim I_showResult As Integer = myCRC_16_2.displayResult(vbCrLf & "Guid String = " & StempGUID & vbCrLf, 1, 1, 0)
+                                Dim I_showResult As Integer = myCRC_16_2.DisplayResult("Guid String = " & StempGUID & vbCrLf, 1, 1, 0)
+                            Case "218" 'DA
+                                PrintLine(debugFileNumber, debugTime & ": Bus Power Status.")
+                                If data(5) = 1 Then
+                                    PrintLine(debugFileNumber, debugTime & "  > Bus is Live")
+                                    '*** Display bus status
+                                    Dim I_showResult As Integer = myCRC_16_2.DisplayResult(vbCrLf & "  > Bus is Live" & vbCrLf, 1, 1, 0)
+                                Else
+                                    PrintLine(debugFileNumber, debugTime & "  > Bus is Safe")
+                                    '*** Display bus status
+                                    Dim I_showResult As Integer = myCRC_16_2.DisplayResult(vbCrLf & "  > Bus is Safe" & vbCrLf, 1, 1, 0)
+                                End If
+                            Case "234" 'EA - discover topoplgy. Response uses EB packet below
+                                PrintLine(debugFileNumber, debugTime & ": Discovering Topology.")
+                                If data(5) = 0 Then
+                                    PrintLine(debugFileNumber, debugTime & "  > No Error.")
+                                Else
+                                    PrintLine(debugFileNumber, debugTime & "  > Topology not yet discovered.")
+                                End If
+                                PrintLine(debugFileNumber, debugTime & "  > Number of boards detected = " & data(6).ToString)
+                                PrintLine(debugFileNumber, debugTime & "  > Number of Channels = " & data(7).ToString)
+                                If FrmMain.iVersionMajor >= 3 Then
                                     For x = 7 To 19
                                         Select Case x
                                             Case 7
@@ -1044,149 +1083,173 @@ Public Class FrmMain
 
                                         End Select
                                     Next
-                                End If
-                            End If
-
-                        Case "235" 'EB. 
-                            '**** 21/09/2018
-                            '** 25/09/*2018 also added to discover topology above
-                            'If the version number is above 3.0 a new response is expected here
-                            '** New response has the same data in bytes 5, 6 & 7 but adds the following
-                            '******** zero based byte count
-                            '** Byte 8 Model of tester. 01, 03, 05 or 06
-                            '           0x01 Tester with no integrated channels - original standard master
-                            '           0x02 24 channel CIB
-                            '           0x03 Tester with 8 integrated channels - MC8 - RELEY
-                            '           0x04 8 channel CIB - Does not exist as a seperate unit
-                            '           0x00 No device in that location
-                            '           0x05 Tester with 8 integrated channel - MC8 SOLID STATE
-                            '           0x06 Tester with 4 integrated - MC8 SOLID STATE
-                            '           0x07 internally used for 4 channel CIB section of MC4
-                            '           0x08 12 Channel CIB - SOLID STATE
-                            '** Bytes 9 - 19 Map of Attached CIB devices 
-                            '           Using the same codes above
-                            PrintLine(debugFileNumber, debugTime & ": Topology.")
-                            If data(5) = 0 Then
-                                PrintLine(debugFileNumber, debugTime & "  > No Error.")
-                                BoolTopologyError = False
-                            Else
-                                PrintLine(debugFileNumber, debugTime & "  > Topology not yet discovered or error reading topology.")
-                                BoolTopologyError = True
-                            End If
-                            PrintLine(debugFileNumber, debugTime & "  > Number of boards detected = " & data(6).ToString)
-                            PrintLine(debugFileNumber, debugTime & "  > Number of Channels = " & data(7).ToString)
-                            If FrmMain.iVersionMajor >= 3 Then
-                                For x = 7 To 17
-                                    Select Case x
-                                        Case 7
-                                            myCRC_16_2.SetChannelCount(data(7))
-                                        Case 8  ' Master type
-                                            myCRC_16_2.GetMasterTopology(data(8))
-                                        Case 9  'First Channel board
-                                            If data(9) = 8 Then
-                                                '*** 12 channel SS CIB
-                                                '** 14.11.2019  NO MORE SOLID STATE
-                                                'FrmMain.ChkSS.Checked = True
-                                            End If
-                                    End Select
-                                Next
-                            Else
-                                If FrmMain.iVersionMajor = 2 And FrmMain.iVersionMinor < 6 Then
-
                                 Else
-                                    '** Master is new standard with microAmp
-                                    For x = 7 To 19
+                                    If FrmMain.iVersionMajor = 2 And FrmMain.iVersionMinor < 6 Then
+
+
+                                    Else
+                                        '** Master is new standard with microAmp
+                                        For x = 7 To 19
+                                            Select Case x
+                                                Case 7
+                                                    myCRC_16_2.SetChannelCount(data(7))
+                                                Case 8  ' Master type
+                                                    myCRC_16_2.GetMasterTopology(data(8))
+
+                                            End Select
+                                        Next
+                                    End If
+                                End If
+
+                            Case "235" 'EB. 
+                                '**** 21/09/2018
+                                '** 25/09/*2018 also added to discover topology above
+                                'If the version number is above 3.0 a new response is expected here
+                                '** New response has the same data in bytes 5, 6 & 7 but adds the following
+                                '******** zero based byte count
+                                '** Byte 8 Model of tester. 01, 03, 05 or 06
+                                '           0x01 Tester with no integrated channels - original standard master
+                                '           0x02 24 channel CIB
+                                '           0x03 Tester with 8 integrated channels - MC8 - RELEY
+                                '           0x04 8 channel CIB - Does not exist as a seperate unit
+                                '           0x00 No device in that location
+                                '           0x05 Tester with 8 integrated channel - MC8 SOLID STATE
+                                '           0x06 Tester with 4 integrated - MC8 SOLID STATE
+                                '           0x07 internally used for 4 channel CIB section of MC4
+                                '           0x08 12 Channel CIB - SOLID STATE
+                                '** Bytes 9 - 19 Map of Attached CIB devices 
+                                '           Using the same codes above
+                                PrintLine(debugFileNumber, debugTime & ": Topology.")
+                                If data(5) = 0 Then
+                                    PrintLine(debugFileNumber, debugTime & "  > No Error.")
+                                    BoolTopologyError = False
+                                Else
+                                    PrintLine(debugFileNumber, debugTime & "  > Topology not yet discovered or error reading topology.")
+                                    BoolTopologyError = True
+                                End If
+                                PrintLine(debugFileNumber, debugTime & "  > Number of boards detected = " & data(6).ToString)
+                                PrintLine(debugFileNumber, debugTime & "  > Number of Channels = " & data(7).ToString)
+                                If FrmMain.iVersionMajor >= 3 Then
+                                    For x = 7 To 17
                                         Select Case x
                                             Case 7
                                                 myCRC_16_2.SetChannelCount(data(7))
                                             Case 8  ' Master type
                                                 myCRC_16_2.GetMasterTopology(data(8))
-
+                                            Case 9  'First Channel board
+                                                If data(9) = 8 Then
+                                                    '*** 12 channel SS CIB
+                                                    '** 14.11.2019  NO MORE SOLID STATE
+                                                    'FrmMain.ChkSS.Checked = True
+                                                End If
                                         End Select
                                     Next
-                                End If
-                            End If
+                                Else
+                                    If FrmMain.iVersionMajor = 2 And FrmMain.iVersionMinor < 6 Then
 
-                        Case Else
-                            PrintLine(debugFileNumber, debugTime & "   >>> RECEIVED >" & dataReceivedFormatted & "< checksum is " & checkSumIsOK.ToString &
+                                    Else
+                                        '** Master is new standard with microAmp
+                                        For x = 7 To 19
+                                            Select Case x
+                                                Case 7
+                                                    myCRC_16_2.SetChannelCount(data(7))
+                                                Case 8  ' Master type
+                                                    myCRC_16_2.GetMasterTopology(data(8))
+
+                                            End Select
+                                        Next
+                                    End If
+                                End If
+
+                            Case Else
+                                PrintLine(debugFileNumber, debugTime & "   >>> RECEIVED >" & dataReceivedFormatted & "< checksum is " & checkSumIsOK.ToString &
                          " for " & dataOnly.Length.ToString & " bytes")
-                    End Select
-                    '**********************
-                    '** Display error or result
-                    If BoolTopologyError Then
-                        Dim showResult As Integer = myCRC_16_2.DisplayResult("Received Reply =>" & dataReceivedFormatted & "< checksum is " & checkSumIsOK.ToString &
+                        End Select
+                        '**********************
+                        '** Display error or result
+                        If BoolTopologyError Then
+                            Dim showResult As Integer = myCRC_16_2.DisplayResult("Received Reply =>" & dataReceivedFormatted & "< checksum is " & checkSumIsOK.ToString &
                                                                           " for " & dataOnly.Length.ToString & " bytes" & vbCrLf & "*** ERROR READING TOPOLOGY ***", 1, 1, 0)
-                    Else
-                        Dim showResult As Integer = myCRC_16_2.DisplayResult("Received Reply =>" & dataReceivedFormatted & "< checksum is " & checkSumIsOK.ToString &
+                        Else
+                            Dim showResult As Integer = myCRC_16_2.DisplayResult("Received Reply =>" & dataReceivedFormatted & "< checksum is " & checkSumIsOK.ToString &
                                                                       " for " & dataOnly.Length.ToString & " bytes", 1, 1, 0)
+                        End If
+
+                        If sError <> "No Error" Then
+                            sCurrent = "0"
+                        End If
+
+                        If data(4) <> 146 Then sCurrent = "Current = " & sCurrent.ToString & " mA"
+
+                        Debug.Print(sError & " " & sChannel & " " & sDuration & " " & sCurrent)
+
+                        Dim UpdateResult As Integer = myCRC_16_2.DisplayResult(sError & " " & sChannel & " " & sDuration & " " & sCurrent, 1, 1, 0)
+                        'If sChannel <> "" Then
+
+                        '    Dim S_Trip As String = "NO"
+                        '    If FrmMain.B_RelayCheck Then S_Trip = "Relay Test Mode"
+                        '    '*** Change message if relay test mode
+                        '    If FrmMain.B_tripped Then
+                        '        S_Trip = "YES"
+                        '        If FrmMain.B_RelayCheck Then S_Trip = "YES - Relay Test Mode"
+                        '        FrmMain.SetStatus(sError, iChTested.ToString, S_Trip)
+                        '        If (iChTested = 1) Or (iChTested = 9) Then
+                        '            Dim BlockMessage As Boolean = FrmMain.ChkSkipCIB.Checked And iChTested = 9
+                        '            If Not BlockMessage Then
+                        '                Dim IntContinue As Integer = MsgBox("Do you wish to continue in automatic mode?", vbQuestion + vbYesNo, "Continue ?")
+                        '                If IntContinue = vbYes Then
+                        '                    FrmMain.AutoStartTesting = True
+                        '                    FrmMain.bAutoEnabled = True
+                        '                    FrmMain.chkAuto.Text = "Auto ON"
+                        '                    FrmMain.chkAuto.Checked = True
+                        '                Else
+                        '                    FrmMain.AutoStartTesting = False
+                        '                    FrmMain.bAutoEnabled = False
+                        '                    FrmMain.chkAuto.Text = "Auto OFF"
+                        '                    FrmMain.chkAuto.Checked = False
+                        '                End If
+                        '            End If
+                        '        End If
+                        '    Else    '**** NOT tripped
+                        '        If Not FrmMain.B_RelayCheck Then
+                        '            '*** Show no trip image if not in relay test mode
+                        '            FrmMain.ImgError.Visible = True
+                        '            If FrmMain.iCurrentStep = 9 Then
+                        '                If (iChTested = 1) Or (iChTested = 9) Then
+                        '                    Dim BlockMessage As Boolean = FrmMain.ChkSkipCIB.Checked And iChTested = 9
+                        '                    If Not BlockMessage Then
+                        '                        Dim IntContinue As Integer = MsgBox("RCD " & iChTested.ToString & " did not trip. Do you wish to continue in automatic mode?", vbQuestion + vbYesNo, "Continue ?")
+                        '                        If IntContinue = vbYes Then
+                        '                            FrmMain.AutoStartTesting = True
+                        '                            FrmMain.bAutoEnabled = True
+                        '                            FrmMain.chkAuto.Text = "Auto ON"
+                        '                            FrmMain.chkAuto.Checked = True
+                        '                        Else
+                        '                            FrmMain.AutoStartTesting = False
+                        '                            FrmMain.bAutoEnabled = False
+                        '                            FrmMain.chkAuto.Text = "Auto OFF"
+                        '                            FrmMain.chkAuto.Checked = False
+                        '                        End If
+                        '                    End If
+                        '                End If
+                        '            End If
+                        '        End If
+                        '        FrmMain.SetStatus(sError, iChTested.ToString, S_Trip)
+                        '    End If
+                        '    Dim showResultData As Integer = myCRC_16_2.DisplayResult(sError & vbCrLf & sChannel & ":   " & sDuration & "   " & sCurrent & vbCrLf & "Trip: " & S_Trip, 1, 0, 0)
+                        'Else
+                        '    Dim showResultData As Integer = myCRC_16_2.DisplayResult("Waiting for response . . . ", 1, 0, 0)
+                        'End If
+                        ' Close everything.
+                        'stream.Close()
+                        'client.Close()
+                    Else    '*** NO bDataAvailable
+
+                        FrmMain.TxtDebug.Text += "No Data"
                     End If
-
-                    If sError <> "No Error" Then
-                        sCurrent = "0"
-                    End If
-
-                    If data(4) <> 146 Then sCurrent = "Current = " & sCurrent.ToString & " mA"
-
-                    Debug.Print(sError & " " & sChannel & " " & sDuration & " " & sCurrent)
-                    'If sChannel <> "" Then
-
-                    '    Dim S_Trip As String = "NO"
-                    '    If FrmMain.B_RelayCheck Then S_Trip = "Relay Test Mode"
-                    '    '*** Change message if relay test mode
-                    '    If FrmMain.B_tripped Then
-                    '        S_Trip = "YES"
-                    '        If FrmMain.B_RelayCheck Then S_Trip = "YES - Relay Test Mode"
-                    '        FrmMain.SetStatus(sError, iChTested.ToString, S_Trip)
-                    '        If (iChTested = 1) Or (iChTested = 9) Then
-                    '            Dim BlockMessage As Boolean = FrmMain.ChkSkipCIB.Checked And iChTested = 9
-                    '            If Not BlockMessage Then
-                    '                Dim IntContinue As Integer = MsgBox("Do you wish to continue in automatic mode?", vbQuestion + vbYesNo, "Continue ?")
-                    '                If IntContinue = vbYes Then
-                    '                    FrmMain.AutoStartTesting = True
-                    '                    FrmMain.bAutoEnabled = True
-                    '                    FrmMain.chkAuto.Text = "Auto ON"
-                    '                    FrmMain.chkAuto.Checked = True
-                    '                Else
-                    '                    FrmMain.AutoStartTesting = False
-                    '                    FrmMain.bAutoEnabled = False
-                    '                    FrmMain.chkAuto.Text = "Auto OFF"
-                    '                    FrmMain.chkAuto.Checked = False
-                    '                End If
-                    '            End If
-                    '        End If
-                    '    Else    '**** NOT tripped
-                    '        If Not FrmMain.B_RelayCheck Then
-                    '            '*** Show no trip image if not in relay test mode
-                    '            FrmMain.ImgError.Visible = True
-                    '            If FrmMain.iCurrentStep = 9 Then
-                    '                If (iChTested = 1) Or (iChTested = 9) Then
-                    '                    Dim BlockMessage As Boolean = FrmMain.ChkSkipCIB.Checked And iChTested = 9
-                    '                    If Not BlockMessage Then
-                    '                        Dim IntContinue As Integer = MsgBox("RCD " & iChTested.ToString & " did not trip. Do you wish to continue in automatic mode?", vbQuestion + vbYesNo, "Continue ?")
-                    '                        If IntContinue = vbYes Then
-                    '                            FrmMain.AutoStartTesting = True
-                    '                            FrmMain.bAutoEnabled = True
-                    '                            FrmMain.chkAuto.Text = "Auto ON"
-                    '                            FrmMain.chkAuto.Checked = True
-                    '                        Else
-                    '                            FrmMain.AutoStartTesting = False
-                    '                            FrmMain.bAutoEnabled = False
-                    '                            FrmMain.chkAuto.Text = "Auto OFF"
-                    '                            FrmMain.chkAuto.Checked = False
-                    '                        End If
-                    '                    End If
-                    '                End If
-                    '            End If
-                    '        End If
-                    '        FrmMain.SetStatus(sError, iChTested.ToString, S_Trip)
-                    '    End If
-                    '    Dim showResultData As Integer = myCRC_16_2.DisplayResult(sError & vbCrLf & sChannel & ":   " & sDuration & "   " & sCurrent & vbCrLf & "Trip: " & S_Trip, 1, 0, 0)
-                    'Else
-                    '    Dim showResultData As Integer = myCRC_16_2.DisplayResult("Waiting for response . . . ", 1, 0, 0)
-                    'End If
-                    ' Close everything.
-                    'stream.Close()
-                    'client.Close()
+                    '**** Added to make sure stream has closed 
+                    'MAY BE CLOSING TOO SOON FOR SECOND GET COMMAND
+                    NetStream.Close()
                 Else    '*** Else Reply is not > 0
                     Debug.Print("This command does not get a response...")
                     Dim myCRC_16 As New CRC_16()
@@ -1194,30 +1257,49 @@ Public Class FrmMain
                     Dim showResult2 As Integer = myCRC_16.DisplayResult("This command does not get a response", True, 1, 3)
                 End If ' *** Reply > 0
 
-            Else
+            Else    '*** Ethernet not connected
                 Debug.Print("Skip send. Not Connected")
                 debugTime = (Format(Now(), "hh:mm:ss"))
                 PrintLine(debugFileNumber, debugTime & ": Skip send. Not Connected")
                 Dim myCRC_16 As New CRC_16()
-                Dim showResult2 As Integer = myCRC_16.DisplayResult("Failed. No Connection", True, -1, 1)
+                Dim showResult2 As Integer = myCRC_16.DisplayResult("Send Skipped. No Connection", True, -1, 1)
             End If '*** If ethernet client is connected
 
             'makeConnection(server, False)
             FileClose(debugFileNumber)
+            FrmMain.LogFileOpen = False
+
+
+
         Catch e As ArgumentNullException
             Debug.Print("ArgumentNullException: {0}", e)
             debugTime = (Format(Now(), "hh:mm:ss"))
-            PrintLine(debugFileNumber, debugTime & " In Connect 1: ArgumentNullException: {0}", e)
+            If FrmMain.LogFileOpen Then
+                PrintLine(debugFileNumber, debugTime & " In Connect 1: ArgumentNullException: {0}", e)
+                FileClose(debugFileNumber)
+                FrmMain.LogFileOpen = False
+            End If
+
         Catch e As SocketException
             Debug.Print("SocketException: {0}", e)
             debugTime = (Format(Now(), "hh:mm:ss"))
-            PrintLine(debugFileNumber, debugTime & " In Connect 2: ArgumentNullException: {0}", e)
+            If FrmMain.LogFileOpen Then
+                PrintLine(debugFileNumber, debugTime & " In Connect 2: ArgumentNullException: {0}", e)
+                FileClose(debugFileNumber)
+                FrmMain.LogFileOpen = False
+            End If
 
         Catch err As Exception
-            MessageBox.Show(err.Message & vbCrLf & err.Source)
+            If FrmMain.LogFileOpen Then
+                PrintLine(debugFileNumber, debugTime & " In err: ArgumentNullException:")
+                FileClose(debugFileNumber)
+                FrmMain.LogFileOpen = False
+            End If
+            MessageBox.Show("*** General Exception ***" & vbNewLine & err.Message & vbCrLf & err.Source)
         End Try
         '    Connect = "Result"
     End Function 'Connect
+
     Private Function RT_Decode(CMD As String, StrPacket As String) As String
         Dim StrRawPacket As String = StrPacket
         Dim StrResultArray(250) As String
@@ -1233,7 +1315,7 @@ Public Class FrmMain
             Debug.Print("Byte saved " & StrResultArray(IntCounter))
             StrPacket = Strings.Right(StrPacket, Len(StrPacket) - IntSpacePos)
             IntSpacePos = InStr(StrPacket, " ")
-            '*** NOTE THIS METHOD DOES NOT RETURN THE SECOD CHECKSUM BYTE, BUT IT ISNOT NEEDED HERE
+            '*** NOTE THIS METHOD DOES NOT RETURN THE SECOD CHECKSUM BYTE, BUT IT IS NOT NEEDED HERE
             '*** AS IT HAS ALREADY BEEN CHECKED
         End While
 
@@ -1247,49 +1329,56 @@ Public Class FrmMain
                 For x = 0 To 250
                     Debug.Print(x.ToString & " >" & StrResultArray(x) & "<")
                 Next
+                Dim Byte3OK As Boolean = True
                 Try
                     IntResponseLength = CInt("&H" & (Trim(StrResultArray(3)))) - 1 '2
                 Catch
                     MsgBox("Byte 3 is >" & Trim(StrResultArray(3)) & "<", vbOKOnly, "byte 3 Error")
+                    Byte3OK = False
                 End Try
+                If Byte3OK Then
+                    For x = 1 To IntResponseLength
+                        TmpString += StrResultArray(x)
+                    Next
+                    TxtDebug.Text += vbNewLine & "Configuration " & TmpString
+                    '*** decode some info
+                    Select Case Trim(StrResultArray(9))
+                        Case "1"
+                            LblType.Text = "Type: STANDARD"
+                            IntMasterType = STANDARD
+                            IntMaxChannel = 0
+                            LblChLimit.Text = "0"
+                            MsgBox("Incompatible device detected. Please use RT Auto Config to program this device.", vbCritical + vbOKOnly, "Error - Cannot proceed.")
+                        Case "9"
+                            LblType.Text = "Type: MC8F5"
+                            IntMasterType = MC8F5
+                            IntMaxChannel = CInt("&H" & (Trim(StrResultArray(8))))
+                            LblChLimit.Text = IntMaxChannel.ToString
+                        Case Else
+                            LblType.Text = "Type: MC8"
+                            IntMasterType = MC8
+                            If StrResultArray(9) IsNot Nothing Then
+                                IntMaxChannel = CInt("&H" & (Trim(StrResultArray(8))))
 
-                For x = 1 To IntResponseLength
-                    TmpString += StrResultArray(x)
-                Next
-                TxtDebug.Text += vbNewLine & "Configuration " & TmpString
-                '*** decode some info
-                Select Case Trim(StrResultArray(9))
-                    Case "1"
-                        LblType.Text = "Type: STANDARD"
-                        IntMasterType = STANDARD
-                        IntMaxChannel = 0
-                        LblChLimit.Text = "0"
-                        MsgBox("Incompatible device detected. Please use RT Auto Config to program this device.", vbCritical + vbOKOnly, "Error - Cannot proceed.")
-                    Case "9"
-                        LblType.Text = "Type: MC8F5"
-                        IntMasterType = MC8F5
-                        IntMaxChannel = CInt("&H" & (Trim(StrResultArray(8))))
-                        LblChLimit.Text = IntMaxChannel.ToString
-                    Case Else
-                        LblType.Text = "Type: MC8"
-                        IntMasterType = MC8
-                        IntMaxChannel = CInt("&H" & (Trim(StrResultArray(8))))
-                        LblChLimit.Text = IntMaxChannel.ToString
-                End Select
+                            End If
+                            LblChLimit.Text = IntMaxChannel.ToString
+                    End Select
 
-                RT_Decode = "Response to command " & Trim(StrResultArray(5)) & " = " & TmpString
-
+                    RT_Decode = "Response to command " & Trim(StrResultArray(5)) & " = " & TmpString
+                Else
+                    RT_Decode = "ERROR"
+                End If
             Case "80", "81"
                 Debug.Print(CMD & " or 81 Should equal " & StrResultArray(5))
                 '*** Do test - Trip RCD
                 TxtDebug.Text = "Trip RCD " & StrRawPacket
 
-                RT_Decode = StrResultArray(12)
+                RT_Decode = StrResultArray(13)
 
                 '*** Overide result if B_RelayCheck is active as these don't trip
                 If B_RelayCheck Then
                     If Trim(StrResultArray(6)) = "0" Then   '** No Error
-                        Select Case Trim(StrResultArray(12))
+                        Select Case Trim(StrResultArray(13))
                             Case "0" '*** relay check - no trip
                                 RT_Decode = 3
                             Case "1" '*** relay check - False trip
@@ -1301,13 +1390,13 @@ Public Class FrmMain
                 End If
 
             Case "91"
-                '*** Set master GUID
-                TxtDebug.Text = "Set Master GUID " & StrRawPacket
-                RT_Decode = "Response to Set Master GUID command " & StrRawPacket
+                '*** Set master SSID
+                TxtDebug.Text = "Set Master SSID " & StrRawPacket
+                RT_Decode = "Response to Set Master SSID command " & StrRawPacket
 
             Case "92"   '***  Get firmware version
                 Debug.Print(CMD & " Should equal " & StrResultArray(5))
-                TxtDebug.Text = "Get Firmware Version"
+                TxtDebug.Text += " Get Firmware Version"
                 iVersionMinor = StrResultArray(6)
                 iVersionMajor = StrResultArray(7)
                 LblVersion.Text = "Version: " & iVersionMajor & "." & iVersionMinor
@@ -1317,9 +1406,13 @@ Public Class FrmMain
             Case "BE" '*** Get GUIDs
                 Debug.Print(CMD & " Should equal " & StrResultArray(5) & " " & StrRawPacket)
                 Dim StempGUID As String = ""
-                For x = 6 To 41
-                    StempGUID &= Chr(CInt("&H" & Trim(StrResultArray(x))))
-                Next
+                If StrRawPacket <> "" Then
+                    For x = 6 To 41
+                        StempGUID &= Chr(CInt("&H" & Trim(StrResultArray(x))))
+                    Next
+                Else
+                    StempGUID = "Error - No response."
+                End If
                 RT_Decode = StempGUID
                 'RT_Decode = "Response to command " & Trim(StrResultArray(5)) & " = GUID: = " & StempGUID
                 TxtDebug.Text = "Get Master or CIB GUID = " & StempGUID
@@ -1348,28 +1441,29 @@ Public Class FrmMain
     Private Sub BtnConfig_Click(sender As Object, e As EventArgs) Handles BtnConfig.Click
         '*** Disable button
         BtnConfig.Enabled = False
+        Dim LogSaved As Integer = 0
 
         '*** Log activity
         StrTextToLog = "Discover Config"
-        Dim debugFilename As String = StrLogPath & "Debug " & Format(Now(), "yyyyMMdd") & "_" & Trim(TxtOrderRef.Text) & "_" & TxtMasterSSID.Text & ".log"
-        Dim debugFileNumber As Integer = FreeFile()
-        FileOpen(debugFileNumber, debugFilename, OpenMode.Append)
-        Dim debugTime As String = Format(Now(), "hh:mm:ss")
-        PrintLine(debugFileNumber, debugTime & " " & StrTextToLog)
-
+        LogSaved = WriteLogFile(StrTextToLog)
+        StrCommandInUse = "EA"
         Dim StrResult As String = ReadAllTopology()
         '*** If logging to this file is needed in other areas either replicate the file name or make it global
         '*** OK here only for now.
         '*** Log data
-        debugTime = Format(Now(), "hh:mm:ss")
         StrTextToLog = StrResult
-        PrintLine(debugFileNumber, debugTime & " " & StrTextToLog)
+        LogSaved = WriteLogFile(StrTextToLog)
 
-        Dim Decoded As String = RT_Decode("EA", StrResult)
-        '*** Log data
-        StrTextToLog = Decoded
-        PrintLine(debugFileNumber, debugTime & " " & StrTextToLog)
-        FileClose(debugFileNumber)
+        If StrResult = "" Then
+            StrTextToLog = "NOTHING RETURNED"
+        Else
+            Dim Decoded As String = RT_Decode(StrCommandInUse, StrResult)
+
+            '*** Log data
+            StrTextToLog = Decoded
+        End If
+        StrCommandInUse = "00"
+        LogSaved = WriteLogFile(StrTextToLog)
         '*** Enable button
         BtnConfig.Enabled = True
     End Sub
@@ -1447,6 +1541,7 @@ Public Class FrmMain
         '*** Enable connection and disable manual connection button
         MakeConnection(sIP, True, iPort)
         BtnMguid.Enabled = False
+        BtnCIBID.Enabled = False
 
         '*** Read GUID
         Dim data2Send As String = ""
@@ -1495,82 +1590,79 @@ Public Class FrmMain
         '*** Disconnect and re-enable manual connect button.
         MakeConnection(sIP, False, iPort)
         BtnMguid.Enabled = True
+        BtnCIBID.Enabled = True
     End Function
 
     Private Sub BtnMguid_Click(sender As Object, e As EventArgs) Handles BtnMguid.Click
+
+        Dim LogSaved As Integer = 0
+
         '*** Log activity
         StrTextToLog = "Get Master GUID"
-        Dim debugFilename As String = StrLogPath & "Debug " & Format(Now(), "yyyyMMdd") & "_" & Trim(TxtOrderRef.Text) & "_" & TxtMasterSSID.Text & ".log"
-        Dim debugFileNumber As Integer = FreeFile()
-        FileOpen(debugFileNumber, debugFilename, OpenMode.Append)
-        Dim debugTime As String = Format(Now(), "hh:mm:ss")
-        PrintLine(debugFileNumber, debugTime & " " & StrTextToLog)
-
+        LogSaved = WriteLogFile(StrTextToLog)
+        StrCommandInUse = "BE"
         Dim StrResult As String = ReadGuid("0")
 
         '*** If logging to this file is needed in other areas either replicate the file name or make it global
         '*** OK here only for now.
         '*** Log data
-        debugTime = Format(Now(), "hh:mm:ss")
         StrTextToLog = StrResult
-        PrintLine(debugFileNumber, debugTime & " " & StrTextToLog)
+        LogSaved = WriteLogFile(StrTextToLog)
 
-        Dim Decoded As String = RT_Decode("BE", StrResult)
+        Dim Decoded As String = RT_Decode(StrCommandInUse, StrResult)
+        StrCommandInUse = "00"
+
         '*** Log data
         StrTextToLog = Decoded
-        PrintLine(debugFileNumber, debugTime & " " & StrTextToLog)
-        FileClose(debugFileNumber)
+        LogSaved = WriteLogFile(StrTextToLog)
 
     End Sub
 
     Private Sub BtnCIBID_Click(sender As Object, e As EventArgs) Handles BtnCIBID.Click
+        Dim LogSaved As Integer = 0
+
         '*** Log activity
         StrTextToLog = "Get CIB GUID"
-        Dim debugFilename As String = StrLogPath & "Debug " & Format(Now(), "yyyyMMdd") & "_" & Trim(TxtOrderRef.Text) & "_" & TxtMasterSSID.Text & ".log"
-        Dim debugFileNumber As Integer = FreeFile()
-        FileOpen(debugFileNumber, debugFilename, OpenMode.Append)
-        Dim debugTime As String = Format(Now(), "hh:mm:ss")
-        PrintLine(debugFileNumber, debugTime & " " & StrTextToLog)
-
+        LogSaved = WriteLogFile(StrTextToLog)
+        StrCommandInUse = "BE"
         Dim StrResult As String = ReadGuid("1")
 
         '*** If logging to this file is needed in other areas either replicate the file name or make it global
         '*** OK here only for now.
         '*** Log data
-        debugTime = Format(Now(), "hh:mm:ss")
         StrTextToLog = StrResult
-        PrintLine(debugFileNumber, debugTime & " " & StrTextToLog)
+        LogSaved = WriteLogFile(StrTextToLog)
 
-        Dim Decoded As String = RT_Decode("BE", StrResult)
+        Dim Decoded As String = RT_Decode(StrCommandInUse, StrResult)
+        StrCommandInUse = "00"
+
         '*** Log data
         StrTextToLog = Decoded
-        PrintLine(debugFileNumber, debugTime & " " & StrTextToLog)
-        FileClose(debugFileNumber)
+        LogSaved = WriteLogFile(StrTextToLog)
     End Sub
 
     Private Sub BtnBusPwr_Click(sender As Object, e As EventArgs) Handles BtnBusPwr.Click
+
+        Dim LogSaved As Integer = 0
+
         '*** Log activity
         StrTextToLog = "Check BUS Power"
-        Dim debugFilename As String = StrLogPath & "Debug " & Format(Now(), "yyyyMMdd") & "_" & Trim(TxtOrderRef.Text) & "_" & TxtMasterSSID.Text & ".log"
-        Dim debugFileNumber As Integer = FreeFile()
-        FileOpen(debugFileNumber, debugFilename, OpenMode.Append)
-        Dim debugTime As String = Format(Now(), "hh:mm:ss")
-        PrintLine(debugFileNumber, debugTime & " " & StrTextToLog)
-
+        LogSaved = WriteLogFile(StrTextToLog)
+        StrCommandInUse = "DA"
         Dim StrResult As String = ReadBusPower()
 
         '*** If logging to this file is needed in other areas either replicate the file name or make it global
         '*** OK here only for now.
         '*** Log data
-        debugTime = Format(Now(), "hh:mm:ss")
         StrTextToLog = StrResult
-        PrintLine(debugFileNumber, debugTime & " " & StrTextToLog)
+        LogSaved = WriteLogFile(StrTextToLog)
 
-        Dim Decoded As String = RT_Decode("DA", StrResult)
+        Dim Decoded As String = RT_Decode(StrCommandInUse, StrResult)
+        StrCommandInUse = "00"
         '*** Log data
         StrTextToLog = Decoded
-        PrintLine(debugFileNumber, debugTime & " " & StrTextToLog)
-        FileClose(debugFileNumber)
+        LogSaved = WriteLogFile(StrTextToLog)
+
     End Sub
     Private Function ReadBusPower()
         MakeConnection(sIP, False, iPort)
@@ -1811,45 +1903,50 @@ Public Class FrmMain
     End Function
 
     Private Sub BtnReadConfig_Click(sender As Object, e As EventArgs) Handles BtnReadConfig.Click
+
+        Dim LogSaved As Integer = 0
+
         '*** Log activity
         StrTextToLog = "Read Config"
-        Dim debugFilename As String = StrLogPath & "Debug " & Format(Now(), "yyyyMMdd") & "_" & Trim(TxtOrderRef.Text) & "_" & TxtMasterSSID.Text & ".log"
-        Dim debugFileNumber As Integer = FreeFile()
-        FileOpen(debugFileNumber, debugFilename, OpenMode.Append)
-        Dim debugTime As String = Format(Now(), "hh:mm:ss")
-        PrintLine(debugFileNumber, debugTime & " " & StrTextToLog)
+        LogSaved = WriteLogFile(StrTextToLog)
 
-
+        StrCommandInUse = "EB"
         Dim StrResult As String = ReadTopology()
         '*** If logging to this file is needed in other areas either replicate the file name or make it global
         '*** OK here only for now.
         '*** Log data
-        debugTime = Format(Now(), "hh:mm:ss")
         StrTextToLog = StrResult
-        PrintLine(debugFileNumber, debugTime & " " & StrTextToLog)
+        LogSaved = WriteLogFile(StrTextToLog)
 
-        Dim Decoded As String = RT_Decode("EB", StrResult)
+        Dim Decoded As String = RT_Decode(StrCommandInUse, StrResult)
+        StrCommandInUse = "00"
+
         '*** Log data
         StrTextToLog = Decoded
-        PrintLine(debugFileNumber, debugTime & " " & StrTextToLog)
-        FileClose(debugFileNumber)
+        LogSaved = WriteLogFile(StrTextToLog)
     End Sub
 
     Private Sub BtnTrip_Click(sender As Object, e As EventArgs) Handles BtnTrip.Click
+
+
+        BoolManTrip = True
         BtnTrip.Enabled = False
+        StrCommandInUse = "80"
         Dim StrResult As String = TripRCD()
+        StrCommandInUse = "81"
+        StrResult = GetTripResult()
+        Dim Decoded As String = RT_Decode("81", StrResult)
         BtnTrip.Enabled = True
+        BoolManTrip = False
+
     End Sub
     Private Function TripRCD() As String
+        Dim LogSaved As Integer = 0
         If IntMasterType > 0 Then
             '*** Log activity
+            Dim RCDlogOpen As Boolean = False
             StrTextToLog = "Trip RCD"
-            Dim debugFilename As String = StrLogPath & "Debug " & Format(Now(), "yyyyMMdd") & "_" & Trim(TxtOrderRef.Text) & "_" & TxtMasterSSID.Text & ".log"
-            Dim debugFileNumber As Integer = FreeFile()
-            FileOpen(debugFileNumber, debugFilename, OpenMode.Append)
-            Dim debugTime As String = Format(Now(), "hh:mm:ss")
-            PrintLine(debugFileNumber, debugTime & " " & StrTextToLog)
-
+            LogSaved = WriteLogFile(StrTextToLog)
             '*** Connect first
             '*** Make sure it is disconnected
             MakeConnection(sIP, False, iPort)
@@ -1859,7 +1956,7 @@ Public Class FrmMain
 
             '*** Enable connection and disable manual connection button
             MakeConnection(sIP, True, iPort)
-
+            StrCommandInUse = "80"
             Dim StrResult As String = DoTest()
             '*** allow app to Update graphics
             Application.DoEvents()
@@ -1869,22 +1966,120 @@ Public Class FrmMain
 
             '*** If logging to this file is needed in other areas either replicate the file name or make it global
             '*** OK here only for now.
+            ' If BoolManTrip Then
+            Dim Decoded As String = ""
+            If StrResult <> "" Then RT_Decode("80", StrResult)
+            '  TripRCD = Decoded
+            '   End If
+
             '*** Log data
-            debugTime = Format(Now(), "hh:mm:ss")
             StrTextToLog = StrResult
-            PrintLine(debugFileNumber, debugTime & " " & StrTextToLog)
-
-            Dim Decoded As String = RT_Decode("80", StrResult)
-            TripRCD = Decoded
-
-
-            '*** Log data
+            logSaved = WriteLogFile(StrTextToLog)
             StrTextToLog = Decoded
-            PrintLine(debugFileNumber, debugTime & " " & StrTextToLog)
-            FileClose(debugFileNumber)
+            LogSaved = WriteLogFile(StrTextToLog)
+
+            Return StrResult
         Else
             MsgBox("Please get configuration first", vbOKOnly + vbCritical, "Cannot continue")
         End If
+    End Function
+    Function GetResult() As String
+        Dim iResult As String = 0
+        Dim iSelectedChannel As Integer = Microsoft.VisualBasic.Val(LblChannel.Text)
+        Dim iChannelLimit As Integer = Microsoft.VisualBasic.Val(LblChLimit.Text) ' - 1
+        Dim UseMicroAmp As Boolean = True
+
+        '*** Get Result
+        Dim data2Send As String = ""
+        Dim commandLength As Integer = 4   '*** 0 based Length less 2 x Check sum bytes
+        Dim bytesForCRC(commandLength) As Byte
+
+        Dim myCRC_16 As New CRC_16()
+
+        bytesForCRC(0) = 85         '** Header A
+        bytesForCRC(1) = 170        '** Header B
+        bytesForCRC(2) = &HD  '** Command length with 2 x checksum (13)
+        bytesForCRC(3) = &H0   '** Device address 0 for tester
+        bytesForCRC(4) = &H81       '** Command instruction - Commence test 
+        '*********** START Checksum calculation
+        Dim csum() As Byte = myCRC_16.ComputeChecksumBytes(bytesForCRC)
+        '************ END Checksum calculation
+
+        For x = 0 To commandLength
+            data2Send &= Chr(bytesForCRC(x))
+        Next
+        data2Send = data2Send & Chr(csum(0)) & Chr(csum(1))
+
+        Dim data2SendFormatted As String = ""
+        For x = 1 To Len(data2Send)
+            data2SendFormatted = data2SendFormatted & " " & Hex(Asc(Mid(data2Send, x, 1)))
+        Next
+
+        Debug.Print("Command: Get Test Result 0x81 on channel ")
+
+        S_LogFileText = "_" & TxtMasterSSID.Text & "_" & TxtCIBid.Text
+        StrCommandInUse = "81"
+        iResult = Connect(sIP, data2Send, 14, S_LogFileText, TxtOrderRef.Text)
+        iResult = Trim(iResult)
+        StrCommandInUse = "00"
+
+        StrCommandInUse = "00"
+        Application.DoEvents()
+
+        Return iResult
+    End Function
+    Function GetTripResult() As String
+        '*** Connect to device
+        '*** Make sure it is disconnected to start with
+        MakeConnection(sIP, False, iPort)
+
+        '** Clear debug window
+        Me.TxtDebug.Text = ""
+
+        '*** Enable connection and disable manual connection button
+        MakeConnection(sIP, True, iPort)
+
+
+        '*** Fetch Result
+        Dim data2Send As String = ""
+        Dim commandLength As Integer = 4   '*** 0 based Length less 2 x Check sum bytes
+
+        Dim bytesForCRC(commandLength) As Byte
+
+        Dim myCRC_16 As New CRC_16()
+
+        bytesForCRC(0) = 85         '** Header A
+        bytesForCRC(1) = 170        '** Header B
+        bytesForCRC(2) = &H7  '** Command length with 2 x checksum
+        bytesForCRC(3) = &H0   '** Device address 0 for tester
+        bytesForCRC(4) = &H81  '** Command instruction - Get result
+
+        '*********** START Checksum calculation
+        Dim csum() As Byte = myCRC_16.ComputeChecksumBytes(bytesForCRC)
+        '************ END Checksum calculation
+
+        For x = 0 To commandLength
+            data2Send &= Chr(bytesForCRC(x))
+        Next
+        data2Send = data2Send & Chr(csum(0)) & Chr(csum(1))
+
+        Dim data2SendFormatted As String = ""
+        For x = 1 To Len(data2Send)
+            data2SendFormatted = data2SendFormatted & " " & Hex(Asc(Mid(data2Send, x, 1)))
+        Next
+
+        Debug.Print("Command: Fetch Result 0x81")
+        TxtDebug.Text = "Command: Fetch Result 0x81"
+        'Connect("169.254.1.1", data2Send, 14)
+
+        Dim Test As String = Connect(sIP, data2Send, 14, S_LogFileText, TxtOrderRef.Text)
+
+        '*** allow app to update graphics
+        Application.DoEvents()
+
+        '*** Disconnect and re-enable manual connect button.
+        MakeConnection(sIP, False, iPort)
+        Return Test
     End Function
     Function DoTest() As String
         Dim iResult As String = 0
@@ -2041,39 +2236,45 @@ Public Class FrmMain
                 ' Connect("169.254.1.1", data2Send, 7)
 
                 S_LogFileText = "_" & TxtMasterSSID.Text & "_" & TxtCIBid.Text
+                StrCommandInUse = "80"
                 iResult = Connect(sIP, data2Send, 7, S_LogFileText, TxtOrderRef.Text)
                 Application.DoEvents()
 
-                '*** Fetch Result
-                data2Send = ""
-                Dim bytesForCRC2(4) As Byte
+                ''*** Fetch Result after waiting for trip - 
+                'Debug.Print("************ Start wait for trip")
+                'Threading.Thread.Sleep(1000)
+                'Debug.Print("************ End wait for trip")
+                'data2Send = ""
+                'Dim bytesForCRC2(4) As Byte
 
-                bytesForCRC2(0) = 85   '** Header A
-                bytesForCRC2(1) = 170  '** Header B
-                bytesForCRC2(2) = &H7  '** Command length with 2 x checksum
-                bytesForCRC2(3) = &H0  '** Device address 0 for tester
-                bytesForCRC2(4) = &H81 '** Command instruction - Get result
+                'bytesForCRC2(0) = 85   '** Header A
+                'bytesForCRC2(1) = 170  '** Header B
+                'bytesForCRC2(2) = &H7  '** Command length with 2 x checksum
+                'bytesForCRC2(3) = &H0  '** Device address 0 for tester
+                'bytesForCRC2(4) = &H81 '** Command instruction - Get result
 
-                '*********** START Checksum calculation
-                csum = myCRC_16.ComputeChecksumBytes(bytesForCRC2)
-                '************ END Checksum calculation
+                ''*********** START Checksum calculation
+                'csum = myCRC_16.ComputeChecksumBytes(bytesForCRC2)
+                ''************ END Checksum calculation
+                'iResult = ""
+                'For x = 0 To 4
+                '    data2Send += Chr(bytesForCRC2(x))
+                'Next
+                'data2Send = data2Send & Chr(csum(0)) & Chr(csum(1))
 
-                For x = 0 To 4
-                    data2Send += Chr(bytesForCRC2(x))
-                Next
-                data2Send = data2Send & Chr(csum(0)) & Chr(csum(1))
+                'data2SendFormatted = ""
+                'For x = 1 To Len(data2Send)
+                '    data2SendFormatted = data2SendFormatted & " " & Hex(Asc(Mid(data2Send, x, 1)))
+                'Next
 
-                data2SendFormatted = ""
-                For x = 1 To Len(data2Send)
-                    data2SendFormatted = data2SendFormatted & " " & Hex(Asc(Mid(data2Send, x, 1)))
-                Next
+                'Debug.Print("Command: Fetch Result 0x81")
 
-                Debug.Print("Command: Fetch Result 0x81")
-
-                S_LogFileText = "_" & TxtMasterSSID.Text & "_" & TxtCIBid.Text
-                iResult = Connect(sIP, data2Send, 14, S_LogFileText, TxtOrderRef.Text)
-                iResult = Trim(iResult)
-                '   iResult = "-3"
+                'S_LogFileText = "_" & TxtMasterSSID.Text & "_" & TxtCIBid.Text
+                'StrCommandInUse = "80"
+                'iResult = Connect(sIP, data2Send, 14, S_LogFileText, TxtOrderRef.Text)
+                'iResult = Trim(iResult)
+                'StrCommandInUse = "00"
+                ''   iResult = "-3"
 
             Else    '** number out of range
 
@@ -2082,6 +2283,7 @@ Public Class FrmMain
         Else    '*** Not numeric
             iResult = "-1 not a number"
         End If '*** Numeric channel number
+        StrCommandInUse = "00"
         Application.DoEvents()
 
         Return iResult
@@ -2131,16 +2333,23 @@ Public Class FrmMain
         ValidatePage = IntValidation
     End Function
     Private Function TestStep() As Integer
+        Dim LogSaved As Integer = 0
+        Dim TestingLogOpen As Boolean = False
         Select Case ICurrentStep
             Case 1  '*** Connect to WIFI
+                '** Clear out put window
+                TxtDebug.Text = ""
                 '*** If skipping master, assume it is already connected
                 If ChkSkipMaster.Checked And Strings.Left(SConnectedWiFi, 3) = "RT_" Then
                     If ChkAutoStep.Checked Then
+                        LblStatus.Text = "Already Connected"
                         ICurrentStep += 1
                         BtnNext.PerformClick()
                     Else
+                        LblStatus.Text = "Already Connected"
                         '*** Display Prompt
                         LblPrompt.Visible = True
+                        ICurrentStep += 1
                     End If
                 Else
                     LblStatus.Text = "Connecting to Wi-Fi"
@@ -2202,31 +2411,31 @@ Public Class FrmMain
 
                 '*** Log activity
                 StrTextToLog = "Get firmware version"
-                Dim debugFilename As String = StrLogPath & "Debug " & Format(Now(), "yyyyMMdd") & "_" & Trim(TxtOrderRef.Text) & "_" & TxtMasterSSID.Text & ".log"
-                Dim debugFileNumber As Integer = FreeFile()
-                FileOpen(debugFileNumber, debugFilename, OpenMode.Append)
-                Dim debugTime As String = Format(Now(), "hh:mm:ss")
-                PrintLine(debugFileNumber, debugTime & " " & StrTextToLog)
+                LogSaved = WriteLogFile(StrTextToLog)
 
                 Dim StrResult As String = GetMasterVersion()
 
                 '*** Log data
-                debugTime = Format(Now(), "hh:mm:ss")
                 StrTextToLog = StrResult
-                PrintLine(debugFileNumber, debugTime & " " & StrTextToLog)
+                LogSaved = WriteLogFile(StrTextToLog)
 
                 Dim Decoded As String = RT_Decode("92", StrResult)
 
                 '*** Log data
                 StrTextToLog = Decoded
-                PrintLine(debugFileNumber, debugTime & " " & StrTextToLog)
-                FileClose(debugFileNumber)
-                If ChkAutoStep.Checked Then
-                    ICurrentStep += 1
-                    BtnNext.PerformClick()
+                LogSaved = WriteLogFile(StrTextToLog)
+
+                If StrResult = "" Then
+                    MsgBox("Error getting version." & vbNewLine & "Cannot Continue", vbCritical + vbOKOnly, "Error")
                 Else
-                    '*** Display Prompt
-                    LblPrompt.Visible = True
+                    If ChkAutoStep.Checked Then
+                        ICurrentStep += 1
+                        BtnNext.PerformClick()
+                    Else
+                        '*** Display Prompt
+                        LblPrompt.Visible = True
+                        ICurrentStep += 1
+                    End If
                 End If
                 '*** 
             Case 3  '*** Discover topology (Config)
@@ -2238,24 +2447,23 @@ Public Class FrmMain
                 '*** Update step Label
                 lblCurrentStep.Text = String.Format("Step {0} of {1}", ICurrentStep, IntMaxStep)
                 '*** Log activity
-                StrTextToLog = "Discover Config"
-                Dim debugFilename As String = StrLogPath & "Debug " & Format(Now(), "yyyyMMdd") & "_" & Trim(TxtOrderRef.Text) & "_" & TxtMasterSSID.Text & ".log"
-                Dim debugFileNumber As Integer = FreeFile()
-                FileOpen(debugFileNumber, debugFilename, OpenMode.Append)
-                Dim debugTime As String = Format(Now(), "hh:mm:ss")
-                PrintLine(debugFileNumber, debugTime & " " & StrTextToLog)
+                StrTextToLog = "Discover Config - Step 3"
 
+                LogSaved = WriteLogFile(StrTextToLog)
+                StrCommandInUse = "EA"
                 Dim StrResult As String = ReadAllTopology()
-                '*** Log data
-                debugTime = Format(Now(), "hh:mm:ss")
-                StrTextToLog = StrResult
-                PrintLine(debugFileNumber, debugTime & " " & StrTextToLog)
 
-                Dim Decoded As String = RT_Decode("EA", StrResult)
+                '*** Log data
+                StrTextToLog = "Result of ReadAllTopology " & StrResult
+                LogSaved = WriteLogFile(StrTextToLog)
+
+                Dim Decoded As String = "Not Decoded"
+                If StrResult <> "" Then
+                    Decoded = RT_Decode("EA", StrResult)
+                End If
                 '*** Log data
                 StrTextToLog = Decoded
-                PrintLine(debugFileNumber, debugTime & " " & StrTextToLog)
-                FileClose(debugFileNumber)
+                LogSaved = WriteLogFile(StrTextToLog)
 
                 '*** Print all Labels
                 If ChkAutoPrint.Checked Then BtnPrintEquipLbl.PerformClick()
@@ -2267,37 +2475,36 @@ Public Class FrmMain
                 Else
                     '*** Display Prompt
                     LblPrompt.Visible = True
+                    ICurrentStep += 1
                 End If
+
             Case 4  '*** If not skipping master, read the current GUID
-                LblStatus.Text = "Getting Master GUID"
-                Application.DoEvents()
                 Debug.Print("In Step " & ICurrentStep.ToString)
                 '*** Update step Label
                 lblCurrentStep.Text = String.Format("Step {0} of {1}", ICurrentStep, IntMaxStep)
                 '*** Hide Prompt
                 LblPrompt.Visible = False
                 If ChkSkipMaster.Checked = False Then
-                    '*** Log activity
-                    StrTextToLog = "Get Master GUID"
-                    Dim debugFilename As String = StrLogPath & "Debug " & Format(Now(), "yyyyMMdd") & "_" & Trim(TxtOrderRef.Text) & "_" & TxtMasterSSID.Text & ".log"
-                    Dim debugFileNumber As Integer = FreeFile()
-                    FileOpen(debugFileNumber, debugFilename, OpenMode.Append)
-                    Dim debugTime As String = Format(Now(), "hh:mm:ss")
-                    PrintLine(debugFileNumber, debugTime & " " & StrTextToLog)
+                    LblStatus.Text = "Getting Master GUID"
+                    Application.DoEvents()
 
+                    '*** Log activity
+                    StrTextToLog = "Get Master GUID - Step 4"
+                    LogSaved = WriteLogFile(StrTextToLog)
+
+                    StrCommandInUse = "BE"
                     Dim StrResult As String = ReadGuid("0")
 
                     '*** Log data
-                    debugTime = Format(Now(), "hh:mm:ss")
                     StrTextToLog = StrResult
-                    PrintLine(debugFileNumber, debugTime & " " & StrTextToLog)
+                    LogSaved = WriteLogFile(StrTextToLog)
 
                     Dim Decoded As String = RT_Decode("BE", StrResult)
                     '  S_MasterGUID = Decoded
                     '*** Log data
                     StrTextToLog = Decoded
-                    PrintLine(debugFileNumber, debugTime & " " & StrTextToLog)
-                    FileClose(debugFileNumber)
+                    LogSaved = WriteLogFile(StrTextToLog)
+
                     '*** 
                     If ChkAutoStep.Checked Then
                         ICurrentStep += 1
@@ -2307,6 +2514,7 @@ Public Class FrmMain
                         LblPrompt.Visible = True
                     End If
                 Else
+                    LblStatus.Text = "Skipping Master GUID"
                     '*** Skip next few steps as I don't have to program the master every time or trip the RCD
                     If ChkAutoStep.Checked Then
                         ICurrentStep += 5
@@ -2314,6 +2522,7 @@ Public Class FrmMain
                     Else
                         '*** Display Prompt
                         LblPrompt.Visible = True
+                        ICurrentStep += 5
                     End If
                 End If
             Case 5 '*** Update & compare GUIDS
@@ -2328,25 +2537,22 @@ Public Class FrmMain
 
                 '*** Log activity
                 StrTextToLog = "Write Master GUID"
-                Dim debugFilename As String = StrLogPath & "Debug " & Format(Now(), "yyyyMMdd") & "_" & Trim(TxtOrderRef.Text) & "_" & TxtMasterSSID.Text & ".log"
-                Dim debugFileNumber As Integer = FreeFile()
-                FileOpen(debugFileNumber, debugFilename, OpenMode.Append)
-                Dim debugTime As String = Format(Now(), "hh:mm:ss")
-                PrintLine(debugFileNumber, debugTime & " " & StrTextToLog)
+                LogSaved = WriteLogFile(StrTextToLog)
 
                 '*** Write GUID
+                StrCommandInUse = "BD"
                 WriteGUID(GuidString, "0")
                 StrTextToLog = "Writing " & GuidString
-                debugTime = Format(Now(), "hh:mm:ss")
-                PrintLine(debugFileNumber, debugTime & " " & StrTextToLog)
+                LogSaved = WriteLogFile(StrTextToLog)
 
+                '** Read GUID
+                StrCommandInUse = "BE"
                 Dim StrResult As String = ReadGuid("0")
                 Dim Decoded As String = RT_Decode("BE", StrResult)
                 S_MasterGUID = Decoded
                 '*** Log data
-                debugTime = Format(Now(), "hh:mm:ss")
                 StrTextToLog = "Read back GUID " & S_MasterGUID
-                PrintLine(debugFileNumber, debugTime & " " & StrTextToLog)
+                LogSaved = WriteLogFile(StrTextToLog)
                 '*** 
 
                 '**** COMPARE Before & After GUIDS
@@ -2354,16 +2560,14 @@ Public Class FrmMain
 
                     LblStatus.Text = "GUIDS Match"
                     '*** Log data
-                    debugTime = Format(Now(), "hh:mm:ss")
                     StrTextToLog = "GUIDS Match"
-                    PrintLine(debugFileNumber, debugTime & " " & StrTextToLog)
+                    LogSaved = WriteLogFile(StrTextToLog)
                 Else
                     LblStatus.Text = "GUIDS DO NOT Match"
                     '*** Log data
-                    debugTime = Format(Now(), "hh:mm:ss")
                     StrTextToLog = "GUIDS DO NOT Match"
-                    PrintLine(debugFileNumber, debugTime & " " & StrTextToLog)
-                    Dim MsgResponse As Integer = MsgBox("GUIDs do not match!" & vbNewLine & "Do you wish to continue?", vbYesNo + vbQuestion, "Warning")
+                    LogSaved = WriteLogFile(StrTextToLog)
+                    Dim MsgResponse As Integer = MsgBox("GUIDs do not match!" & vbNewLine & "Do you wish to continue?", vbYesNo + vbQuestion + MsgBoxStyle.DefaultButton2, "Warning")
                     If MsgResponse = vbNo Then
                         ChkAutoStep.Checked = False
                     End If
@@ -2371,7 +2575,7 @@ Public Class FrmMain
                 LblMguid.Text = S_MasterGUID
                 LblMguid.Visible = True
 
-                FileClose(debugFileNumber)
+                TestingLogOpen = False
                 '*** 
                 If ChkAutoStep.Checked Then
                     ICurrentStep += 1
@@ -2379,6 +2583,7 @@ Public Class FrmMain
                 Else
                     '*** Display Prompt
                     LblPrompt.Visible = True
+                    ICurrentStep += 1
                 End If
 
             Case 6 ' Set New Master SSID If required
@@ -2393,24 +2598,21 @@ Public Class FrmMain
 
                     '*** Log activity
                     StrTextToLog = "Set Master SSID"
-                    Dim debugFilename As String = StrLogPath & "Debug " & Format(Now(), "yyyyMMdd") & "_" & Trim(TxtOrderRef.Text) & "_" & TxtMasterSSID.Text & ".log"
-                    Dim debugFileNumber As Integer = FreeFile()
-                    FileOpen(debugFileNumber, debugFilename, OpenMode.Append)
-                    Dim debugTime As String = Format(Now(), "hh:mm:ss")
-                    PrintLine(debugFileNumber, debugTime & " " & StrTextToLog)
+                    LogSaved = WriteLogFile(StrTextToLog)
 
+                    StrCommandInUse = "91"
                     Dim StrResult As String = SetSSID()
 
                     '*** Log data
-                    debugTime = Format(Now(), "hh:mm:ss")
                     StrTextToLog = StrResult
-                    PrintLine(debugFileNumber, debugTime & " " & StrTextToLog)
+                    LogSaved = WriteLogFile(StrTextToLog)
 
                     Dim Decoded As String = RT_Decode("91", StrResult)
+                    StrCommandInUse = "00"
+
                     '*** Log data
                     StrTextToLog = Decoded
-                    PrintLine(debugFileNumber, debugTime & " " & StrTextToLog)
-                    FileClose(debugFileNumber)
+                    LogSaved = WriteLogFile(StrTextToLog)
                     MsgBox("When the master ID appears in the WiFi list," & vbNewLine & "Click OK to connect and continue.", vbOKOnly, "SSID Updated.")
 
                     '*******
@@ -2422,17 +2624,23 @@ Public Class FrmMain
                     Dim IntConWifi As Integer = 0
                     Dim IntConnectCount As Integer = 0 '** counter to exit while if not connecting
                     Dim IntConnectLimit As Integer = 8
-                    While IntConWifi = 0
-                        IntConWifi = ConnectWiFi(True) '*** Ignore 001 and connect to new master 
-                        If IntConWifi = 1 Then Threading.Thread.Sleep(2000)
-                        If Strings.Left(SConnectedWiFi, 3) = "RT_" Then
-                            Debug.Print("S01 - Connected Wifi " & SConnectedWiFi & " - " & IntConWifi)
-                            Application.DoEvents()
-                            Exit While
-                        End If
-                        IntConnectCount += 1
-                        If IntConnectCount = IntConnectLimit Then Exit While
-                    End While
+                    If SConnectedWiFi <> "RT_" & Trim(TxtMasterSSID.Text) Then
+                        While IntConWifi = 0
+                            IntConWifi = ConnectWiFi(True) '*** Ignore 001 and connect to new master 
+                            If IntConWifi = 1 Then
+                                Threading.Thread.Sleep(500)
+                            Else
+                                Threading.Thread.Sleep(2000)
+                            End If
+                            If Strings.Left(SConnectedWiFi, 3) = "RT_" Then
+                                Debug.Print("S01 - Connected Wifi " & SConnectedWiFi & " - " & IntConWifi)
+                                Application.DoEvents()
+                                Exit While
+                            End If
+                            IntConnectCount += 1
+                            If IntConnectCount = IntConnectLimit Then Exit While
+                        End While
+                    End If
                     Application.DoEvents()
 
                     If IntConnectCount = IntConnectLimit Then
@@ -2448,6 +2656,7 @@ Public Class FrmMain
                 Else
                     '*** Display Prompt
                     LblPrompt.Visible = True
+                    ICurrentStep += 1
                 End If
 
             Case 7 '*** Trip Master RCD
@@ -2461,25 +2670,27 @@ Public Class FrmMain
 
                 '*** Log activity
                 StrTextToLog = "Tripping MC8 RCDs"
-                Dim debugFilename As String = StrLogPath & "Debug " & Format(Now(), "yyyyMMdd") & "_" & Trim(TxtOrderRef.Text) & "_" & TxtMasterSSID.Text & ".log"
-                Dim debugFileNumber As Integer = FreeFile()
-                FileOpen(debugFileNumber, debugFilename, OpenMode.Append)
-                Dim debugTime As String = Format(Now(), "hh:mm:ss")
-                PrintLine(debugFileNumber, debugTime & " " & StrTextToLog)
-                FileClose(debugFileNumber)
+                LogSaved = WriteLogFile(StrTextToLog)
 
                 '*** Update step Label
                 lblCurrentStep.Text = String.Format("Step {0} of {1}", ICurrentStep, IntMaxStep)
                 '*** Hide Prompt
                 LblPrompt.Visible = False
                 LblChannel.Text = "1"
+                StrCommandInUse = "80"
                 Dim StrResult As String = TripRCD()
+
                 IntMasterTestsDone += 1
 
-                Dim Decoded As String = RT_Decode("80", StrResult)
+                '  Dim Decoded As String = RT_Decode("80", StrResult)
+
+                StrCommandInUse = "81"
+                StrResult = GetTripResult()
+                Dim Decoded As String = RT_Decode("81", StrResult)
+                StrCommandInUse = "00"
                 Dim IntContinueTrip As Integer = 0
 
-                Select Case Val(StrResult)
+                Select Case Val(Decoded)
                     Case -1 '*** Error in command
                         PicStatM1.Image = My.Resources.StatusRed
                         Application.DoEvents()
@@ -2494,7 +2705,7 @@ Public Class FrmMain
                         PicStatM1.Image = My.Resources.StatusRed
                         Application.DoEvents()
                         StrTextToLog += "No trip on ch 1"
-                        IntContinueTrip = MsgBox("RCD did not trip on channel 1." & vbNewLine & "Do you wish to continue. Y/N", vbYesNo + vbQuestion, "Question")
+                        IntContinueTrip = MsgBox("RCD did not trip on channel 1." & vbNewLine & "Do you wish to continue. Y/N", vbYesNo + vbQuestion + MsgBoxStyle.DefaultButton2, "Question")
                         ToolTip1.SetToolTip(PicStatM1, "Fail - RCD did NOT trip")
                     Case 1  '*** RCD did trip
                         PicStatM1.Image = My.Resources.StatusGreen
@@ -2548,12 +2759,8 @@ Public Class FrmMain
                 B_RelayCheck = False
 
                 '*** Log data
-                debugFileNumber = FreeFile()
-                FileOpen(debugFileNumber, debugFilename, OpenMode.Append)
-                debugTime = Format(Now(), "hh:mm:ss")
                 StrTextToLog = "Result from trip " & StrResult
-                PrintLine(debugFileNumber, debugTime & " " & StrTextToLog)
-                FileClose(debugFileNumber)
+                LogSaved = WriteLogFile(StrTextToLog)
 
                 '*** 
                 If ChkAutoStep.Checked Then
@@ -2562,6 +2769,7 @@ Public Class FrmMain
                 Else
                     '*** Display Prompt
                     LblPrompt.Visible = True
+                    ICurrentStep += 1
                 End If
 
             Case 8  '*** Update database for Master
@@ -2575,11 +2783,7 @@ Public Class FrmMain
 
                 '*** Log activity
                 StrTextToLog = "Update database for Master"
-                Dim debugFilename As String = StrLogPath & "Debug " & Format(Now(), "yyyyMMdd") & "_" & Trim(TxtOrderRef.Text) & "_" & TxtMasterSSID.Text & ".log"
-                Dim debugFileNumber As Integer = FreeFile()
-                FileOpen(debugFileNumber, debugFilename, OpenMode.Append)
-                Dim debugTime As String = Format(Now(), "hh:mm:ss")
-                PrintLine(debugFileNumber, debugTime & " " & StrTextToLog)
+                LogSaved = WriteLogFile(StrTextToLog)
                 Dim TmpType As String = "MC8F5"
                 Select Case IntMasterType
                     Case 1
@@ -2591,8 +2795,7 @@ Public Class FrmMain
                 WriteNDB(S_MasterGUID, Trim(TxtMasterSSID.Text), TmpType, IntMasterTestsDone, Trim(TxtMasterManCode.Text))
                 '*** Log data
                 StrTextToLog = S_MasterGUID & " " & Trim(TxtMasterSSID.Text) & " " & TmpType & " " & IntMasterTestsDone & " " & Trim(TxtMasterManCode.Text)
-                PrintLine(debugFileNumber, debugTime & " " & StrTextToLog)
-                FileClose(debugFileNumber)
+                LogSaved = WriteLogFile(StrTextToLog)
 
                 '*** 
                 If ChkAutoStep.Checked Then
@@ -2601,15 +2804,17 @@ Public Class FrmMain
                 Else
                     '*** Display Prompt
                     LblPrompt.Visible = True
+                    ICurrentStep += 1
                 End If
             Case 9 '*** Commence Channel board
                 If ChkSkipCIB.Checked Then
-
                     '*** 
                     If ChkAutoStep.Checked Then
+                        LblStatus.Text = "CIB Skipped"
                         ICurrentStep = 11
                         BtnNext.PerformClick()
                     Else
+                        LblStatus.Text = "CIB Skipped"
                         ICurrentStep = 11
                         '*** Display Prompt
                         LblPrompt.Visible = True
@@ -2636,25 +2841,21 @@ Public Class FrmMain
 
                     '*** Log activity
                     StrTextToLog = "Write CIB GUID"
-                    Dim debugFilename As String = StrLogPath & "Debug " & Format(Now(), "yyyyMMdd") & "_" & Trim(TxtOrderRef.Text) & "_" & TxtMasterSSID.Text & ".log"
-                    Dim debugFileNumber As Integer = FreeFile()
-                    FileOpen(debugFileNumber, debugFilename, OpenMode.Append)
-                    Dim debugTime As String = Format(Now(), "hh:mm:ss")
-                    PrintLine(debugFileNumber, debugTime & " " & StrTextToLog)
+                    LogSaved = WriteLogFile(StrTextToLog)
 
                     '*** Write GUID
                     WriteGUID(GuidString, "1")
                     StrTextToLog = "Writing " & GuidString
-                    debugTime = Format(Now(), "hh:mm:ss")
-                    PrintLine(debugFileNumber, debugTime & " " & StrTextToLog)
+                    LogSaved = WriteLogFile(StrTextToLog)
 
-                    Dim StrResult As String = ReadGuid("1")
+                    Dim StrResult As String = ""
+                    StrResult = ReadGuid("1")
                     Dim Decoded As String = RT_Decode("BE", StrResult)
                     sCB_OriginalGUID = Decoded
+
                     '*** Log data
-                    debugTime = Format(Now(), "hh:mm:ss")
                     StrTextToLog = "Read back GUID " & sCB_OriginalGUID
-                    PrintLine(debugFileNumber, debugTime & " " & StrTextToLog)
+                    LogSaved = WriteLogFile(StrTextToLog)
                     '*** 
 
                     '**** COMPARE Before & After GUIDS
@@ -2664,16 +2865,14 @@ Public Class FrmMain
                         Application.DoEvents()
 
                         '*** Log data
-                        debugTime = Format(Now(), "hh:mm:ss")
                         StrTextToLog = "GUIDS Match"
-                        PrintLine(debugFileNumber, debugTime & " " & StrTextToLog)
+                        LogSaved = WriteLogFile(StrTextToLog)
                     Else
                         LblStatus.Text = "GUIDS DO NOT Match"
                         '*** Log data
-                        debugTime = Format(Now(), "hh:mm:ss")
                         StrTextToLog = "GUIDS DO NOT Match"
-                        PrintLine(debugFileNumber, debugTime & " " & StrTextToLog)
-                        Dim MsgResponse As Integer = MsgBox("GUIDs do not match!" & vbNewLine & "Do you wish to continue?", vbYesNo + vbQuestion, "Warning")
+                        LogSaved = WriteLogFile(StrTextToLog)
+                        Dim MsgResponse As Integer = MsgBox("GUIDs do not match!" & vbNewLine & "Do you wish to continue?", vbYesNo + vbQuestion + MsgBoxStyle.DefaultButton2, "Warning")
                         If MsgResponse = vbNo Then
                             ChkAutoStep.Checked = False
                         End If
@@ -2681,8 +2880,6 @@ Public Class FrmMain
                     sNewGUID = GuidString
                     LblCIBguid.Text = sCB_OriginalGUID
                     LblCIBguid.Visible = True
-
-                    FileClose(debugFileNumber)
 
                     '********* Check if set to only update GUID
                     '*** If not trip channels
@@ -2698,11 +2895,7 @@ Public Class FrmMain
 
                     '*** Log activity
                     StrTextToLog = "Tripping CIB RCDs"
-                    debugFileNumber = FreeFile()
-                    FileOpen(debugFileNumber, debugFilename, OpenMode.Append)
-                    debugTime = Format(Now(), "hh:mm:ss")
-                    PrintLine(debugFileNumber, debugTime & " " & StrTextToLog)
-                    FileClose(debugFileNumber)
+                    LogSaved = WriteLogFile(StrTextToLog)
 
                     '*** Update step Label
                     lblCurrentStep.Text = String.Format("Step {0} of {1}", ICurrentStep, IntMaxStep)
@@ -2732,13 +2925,13 @@ Public Class FrmMain
                             PicStatCIB01.Image = My.Resources.StatusRed
                             Application.DoEvents()
                             StrTextToLog += "No trip on ch 9 [1]"
-                            IntContinueTrip = MsgBox("RCD did not trip on channel 1." & vbNewLine & "Do you wish to continue. Y/N", vbYesNo + vbQuestion, "Question")
+                            IntContinueTrip = MsgBox("RCD did not trip on channel 1." & vbNewLine & "Do you wish to continue. Y/N", vbYesNo + vbQuestion + MsgBoxStyle.DefaultButton2, "Question")
                             ToolTip1.SetToolTip(PicStatCIB01, "Fail - RCD did NOT trip")
                         Case 1  '*** RCD did trip
                             PicStatCIB01.Image = My.Resources.StatusGreen
                             Application.DoEvents()
                             StrTextToLog += "Trip on ch 9 [1]"
-                            IntContinueTrip = MsgBox("RCD tripped on channel 1." & vbNewLine & "Do you wish to continue. Y/N", vbYesNo + vbQuestion, "Question")
+                            IntContinueTrip = MsgBox("RCD tripped on channel 1." & vbNewLine & "Do you wish to continue. Y/N", vbYesNo + vbQuestion + MsgBoxStyle.DefaultButton2, "Question")
                             ToolTip1.SetToolTip(PicStatCIB01, "PASS - RCD tripped")
                     End Select
 
@@ -2789,14 +2982,7 @@ Public Class FrmMain
                     B_RelayCheck = False
 
                     '*** Log data
-                    debugFileNumber = FreeFile()
-                    FileOpen(debugFileNumber, debugFilename, OpenMode.Append)
-                    debugTime = Format(Now(), "hh:mm:ss")
                     StrTextToLog = "Result from trip " & StrResult
-                    PrintLine(debugFileNumber, debugTime & " " & StrTextToLog)
-                    FileClose(debugFileNumber)
-
-                    '   End If
                     '*** 
                     If ChkAutoStep.Checked Then
                         ICurrentStep += 1
@@ -2804,30 +2990,30 @@ Public Class FrmMain
                     Else
                         '*** Display Prompt 
                         LblPrompt.Visible = True
+                        ICurrentStep += 1
                     End If
 
                 End If '*** END CIB
 
             Case 10 '*** Update database for CIB
                 LblStatus.Text = "Update database for CIB"
+                StrTextToLog = "Update database for CIB"
                 Application.DoEvents()
 
                 '*** Update step Label
                 lblCurrentStep.Text = String.Format("Step {0} of {1}", ICurrentStep, IntMaxStep)
 
-                Dim debugFilename As String = StrLogPath & "Debug " & Format(Now(), "yyyyMMdd") & "_" & Trim(TxtOrderRef.Text) & "_" & TxtMasterSSID.Text & ".log"
-                Dim debugFileNumber As Integer = FreeFile()
-                FileOpen(debugFileNumber, debugFilename, OpenMode.Append)
-                Dim debugTime As String = Format(Now(), "hh:mm:ss")
-                PrintLine(debugFileNumber, debugTime & " " & StrTextToLog)
+
+                LogSaved = WriteLogFile(StrTextToLog)
+
                 Dim TmpType As String = "CIBF"
 
                 StrTextToLog = "Writing to NDB - CIB info"
                 WriteNDB(sNewGUID, Trim(TxtCIBid.Text), TmpType, IntCIBTestsDone, Trim(TxtCIBManCode.Text))
                 '*** Log data
-                StrTextToLog = S_MasterGUID & " " & Trim(TxtMasterSSID.Text) & " " & TmpType & " " & IntCIBTestsDone & " " & Trim(TxtMasterManCode.Text)
-                PrintLine(debugFileNumber, debugTime & " " & StrTextToLog)
-                FileClose(debugFileNumber)
+                StrTextToLog += vbNewLine & sCB_OriginalGUID & " " & Trim(TxtCIBid.Text) & " " & TmpType & " " & IntCIBTestsDone & " " & Trim(TxtMasterManCode.Text)
+
+                LogSaved = WriteLogFile(StrTextToLog)
                 '*** 
                 If ChkAutoStep.Checked Then
                     ICurrentStep += 1
@@ -2835,6 +3021,7 @@ Public Class FrmMain
                 Else
                     '*** Display Prompt
                     LblPrompt.Visible = True
+                    ICurrentStep += 1
                 End If
 
             Case 11 '*** Process completed
@@ -2854,6 +3041,34 @@ Public Class FrmMain
         End Select
         Debug.Print("Finished " & ICurrentStep.ToString)
         TestStep = 1
+    End Function
+    Private Function WriteLogFile(LogData As String) As Integer
+        '*** Global logging function
+        '*** Log data
+        Dim LogFilename As String = StrLogPath & "Debug " & Format(Now(), "yyyyMMdd") & "_" & Trim(TxtOrderRef.Text) & "_" & TxtMasterSSID.Text & ".log"
+        Dim LogFileNumber As Integer
+        Dim LogTime As String = Format(Now(), "hh:mm:ss")
+        LogFileNumber = FreeFile()
+        FileOpen(LogFileNumber, LogFilename, OpenMode.Append)
+        LogTime = Format(Now(), "hh:mm:ss")
+        PrintLine(LogFileNumber, LogTime & " " & LogData)
+        FileClose(LogFileNumber)
+        Return 1
+        '*** 
+    End Function
+    Private Function WriteDebugLogFile(LogData As String) As Integer
+        '*** Global logging function
+        '*** Log data
+        Dim debugFilename As String = StrLogPath & "Debug " & Format(Now(), "yyyyMMdd") & "_" & Trim(TxtOrderRef.Text) & "_" & TxtMasterSSID.Text & ".log"
+        Dim debugFileNumber As Integer
+        Dim debugTime As String = Format(Now(), "hh:mm:ss")
+        debugFileNumber = FreeFile()
+        FileOpen(debugFileNumber, debugFilename, OpenMode.Append)
+        debugTime = Format(Now(), "hh:mm:ss")
+        PrintLine(debugFileNumber, debugTime & " " & LogData)
+        FileClose(debugFileNumber)
+        Return 1
+        '*** 
     End Function
     Private Sub WriteGUID(guidString As String, device As String)
         '*** Make sure it is disconnected to start with
@@ -2997,6 +3212,9 @@ Public Class FrmMain
         TxtDebug.Text = "Command:Set GUID 0xBD >" & data2SendFormatted & "< " & Len(data2Send).ToString
 
         S_LogFileText = "_" & TxtMasterSSID.Text & "_" & TxtCIBid.Text
+        If device = "1" Then
+            Debug.Print("Setting CIB Guid")
+        End If
         Connect(sIP, data2Send, 7, S_LogFileText, TxtOrderRef.Text)
 
         '*** Close connection
@@ -3053,6 +3271,9 @@ Public Class FrmMain
 
     End Sub
     Private Sub BtnRestart_Click(sender As Object, e As EventArgs) Handles BtnRestart.Click
+        '*** Reinitialise everything
+        Initialise()
+
         ICurrentStep = 1
         LblType.Text = "Type:"
         LblVersion.Text = "Version: "
@@ -3061,7 +3282,8 @@ Public Class FrmMain
         IntMasterTestsDone = 0
         LblMguid.Visible = False
         LblCIBguid.Visible = False
-        RtUnitChannel = 0
+
+        ' RtUnitChannel = 0
         If Not ChkSkipMaster.Checked Then
             TxtMasterSSID.Text = ""
             TxtMasterManCode.Text = ""
@@ -3206,31 +3428,42 @@ Public Class FrmMain
     End Function
 
     Private Sub BtnSetMasterID_Click(sender As Object, e As EventArgs) Handles BtnSetMasterID.Click
-        BtnSetMasterID.Enabled = False
+        Dim IntControlCount As Integer = 0
+        Dim LogSaved As Integer = 0
+        If ChkLAN.Checked Then IntControlCount = 1
+        If ChkBLE.Checked Then IntControlCount += 2
 
-        '*** Log activity
-        StrTextToLog = "Set Master GUID"
-        Dim debugFilename As String = StrLogPath & "Debug " & Format(Now(), "yyyyMMdd") & "_" & Trim(TxtOrderRef.Text) & "_" & TxtMasterSSID.Text & ".log"
-        Dim debugFileNumber As Integer = FreeFile()
-        FileOpen(debugFileNumber, debugFilename, OpenMode.Append)
-        Dim debugTime As String = Format(Now(), "hh:mm:ss")
-        PrintLine(debugFileNumber, debugTime & " " & StrTextToLog)
+        Select Case IntControlCount
+            Case 0
 
-        Dim StrResultVal As String = SetSSID()
+                BtnSetMasterID.Enabled = False
 
-        Debug.Print("SetSSID result in Button " & StrResultVal)
-        '*** Log data
-        debugTime = Format(Now(), "hh:mm:ss")
-        StrTextToLog = StrResultVal
-        PrintLine(debugFileNumber, debugTime & " " & StrTextToLog)
+                '*** Log activity
+                StrTextToLog = "Set Master SSID"
+                LogSaved = WriteLogFile(StrTextToLog)
 
-        Dim Decoded As String = RT_Decode("91", StrResultVal)
-        '*** Log data
-        StrTextToLog = Decoded
-        PrintLine(debugFileNumber, debugTime & " " & StrTextToLog)
-        FileClose(debugFileNumber)
+                Dim StrResultVal As String = SetSSID()
 
-        BtnSetMasterID.Enabled = True
+                Debug.Print("SetSSID result in Button " & StrResultVal)
+
+                '*** Log data
+                StrTextToLog = StrResultVal
+                LogSaved = WriteLogFile(StrTextToLog)
+
+                Dim Decoded As String = RT_Decode("91", StrResultVal)
+                '*** Log data
+                StrTextToLog = Decoded
+                LogSaved = WriteLogFile(StrTextToLog)
+
+                BtnSetMasterID.Enabled = True
+
+            Case 1
+                'LAN Message
+                MsgBox("Cannot set SSID for LAN Module", vbOKOnly + vbCritical, "Computer says no.")
+            Case 2
+                'BLE Message
+                MsgBox("Cannot set SSID for BLE Module", vbOKOnly + vbCritical, "Computer says no.")
+        End Select
 
     End Sub
 
@@ -3274,8 +3507,7 @@ Public Class FrmMain
     Private Sub BtnTestAudio_Click(sender As Object, e As EventArgs) Handles BtnTestAudio.Click
         My.Computer.Audio.Play(My.Resources.RT_End, AudioPlayMode.Background)
     End Sub
-
-    Private Sub BtnSummary_Click(sender As Object, e As EventArgs) Handles BtnSummary.Click
+    Private Sub GetSummary()
         Dim DateStart As String = Format(DateSummary.Value, "yyyy-MM-dd")
         Dim DateFinish As String = Format(DateSummary.Value.AddDays(1), "yyyy-MM-dd")
         Dim StrWhereClause As String = ""
@@ -3403,6 +3635,10 @@ FROM            dbo.NDB_Board INNER JOIN
         NDB_DB.Close()
         Application.DoEvents() 'Allow UI to refresh
         Dim IntResult As DialogResult = FrmSummary.ShowDialog()
+    End Sub
+    Private Sub BtnSummary_Click(sender As Object, e As EventArgs) Handles BtnSummary.Click
+        GetSummary()
+
     End Sub
 
     Private Sub ChkSummary_CheckedChanged(sender As Object, e As EventArgs) Handles ChkSummary.CheckedChanged
@@ -4222,7 +4458,7 @@ FROM            dbo.NDB_Board INNER JOIN
 
         sScannerString = Trim(TxtMasterSSID.Text)
 
-        Debug.Print("Scanned " & sScannerString)
+        Debug.Print("Scanned ID: " & sScannerString)
 
         Select Case Len(sScannerString)
             Case 6
@@ -4875,6 +5111,7 @@ FROM            dbo.NDB_Board INNER JOIN
 
     End Sub
     Private Sub DoSingleTest()
+        '*** This is called from clicking on the status rectangles on th emaster & CIB results views.
         Dim StartDuration As Date
         Dim StopDuration As Date
         '*** Reset relay test mode
@@ -4890,8 +5127,8 @@ FROM            dbo.NDB_Board INNER JOIN
                 '*** Changes to enable test button to connect & reconnect
                 '*** Add auto sequence to step through configured channels
                 '*** Get the maximum step number allowed - New limit for Auto only
-                '** Modofied to use new step limit as requested to save time - Donno, Wayne & Rodney
-                '*** If master is MC8 only test up to channel 9 to tset the comms on the master
+                '** Modified to use new step limit as requested to save time - Donno, Wayne & Rodney
+                '*** If master is MC8 only test up to channel 9 to test the comms on the master
                 'Dim iMaxChannel As Integer = Val(TxtChannelLimit.Text) - 1
                 'Dim iMaxChannel As Integer = Val(TxtChTestLimit.Text) - 1
                 'Dim iCurrentChannel As Integer = Val(TxtChannel.Text)
@@ -4932,10 +5169,10 @@ FROM            dbo.NDB_Board INNER JOIN
             MsgBox("Please discover topology", vbOKOnly + vbCritical, "Cannot Test")
         End If
 
-        Debug.Print("================================================== Stop Testing - DoSingleTest SUB" & Now())
+        Debug.Print("================================================== Stop Testing - DoSingleTest SUB        " & Now())
         StopDuration = Now()
         Dim OverallSDuration As TimeSpan = StopDuration - StartDuration
-        Debug.Print("================================================== Duration Testing - DoSingleTest SUB" & OverallSDuration.ToString)
+        Debug.Print("================================================== Duration Testing - DoSingleTest SUB " & OverallSDuration.ToString)
     End Sub
     Private Sub SetChannel(ChannelNumber As Integer)
         LblChannel.Text = ChannelNumber.ToString 'Zero based channels
@@ -4977,10 +5214,14 @@ FROM            dbo.NDB_Board INNER JOIN
         LblChannel.Text = "9"
         RtUnitChannel = 8 'Zero based
     End Sub
-
-    Private Sub ChkLAN_CheckedChanged(sender As Object, e As EventArgs) Handles ChkLAN.CheckedChanged
+    Private Sub SetIP()
         If ChkLAN.Checked Then
+            '*** Clear BLE Checkbox
+            ChkBLE.Checked = False
+            BtnPingLan.Visible = True
+            TxtIpAddress.Visible = True
             sIP = TxtIpAddress.Text
+            TTiPAddress.ForeColor = Color.DarkViolet
 
             Dim pingNum As Integer = 0
             Dim pingNumEnd As Integer = 0
@@ -4996,10 +5237,122 @@ FROM            dbo.NDB_Board INNER JOIN
             pingString = pingString & "." & Microsoft.VisualBasic.Val(tempNum) & "."
 
             sIP = pingString & pingNum.ToString '*** Add last octet
-            Debug.Print(pingNum.ToString & " " & pingNumEnd.ToString & " " & sIP)
+            'Debug.Print(sIP)
         Else
             sIP = DefaultSip
+            BtnPingLan.Visible = False
+            LblPingResult.Visible = False
+            TxtIpAddress.Visible = False
+            TTiPAddress.ForeColor = Color.Blue
         End If
-        Debug.Print(sIP)
+        Debug.Print("IP Address Set " & sIP)
+        TTiPAddress.Text = sIP
     End Sub
+    Private Sub ChkLAN_CheckedChanged(sender As Object, e As EventArgs) Handles ChkLAN.CheckedChanged
+        SetIP()
+    End Sub
+
+    Private Sub ChkBLE_CheckedChanged(sender As Object, e As EventArgs) Handles ChkBLE.CheckedChanged
+        If ChkBLE.Checked Then
+            ChkLAN.Checked = False
+        Else
+
+        End If
+    End Sub
+
+    Private Sub BtnPingLan_Click(sender As Object, e As EventArgs) Handles BtnPingLan.Click
+        Me.Cursor = Cursors.WaitCursor
+        Dim pingString As String = TxtMasterSSID.Text   ' "serverfault.com" '
+        Dim ResultString As String = ""
+        Try
+            Dim IntPingWait As Integer = 300 'ms
+            Dim Int2Ping As Boolean = My.Computer.Network.Ping(pingString, IntPingWait) '** Wait xx ms for response
+            If Int2Ping Then
+                Dim Item2Ping As String = pingString
+                Dim addresslist As IPAddress() = Dns.GetHostAddresses(pingString)
+                Dim IntItemCount As Integer = 1
+                LblPingResult.ForeColor = Color.Blue
+                For Each Address In addresslist
+
+                    ResultString += Item2Ping & vbNewLine & "Pinged successfully at " & Address.ToString & vbNewLine
+                    If IntItemCount = 1 Then
+                        '**** PAD out first successful ping (only the first, if there are more than 1)
+                        '**** Into the full octet format 000.000.000.000 and update the text box TxtIpAddress.text
+                        Dim TmpPingString As String = Address.ToString
+                        Dim StrAdd1 As String
+                        Dim StrAdd2 As String
+                        Dim StrAdd3 As String
+                        Dim StrAdd4 As String
+
+                        Dim dotPOSstart As Integer = InStrRev(TmpPingString, ".")
+                        StrAdd4 = Microsoft.VisualBasic.Val(Microsoft.VisualBasic.Right(TmpPingString, Len(TmpPingString) - dotPOSstart))
+                        If Len(StrAdd4) < 3 Then StrAdd4 = PadString(StrAdd4, 3)
+
+                        TmpPingString = Microsoft.VisualBasic.Left(TmpPingString, dotPOSstart - 1)
+                        dotPOSstart = InStrRev(TmpPingString, ".")
+                        StrAdd3 = Microsoft.VisualBasic.Val(Microsoft.VisualBasic.Right(TmpPingString, Len(TmpPingString) - dotPOSstart))
+                        If Len(StrAdd3) < 3 Then StrAdd3 = PadString(StrAdd3, 3)
+
+                        TmpPingString = Microsoft.VisualBasic.Left(TmpPingString, dotPOSstart - 1)
+                        dotPOSstart = InStrRev(TmpPingString, ".")
+                        StrAdd2 = Microsoft.VisualBasic.Val(Microsoft.VisualBasic.Right(TmpPingString, Len(TmpPingString) - dotPOSstart))
+                        If Len(StrAdd2) < 3 Then StrAdd2 = PadString(StrAdd2, 3)
+
+                        TmpPingString = Microsoft.VisualBasic.Left(TmpPingString, dotPOSstart - 1)
+                        dotPOSstart = InStrRev(TmpPingString, ".")
+                        StrAdd1 = Microsoft.VisualBasic.Val(Microsoft.VisualBasic.Right(TmpPingString, Len(TmpPingString) - dotPOSstart))
+                        If Len(StrAdd1) < 3 Then StrAdd1 = PadString(StrAdd1, 3)
+                        TxtIpAddress.Text = StrAdd1 & "." & StrAdd2 & "." & StrAdd3 & "." & StrAdd4
+
+                    Else
+                        LblPingResult.ForeColor = Color.Red
+                    End If
+                    Debug.Print(Item2Ping & " pinged successfully at " & Address.ToString)
+                    IntItemCount += IntItemCount
+                Next
+                '  Dim ResultMAC As String = GetMacAddress(Item2Ping)
+            End If
+            If ResultString <> "" Then
+                LblPingResult.Text = ResultString
+                LblPingResult.Visible = True
+            End If
+        Catch ex As Exception
+            '** Display error message for 009
+            LblPingResult.Text = pingString & vbNewLine & ex.Message
+            LblPingResult.Visible = True
+            'MsgBox(pingString & " " & ex.Message, vbOKOnly + vbCritical, "Error")
+        End Try
+        Me.Cursor = Cursors.Default
+
+    End Sub
+    Private Function PadString(StrToPad As String, TargetLength As Integer) As String
+        While Len(StrToPad) < TargetLength
+            StrToPad = "0" & StrToPad
+        End While
+        Return StrToPad
+    End Function
+
+    Private Sub BtnPrevious_Click(sender As Object, e As EventArgs) Handles BtnPrevious.Click
+
+    End Sub
+
+    Private Sub Button3_Click(sender As Object, e As EventArgs) Handles Button3.Click
+        GetSummary()
+    End Sub
+
+    Private Sub Button4_Click(sender As Object, e As EventArgs) Handles Button4.Click
+        '***** WRITE MASTER GUID
+        Dim G As Guid
+        Dim GuidString As String = G.ToString
+        GuidString = Microsoft.VisualBasic.Left("MRF_MECHANICAL_RELAY_" & Trim(TxtCIBid.Text) & "_" & Format(Now(), "ddMMyyyy"), 36)
+        '*** Write GUID
+        WriteGUID(GuidString, "1")
+    End Sub
+
+    Private Sub BtnGetResult_Click(sender As Object, e As EventArgs) Handles BtnGetResult.Click
+        StrCommandInUse = "81"
+        Dim StrResult As String = GetTripResult()
+    End Sub
+
+
 End Class

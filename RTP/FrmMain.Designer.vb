@@ -43,8 +43,12 @@ Partial Class FrmMain
         Me.StatusStrip1 = New System.Windows.Forms.StatusStrip()
         Me.TSPrinterName = New System.Windows.Forms.ToolStripStatusLabel()
         Me.TSLogPath = New System.Windows.Forms.ToolStripStatusLabel()
+        Me.TTiPAddress = New System.Windows.Forms.ToolStripStatusLabel()
         Me.ChkSkipMaster = New System.Windows.Forms.CheckBox()
         Me.GrpMaster = New System.Windows.Forms.GroupBox()
+        Me.TxtIpAddress = New System.Windows.Forms.MaskedTextBox()
+        Me.LblPingResult = New System.Windows.Forms.Label()
+        Me.BtnPingLan = New System.Windows.Forms.Button()
         Me.LblMguid = New System.Windows.Forms.Label()
         Me.Label38 = New System.Windows.Forms.Label()
         Me.Label37 = New System.Windows.Forms.Label()
@@ -127,6 +131,8 @@ Partial Class FrmMain
         Me.ChkSound = New System.Windows.Forms.CheckBox()
         Me.ChkManCntrls = New System.Windows.Forms.CheckBox()
         Me.GrpManual = New System.Windows.Forms.GroupBox()
+        Me.BtnGetResult = New System.Windows.Forms.Button()
+        Me.Button4 = New System.Windows.Forms.Button()
         Me.Button2 = New System.Windows.Forms.Button()
         Me.Button1 = New System.Windows.Forms.Button()
         Me.Label10 = New System.Windows.Forms.Label()
@@ -168,6 +174,7 @@ Partial Class FrmMain
         Me.LblType = New System.Windows.Forms.Label()
         Me.TabControl1 = New System.Windows.Forms.TabControl()
         Me.TabProg = New System.Windows.Forms.TabPage()
+        Me.Button3 = New System.Windows.Forms.Button()
         Me.PicTick = New System.Windows.Forms.PictureBox()
         Me.LblStatus = New System.Windows.Forms.Label()
         Me.lblCurrentStep = New System.Windows.Forms.Label()
@@ -176,7 +183,6 @@ Partial Class FrmMain
         Me.LblPrompt = New System.Windows.Forms.Label()
         Me.PicRTbarcode = New System.Windows.Forms.PictureBox()
         Me.TabUtil = New System.Windows.Forms.TabPage()
-        Me.TxtIpAddress = New System.Windows.Forms.MaskedTextBox()
         Me.btnClearGUID = New System.Windows.Forms.Button()
         Me.Btn_Override = New System.Windows.Forms.Button()
         Me.Button17 = New System.Windows.Forms.Button()
@@ -402,7 +408,7 @@ Partial Class FrmMain
         '
         'BtnReload
         '
-        Me.BtnReload.Location = New System.Drawing.Point(900, 633)
+        Me.BtnReload.Location = New System.Drawing.Point(905, 633)
         Me.BtnReload.Name = "BtnReload"
         Me.BtnReload.Size = New System.Drawing.Size(75, 54)
         Me.BtnReload.TabIndex = 3
@@ -411,7 +417,7 @@ Partial Class FrmMain
         '
         'BtnSave
         '
-        Me.BtnSave.Location = New System.Drawing.Point(1089, 633)
+        Me.BtnSave.Location = New System.Drawing.Point(1086, 633)
         Me.BtnSave.Name = "BtnSave"
         Me.BtnSave.Size = New System.Drawing.Size(75, 54)
         Me.BtnSave.TabIndex = 4
@@ -422,7 +428,7 @@ Partial Class FrmMain
         '
         Me.StatusStrip1.Font = New System.Drawing.Font("Segoe UI", 9.0!)
         Me.StatusStrip1.ImageScalingSize = New System.Drawing.Size(20, 20)
-        Me.StatusStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.TSPrinterName, Me.TSLogPath})
+        Me.StatusStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.TSPrinterName, Me.TSLogPath, Me.TTiPAddress})
         Me.StatusStrip1.Location = New System.Drawing.Point(0, 737)
         Me.StatusStrip1.Name = "StatusStrip1"
         Me.StatusStrip1.Padding = New System.Windows.Forms.Padding(1, 0, 12, 0)
@@ -444,6 +450,12 @@ Partial Class FrmMain
         Me.TSLogPath.Size = New System.Drawing.Size(23, 17)
         Me.TSLogPath.Text = "C:\"
         '
+        'TTiPAddress
+        '
+        Me.TTiPAddress.Name = "TTiPAddress"
+        Me.TTiPAddress.Size = New System.Drawing.Size(62, 17)
+        Me.TTiPAddress.Text = "IP Address"
+        '
         'ChkSkipMaster
         '
         Me.ChkSkipMaster.AutoSize = True
@@ -457,6 +469,9 @@ Partial Class FrmMain
         '
         'GrpMaster
         '
+        Me.GrpMaster.Controls.Add(Me.TxtIpAddress)
+        Me.GrpMaster.Controls.Add(Me.LblPingResult)
+        Me.GrpMaster.Controls.Add(Me.BtnPingLan)
         Me.GrpMaster.Controls.Add(Me.LblMguid)
         Me.GrpMaster.Controls.Add(Me.Label38)
         Me.GrpMaster.Controls.Add(Me.Label37)
@@ -487,6 +502,38 @@ Partial Class FrmMain
         Me.GrpMaster.TabIndex = 7
         Me.GrpMaster.TabStop = False
         Me.GrpMaster.Text = " Master "
+        '
+        'TxtIpAddress
+        '
+        Me.TxtIpAddress.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.TxtIpAddress.Location = New System.Drawing.Point(528, 70)
+        Me.TxtIpAddress.Mask = "000.000.000.000"
+        Me.TxtIpAddress.Name = "TxtIpAddress"
+        Me.TxtIpAddress.Size = New System.Drawing.Size(97, 20)
+        Me.TxtIpAddress.TabIndex = 145
+        Me.TxtIpAddress.Text = "192168000001"
+        Me.TxtIpAddress.Visible = False
+        '
+        'LblPingResult
+        '
+        Me.LblPingResult.AutoSize = True
+        Me.LblPingResult.ForeColor = System.Drawing.Color.Blue
+        Me.LblPingResult.Location = New System.Drawing.Point(632, 32)
+        Me.LblPingResult.Name = "LblPingResult"
+        Me.LblPingResult.Size = New System.Drawing.Size(70, 15)
+        Me.LblPingResult.TabIndex = 66
+        Me.LblPingResult.Text = "Ping Result"
+        Me.LblPingResult.Visible = False
+        '
+        'BtnPingLan
+        '
+        Me.BtnPingLan.Location = New System.Drawing.Point(528, 30)
+        Me.BtnPingLan.Name = "BtnPingLan"
+        Me.BtnPingLan.Size = New System.Drawing.Size(97, 34)
+        Me.BtnPingLan.TabIndex = 65
+        Me.BtnPingLan.Text = "Ping Device"
+        Me.BtnPingLan.UseVisualStyleBackColor = True
+        Me.BtnPingLan.Visible = False
         '
         'LblMguid
         '
@@ -1399,6 +1446,8 @@ Partial Class FrmMain
         '
         'GrpManual
         '
+        Me.GrpManual.Controls.Add(Me.BtnGetResult)
+        Me.GrpManual.Controls.Add(Me.Button4)
         Me.GrpManual.Controls.Add(Me.Button2)
         Me.GrpManual.Controls.Add(Me.Button1)
         Me.GrpManual.Controls.Add(Me.Label10)
@@ -1424,6 +1473,24 @@ Partial Class FrmMain
         Me.GrpManual.TabIndex = 11
         Me.GrpManual.TabStop = False
         Me.GrpManual.Text = " Manual Controls "
+        '
+        'BtnGetResult
+        '
+        Me.BtnGetResult.Location = New System.Drawing.Point(544, 75)
+        Me.BtnGetResult.Name = "BtnGetResult"
+        Me.BtnGetResult.Size = New System.Drawing.Size(78, 43)
+        Me.BtnGetResult.TabIndex = 36
+        Me.BtnGetResult.Text = "Get Result"
+        Me.BtnGetResult.UseVisualStyleBackColor = True
+        '
+        'Button4
+        '
+        Me.Button4.Location = New System.Drawing.Point(342, 61)
+        Me.Button4.Name = "Button4"
+        Me.Button4.Size = New System.Drawing.Size(78, 43)
+        Me.Button4.TabIndex = 35
+        Me.Button4.Text = "Write C GUID"
+        Me.Button4.UseVisualStyleBackColor = True
         '
         'Button2
         '
@@ -1764,7 +1831,7 @@ Partial Class FrmMain
         '
         Me.BtnNext.BackColor = System.Drawing.Color.FromArgb(CType(CType(0, Byte), Integer), CType(CType(192, Byte), Integer), CType(CType(0, Byte), Integer))
         Me.BtnNext.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(CType(CType(0, Byte), Integer), CType(CType(192, Byte), Integer), CType(CType(0, Byte), Integer))
-        Me.BtnNext.Location = New System.Drawing.Point(1093, 403)
+        Me.BtnNext.Location = New System.Drawing.Point(1086, 404)
         Me.BtnNext.Name = "BtnNext"
         Me.BtnNext.Size = New System.Drawing.Size(75, 54)
         Me.BtnNext.TabIndex = 20
@@ -1782,7 +1849,7 @@ Partial Class FrmMain
         '
         'BtnRestart
         '
-        Me.BtnRestart.Location = New System.Drawing.Point(999, 404)
+        Me.BtnRestart.Location = New System.Drawing.Point(995, 404)
         Me.BtnRestart.Name = "BtnRestart"
         Me.BtnRestart.Size = New System.Drawing.Size(75, 54)
         Me.BtnRestart.TabIndex = 22
@@ -1827,6 +1894,7 @@ Partial Class FrmMain
         '
         'TabProg
         '
+        Me.TabProg.Controls.Add(Me.Button3)
         Me.TabProg.Controls.Add(Me.PicTick)
         Me.TabProg.Controls.Add(Me.ChkSound)
         Me.TabProg.Controls.Add(Me.LblStatus)
@@ -1861,11 +1929,20 @@ Partial Class FrmMain
         Me.TabProg.Text = "Programming"
         Me.TabProg.UseVisualStyleBackColor = True
         '
+        'Button3
+        '
+        Me.Button3.Location = New System.Drawing.Point(905, 532)
+        Me.Button3.Name = "Button3"
+        Me.Button3.Size = New System.Drawing.Size(75, 54)
+        Me.Button3.TabIndex = 116
+        Me.Button3.Text = "QCheck"
+        Me.Button3.UseVisualStyleBackColor = True
+        '
         'PicTick
         '
         Me.PicTick.BackgroundImage = Global.RTP.My.Resources.Resources.grn_tick
         Me.PicTick.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch
-        Me.PicTick.Location = New System.Drawing.Point(1015, 537)
+        Me.PicTick.Location = New System.Drawing.Point(1093, 527)
         Me.PicTick.Name = "PicTick"
         Me.PicTick.Size = New System.Drawing.Size(59, 59)
         Me.PicTick.TabIndex = 115
@@ -1940,7 +2017,6 @@ Partial Class FrmMain
         '
         'TabUtil
         '
-        Me.TabUtil.Controls.Add(Me.TxtIpAddress)
         Me.TabUtil.Controls.Add(Me.btnClearGUID)
         Me.TabUtil.Controls.Add(Me.Btn_Override)
         Me.TabUtil.Controls.Add(Me.Button17)
@@ -1972,15 +2048,6 @@ Partial Class FrmMain
         Me.TabUtil.TabIndex = 1
         Me.TabUtil.Text = "Utilities"
         Me.TabUtil.UseVisualStyleBackColor = True
-        '
-        'TxtIpAddress
-        '
-        Me.TxtIpAddress.Location = New System.Drawing.Point(22, 539)
-        Me.TxtIpAddress.Mask = "000.000.000.000"
-        Me.TxtIpAddress.Name = "TxtIpAddress"
-        Me.TxtIpAddress.Size = New System.Drawing.Size(184, 26)
-        Me.TxtIpAddress.TabIndex = 144
-        Me.TxtIpAddress.Text = "192168000045"
         '
         'btnClearGUID
         '
@@ -2653,5 +2720,11 @@ Partial Class FrmMain
     Friend WithEvents Button2 As Button
     Friend WithEvents Button1 As Button
     Friend WithEvents Label10 As Label
+    Friend WithEvents BtnPingLan As Button
+    Friend WithEvents LblPingResult As Label
     Friend WithEvents TxtIpAddress As MaskedTextBox
+    Friend WithEvents Button3 As Button
+    Friend WithEvents Button4 As Button
+    Friend WithEvents TTiPAddress As ToolStripStatusLabel
+    Friend WithEvents BtnGetResult As Button
 End Class
