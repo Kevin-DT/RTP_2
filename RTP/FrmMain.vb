@@ -1447,7 +1447,7 @@ Public Class FrmMain
         StrTextToLog = "Discover Config"
         LogSaved = WriteLogFile(StrTextToLog)
         StrCommandInUse = "EA"
-        Dim StrResult As String = ReadAllTopology()
+        Dim StrResult As String = DiscoverTopology()
         '*** If logging to this file is needed in other areas either replicate the file name or make it global
         '*** OK here only for now.
         '*** Log data
@@ -1467,7 +1467,7 @@ Public Class FrmMain
         '*** Enable button
         BtnConfig.Enabled = True
     End Sub
-    Private Function ReadAllTopology()
+    Private Function DiscoverTopology()
         '*** Connect to device
         '*** Make sure it is disconnected to start with
         MakeConnection(sIP, False, iPort)
@@ -1521,7 +1521,7 @@ Public Class FrmMain
 
         '************************************
         '*** Return result for decoding
-        ReadAllTopology = Trim(StrResult)
+        DiscoverTopology = Trim(StrResult)
         '************************************
         '*** allow app to Update graphics
         Application.DoEvents()
@@ -1861,7 +1861,7 @@ Public Class FrmMain
         bytesForCRC(1) = 170        '** Header B
         bytesForCRC(2) = &H9  '** Command length with 2 x checksum
         bytesForCRC(3) = &H0   '** Device address 0 for tester
-        bytesForCRC(4) = &HEB  '** Command instruction - Discover Topology
+        bytesForCRC(4) = &HEB  '** Command instruction - Read Topology
         '********** Data
         bytesForCRC(5) = &HFF  '** Command instruction - Timeout A
         bytesForCRC(6) = &H2  '** Command instruction - Timeout B
@@ -1974,7 +1974,7 @@ Public Class FrmMain
 
             '*** Log data
             StrTextToLog = StrResult
-            logSaved = WriteLogFile(StrTextToLog)
+            LogSaved = WriteLogFile(StrTextToLog)
             StrTextToLog = Decoded
             LogSaved = WriteLogFile(StrTextToLog)
 
@@ -2451,10 +2451,10 @@ Public Class FrmMain
 
                 LogSaved = WriteLogFile(StrTextToLog)
                 StrCommandInUse = "EA"
-                Dim StrResult As String = ReadAllTopology()
+                Dim StrResult As String = DiscoverTopology()
 
                 '*** Log data
-                StrTextToLog = "Result of ReadAllTopology " & StrResult
+                StrTextToLog = "Result of DiscoverTopology " & StrResult
                 LogSaved = WriteLogFile(StrTextToLog)
 
                 Dim Decoded As String = "Not Decoded"
@@ -3532,7 +3532,8 @@ Public Class FrmMain
                          dbo.NDB_Board.BRD_NumberOfChannelsTested, dbo.NDB_Board.BRD_EnableLinkConfirmed, dbo.NDB_Board.BRD_Purchaser, dbo.NDB_Board.BRD_OrderNumber, dbo.NDB_Board.BRD_ManufacturerCode, 
                          dbo.NDB_ModuleType.MOD_Type
 FROM            dbo.NDB_Board INNER JOIN
-                         dbo.NDB_ModuleType ON dbo.NDB_Board.BRD_ModuleType_ID = dbo.NDB_ModuleType.MOD_ID" & StrWhereClause
+                         dbo.NDB_ModuleType ON dbo.NDB_Board.BRD_ModuleType_ID = dbo.NDB_ModuleType.MOD_ID" & StrWhereClause &
+                         "ORDER BY BRD_QATestedDate"
 
 
         Dim RT_Sql As New SqlClient.SqlCommand(tmpSQLClause, NDB_DB)
