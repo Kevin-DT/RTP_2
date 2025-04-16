@@ -26,6 +26,7 @@ Partial Class FrmSummary
         Me.DataSummaryGrid = New System.Windows.Forms.DataGridView()
         Me.LblSummaryResult = New System.Windows.Forms.Label()
         Me.BtnClose = New System.Windows.Forms.Button()
+        Me.BtnRefresh = New System.Windows.Forms.Button()
         CType(Me.DataSummaryGrid, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
@@ -56,11 +57,21 @@ Partial Class FrmSummary
         Me.BtnClose.Text = "&Close"
         Me.BtnClose.UseVisualStyleBackColor = True
         '
+        'BtnRefresh
+        '
+        Me.BtnRefresh.Location = New System.Drawing.Point(803, 503)
+        Me.BtnRefresh.Name = "BtnRefresh"
+        Me.BtnRefresh.Size = New System.Drawing.Size(81, 29)
+        Me.BtnRefresh.TabIndex = 3
+        Me.BtnRefresh.Text = "Refresh"
+        Me.BtnRefresh.UseVisualStyleBackColor = True
+        '
         'FrmSummary
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(1081, 538)
+        Me.Controls.Add(Me.BtnRefresh)
         Me.Controls.Add(Me.BtnClose)
         Me.Controls.Add(Me.LblSummaryResult)
         Me.Controls.Add(Me.DataSummaryGrid)
@@ -78,4 +89,5 @@ Partial Class FrmSummary
     Friend WithEvents DataSummaryGrid As DataGridView
     Friend WithEvents LblSummaryResult As Label
     Friend WithEvents BtnClose As Button
+    Friend WithEvents BtnRefresh As Button
 End Class

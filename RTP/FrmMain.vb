@@ -13,6 +13,7 @@ Public Class FrmMain
     'Username: dtsuperuser1
     'Password: dataPublish1$
 
+
     '*** Settings
     Public StrRootFolder As String = "C:\ats\rtp\"
     Public S_PrintFile As String = StrRootFolder & "RT_print.cfg"
@@ -166,6 +167,7 @@ Public Class FrmMain
         TmrWifi.Enabled = True
     End Sub
     Private Sub Initialise()
+        BtnNext.Text = "Start >"
         IntCurrentChannel = 1
         RtUnitChannel = IntCurrentChannel - 1 '*** Remove offset of 1 for 0 based unit channels
         LblChannel.Text = IntCurrentChannel.ToString
@@ -180,7 +182,27 @@ Public Class FrmMain
         Lbl_Server.ForeColor = Color.Blue
         Lbl_Server.Text = "Azure Production"
         Lbl_Server.Visible = True
-        Me.Text = "RTP - AZURE Version " & SversionText
+        Me.Text = "RTP - AZURE Version - for Test Jig 2 v" & SversionText
+
+        '***** RELEASE NOTES
+        Dim releaseNotes As String = "RELEASE NOTES
+
+16/04/2025
+UI update. Some colours & layout changes.
+
+14/04/2025
+Added Wi-Fi IP address override
+
+19/03/2025
+Added support for New Relay Driver detection and saving driver type to RT Database.
+Auto select checkboxes for New Drivers. Can be overriden if required.
+Added displaying of Relay Driver type in summary table (QCheck).
+"
+
+
+        releaseNotesText.Text = releaseNotes
+
+        '***** END RELEASE NOTES
     End Sub
     Private Sub GetSettings()
         Dim rowCount As Integer = 0
@@ -316,6 +338,8 @@ Public Class FrmMain
         Dim AutoSaveFileNumber As Integer = FreeFile()
         'set Default IP address
         If TxtIpAddress.Text = "" Then TxtIpAddress.Text = "192.168.000.001"
+        If wiFIOverrideIP.Text = "" Then TxtIpAddress.Text = "192.168.004.001"
+        'wiFIOverrideIP
         '*** Write data to file
         FileOpen(AutoSaveFileNumber, DataFile, OpenMode.Output)
         PrintLine(AutoSaveFileNumber, "User" & "," & TxtUser.Text)
@@ -340,6 +364,13 @@ Public Class FrmMain
         PrintLine(AutoSaveFileNumber, "LAN" & "," & ChkLAN.Checked.ToString)
         PrintLine(AutoSaveFileNumber, "LastIP" & "," & TxtIpAddress.Text)
         PrintLine(AutoSaveFileNumber, "BLE" & "," & ChkBLE.Checked.ToString)
+        '*** New fields
+        PrintLine(AutoSaveFileNumber, "MC1RCD" & "," & Val(TxtRcdM1.Text))
+        PrintLine(AutoSaveFileNumber, "MC2RCD" & "," & Val(TxtRcdM2.Text))
+        PrintLine(AutoSaveFileNumber, "CC1RCD" & "," & Val(TxtRcdC1.Text))
+        '*** New Wi-Fi override
+        PrintLine(AutoSaveFileNumber, "OverrideIP" & "," & wiFIOverrideIP.Text)
+        PrintLine(AutoSaveFileNumber, "OverrideChecked" & "," & chkOverrideWiFi.Checked.ToString)
 
         'ChkBLE
         '*** Close file 
@@ -360,6 +391,7 @@ Public Class FrmMain
         Dim TmpChkCIB As String = ""
         Dim StrTempCIB As String = ""
         Dim StrTempIPAddress As String = ""
+        Dim StrOverrideIPAddress As String = ""
 
         Try
             Using MyReader As New Microsoft.VisualBasic.FileIO.TextFieldParser(DataFile)
@@ -404,7 +436,14 @@ Public Class FrmMain
                             If RowCount = 20 And fieldCount = 1 Then ChkLAN.Checked = CBool(currentField)
                             If RowCount = 21 And fieldCount = 1 Then StrTempIPAddress = currentField
                             If RowCount = 22 And fieldCount = 1 Then ChkBLE.Checked = CBool(currentField)
-                            'ChkManCntrls
+                            '*** RCD values
+                            If RowCount = 23 And fieldCount = 1 Then TxtRcdM1.Text = currentField
+                            If RowCount = 24 And fieldCount = 1 Then TxtRcdM2.Text = currentField
+                            If RowCount = 25 And fieldCount = 1 Then TxtRcdC1.Text = currentField
+                            '*** New Wi-Fi override
+                            If RowCount = 26 And fieldCount = 1 Then StrOverrideIPAddress = currentField
+                            If RowCount = 27 And fieldCount = 1 Then chkOverrideWiFi.Checked = CBool(currentField)
+
                             fieldCount = +1
                         Next
                         RowCount += 1
@@ -430,6 +469,7 @@ Public Class FrmMain
         ChkSkipCIB.Checked = CBool(TmpChkCIB)
         TxtCIBid.Text = StrTempCIB
         TxtIpAddress.Text = StrTempIPAddress
+        wiFIOverrideIP.Text = StrOverrideIPAddress
         '*** If LAN checked update IP address
         If ChkLAN.Checked Then SetIP()
 
@@ -652,7 +692,7 @@ Public Class FrmMain
     Shared Function Connect(server As [String], message As [String], replySize As Integer, MasterChannel As [String], OrderRefText As [String])
         '*** Hop count refers also to the TTL Time To Live value for the MultiCastScope 
 
-        MasterChannel = UCase(MasterChannel)
+        MasterChannel = Trim(UCase(MasterChannel))
 
         Dim data(Len(message) - 1) As Byte
         Dim data2SendFormatted As String = ""
@@ -773,14 +813,16 @@ Public Class FrmMain
                 Dim sleepDelay As Integer = 1500
 
                 Select Case FrmMain.StrCommandInUse
-                    Case "81", "92", "DA", "EB"
+                    Case "81"
+                        sleepDelay = 1200'500
+                    Case "92", "DA", "EB"
                         sleepDelay = 1500
                     Case "EA"   'Long delay to account for reading from CIB - time delay for additional comms hop
                         sleepDelay = 4000
                     Case "BE", "BD"
                         sleepDelay = 2500
                     Case "80"
-                        sleepDelay = 6000
+                        sleepDelay = 4500
                     Case Else
                         sleepDelay = 5000
                 End Select
@@ -989,39 +1031,40 @@ Public Class FrmMain
                                 PrintLine(debugFileNumber, debugTime & "  > " & sError)
                                 PrintLine(debugFileNumber, debugTime & "  > Channel = " & (data(6) + 1).ToString & " [" & data(6).ToString & "]")
                                 Dim iDurData As Integer = 0
-                                If data(8) > 0 Then iDurData = data(8) * 256 Else iDurData = 0
-                                iDurData += data(7)
-                                PrintLine(debugFileNumber, debugTime & "  > Duration (ms) = " & iDurData)  '*** duration is 2 bytes 
-                                Dim iCurData As Integer = 0
-                                If data(10) > 0 Then iCurData = data(9) * 256 Else iCurData = 0
-                                iCurData += data(9)
-
-                                '****
-                                '*** Current  
-                                sCurrent = "0"
+                                If replySize > 7 Then
+                                    If data(8) > 0 Then iDurData = data(8) * 256 Else iDurData = 0
+                                    iDurData += data(7)
+                                    PrintLine(debugFileNumber, debugTime & "  > Duration (ms) = " & iDurData)  '*** duration is 2 bytes 
+                                    Dim iCurData As Integer = 0
+                                    If data(10) > 0 Then iCurData = data(9) * 256 Else iCurData = 0
+                                    iCurData += data(9)
+                                    '****
+                                    '*** Current  
+                                    sCurrent = "0"
                                 Dim tmpData As String = data(10).ToString("X2") & data(9).ToString("X2")
                                 Dim RealResult As Long = Convert.ToUInt64(tmpData, 16)
                                 sCurrent = (RealResult / 10).ToString
 
-                                '****
-                                '*** 18/12/2019
-                                If sError <> "No Error" Then sCurrent = "0"
-                                ' PrintLine(debugFileNumber, debugTime & "  > Set Val (mA) = " & FrmMain.TxtSetCurrent.Text)
-                                PrintLine(debugFileNumber, debugTime & "  > Current (mA) = " & sCurrent & " (" & data(10).ToString & "," & data(9).ToString & ")") '** Current is 2 bytes
-                                'PrintLine(debugFileNumber, debugTime & "  > Current (mA) = " & iCurData & " (" & data(10).ToString & "," & data(9).ToString & ")") '** Current is 2 bytes
-                                If data(11) = 1 Then
-                                    PrintLine(debugFileNumber, debugTime & "  > Tripped = Yes")
-                                    'FrmMain.B_tripped = True
-                                    'If FrmMain.B_RelayCheck Then
-                                    '    PrintLine(debugFileNumber, debugTime & "  > SHOULD NOT TRIP - Relay Test Mode")
-                                    '    ' MsgBox("Check channel - should not have returned as tripped.", MsgBoxStyle.Critical + MsgBoxStyle.OkOnly, "Something Fishy Here")
-                                    'End If
-                                    'Else
-                                    '    PrintLine(debugFileNumber, debugTime & "  > Tripped = No")
-                                    '    If FrmMain.B_RelayCheck Then
-                                    '        PrintLine(debugFileNumber, debugTime & "  > Relay Test Mode")
-                                    '    End If
-                                    '    FrmMain.B_tripped = False
+                                    '****
+                                    '*** 18/12/2019
+                                    If sError <> "No Error:" Then sCurrent = "0"
+                                    ' PrintLine(debugFileNumber, debugTime & "  > Set Val (mA) = " & FrmMain.TxtSetCurrent.Text)
+                                    PrintLine(debugFileNumber, debugTime & "  > Current (mA) = " & sCurrent & " (" & data(10).ToString & "," & data(9).ToString & ")") '** Current is 2 bytes
+                                    'PrintLine(debugFileNumber, debugTime & "  > Current (mA) = " & iCurData & " (" & data(10).ToString & "," & data(9).ToString & ")") '** Current is 2 bytes
+                                    If data(11) = 1 Then
+                                        PrintLine(debugFileNumber, debugTime & "  > Tripped = Yes")
+                                        'FrmMain.B_tripped = True
+                                        'If FrmMain.B_RelayCheck Then
+                                        '    PrintLine(debugFileNumber, debugTime & "  > SHOULD NOT TRIP - Relay Test Mode")
+                                        '    ' MsgBox("Check channel - should not have returned as tripped.", MsgBoxStyle.Critical + MsgBoxStyle.OkOnly, "Something Fishy Here")
+                                        'End If
+                                        'Else
+                                        '    PrintLine(debugFileNumber, debugTime & "  > Tripped = No")
+                                        '    If FrmMain.B_RelayCheck Then
+                                        '        PrintLine(debugFileNumber, debugTime & "  > Relay Test Mode")
+                                        '    End If
+                                        '    FrmMain.B_tripped = False
+                                    End If
                                 End If
                             Case "145" '91 - Done
                                 PrintLine(debugFileNumber, debugTime & ": Set Wi-Fi Settings [RT_" & SMasterID & "]")
@@ -1301,7 +1344,8 @@ Public Class FrmMain
     End Function 'Connect
 
     Private Function RT_Decode(CMD As String, StrPacket As String) As String
-        Dim StrRawPacket As String = StrPacket
+        Dim StrRawPacket As String = Trim(StrPacket)
+        '  StrPacket = Trim(StrPacket)
         Dim StrResultArray(250) As String
         Dim IntSpacePos As Integer
         Dim IntCounter As Integer = 0
@@ -1309,13 +1353,17 @@ Public Class FrmMain
         IntSpacePos = InStr(StrPacket, " ")
         Debug.Print(StrPacket)
 
+        '############## HERE
+        '### Array has CMD at the start and then a space so refernces below should be PLUS 1 - 0 based plus extra space
+        '### StrResultArray(5) = StrResultArray(6)
+
         While IntSpacePos > 0
             IntCounter += 1
             StrResultArray(IntCounter) = Strings.Left(StrPacket, IntSpacePos)
             Debug.Print("Byte saved " & StrResultArray(IntCounter))
             StrPacket = Strings.Right(StrPacket, Len(StrPacket) - IntSpacePos)
             IntSpacePos = InStr(StrPacket, " ")
-            '*** NOTE THIS METHOD DOES NOT RETURN THE SECOD CHECKSUM BYTE, BUT IT IS NOT NEEDED HERE
+            '*** NOTE THIS METHOD DOES NOT RETURN THE SECOND CHECKSUM BYTE, BUT IT IS NOT NEEDED HERE
             '*** AS IT HAS ALREADY BEEN CHECKED
         End While
 
@@ -1331,14 +1379,14 @@ Public Class FrmMain
                 Next
                 Dim Byte3OK As Boolean = True
                 Try
-                    IntResponseLength = CInt("&H" & (Trim(StrResultArray(3)))) - 1 '2
+                    IntResponseLength = CInt("&H" & (Trim(StrResultArray(3)))) '- 1 '2
                 Catch
                     MsgBox("Byte 3 is >" & Trim(StrResultArray(3)) & "<", vbOKOnly, "byte 3 Error")
                     Byte3OK = False
                 End Try
                 If Byte3OK Then
                     For x = 1 To IntResponseLength
-                        TmpString += StrResultArray(x)
+                           TmpString += StrResultArray(x)
                     Next
                     TxtDebug.Text += vbNewLine & "Configuration " & TmpString
                     '*** decode some info
@@ -1354,8 +1402,15 @@ Public Class FrmMain
                             IntMasterType = MC8F5
                             IntMaxChannel = CInt("&H" & (Trim(StrResultArray(8))))
                             LblChLimit.Text = IntMaxChannel.ToString
+                        Case "3"
+                            LblType.Text = "Type: MC8" '*** Type 3
+                            IntMasterType = MC8
+                            If StrResultArray(9) IsNot Nothing Then
+                                IntMaxChannel = CInt("&H" & (Trim(StrResultArray(8))))
+
+                            End If
                         Case Else
-                            LblType.Text = "Type: MC8"
+                            LblType.Text = "Unknown" '*** Type 3
                             IntMasterType = MC8
                             If StrResultArray(9) IsNot Nothing Then
                                 IntMaxChannel = CInt("&H" & (Trim(StrResultArray(8))))
@@ -1575,8 +1630,8 @@ Public Class FrmMain
         TxtDebug.Text = "Command:Read GUID 0xBE >" & data2SendFormatted & "< " & Len(data2Send).ToString
 
         StrTextToLog = " Getting GUID from device " & Device
-        S_LogFileText = " _" & TxtMasterSSID.Text & " _" & TxtCIBid.Text
-        Dim StrResult As String = Connect(sIP, data2Send, 47, S_LogFileText, TxtOrderRef.Text)
+        S_LogFileText = "_" & TxtMasterSSID.Text & "_" & TxtCIBid.Text
+        Dim StrResult As String = Connect(sIP, data2Send, 47, S_LogFileText, Trim(TxtOrderRef.Text))
         Debug.Print(" ****** GUID " & StrResult)
         TxtDebug.Text = " ****** GUID " & StrResult
 
@@ -1932,7 +1987,7 @@ Public Class FrmMain
         BoolManTrip = True
         BtnTrip.Enabled = False
         StrCommandInUse = "80"
-        Dim StrResult As String = TripRCD()
+        Dim StrResult As String = TripRCD(Val(TxtSetCurrent.Text))
         StrCommandInUse = "81"
         StrResult = GetTripResult()
         Dim Decoded As String = RT_Decode("81", StrResult)
@@ -1940,12 +1995,12 @@ Public Class FrmMain
         BoolManTrip = False
 
     End Sub
-    Private Function TripRCD() As String
+    Private Function TripRCD(Optional ByVal TripCurrent = 30) As String
         Dim LogSaved As Integer = 0
         If IntMasterType > 0 Then
             '*** Log activity
             Dim RCDlogOpen As Boolean = False
-            StrTextToLog = "Trip RCD"
+            StrTextToLog = "Trip RCD Function"
             LogSaved = WriteLogFile(StrTextToLog)
             '*** Connect first
             '*** Make sure it is disconnected
@@ -1957,7 +2012,7 @@ Public Class FrmMain
             '*** Enable connection and disable manual connection button
             MakeConnection(sIP, True, iPort)
             StrCommandInUse = "80"
-            Dim StrResult As String = DoTest()
+            Dim StrResult As String = DoTest(TripCurrent)
             '*** allow app to Update graphics
             Application.DoEvents()
 
@@ -1968,7 +2023,7 @@ Public Class FrmMain
             '*** OK here only for now.
             ' If BoolManTrip Then
             Dim Decoded As String = ""
-            If StrResult <> "" Then RT_Decode("80", StrResult)
+            If StrResult <> "" Then Decoded = RT_Decode("80", StrResult)
             '  TripRCD = Decoded
             '   End If
 
@@ -2081,7 +2136,7 @@ Public Class FrmMain
         MakeConnection(sIP, False, iPort)
         Return Test
     End Function
-    Function DoTest() As String
+    Function DoTest(Optional ByVal TripCurrent = 30) As String
         Dim iResult As String = 0
         Dim iSelectedChannel As Integer = Microsoft.VisualBasic.Val(LblChannel.Text)
         Dim iChannelLimit As Integer = Microsoft.VisualBasic.Val(LblChLimit.Text) ' - 1
@@ -2122,7 +2177,7 @@ Public Class FrmMain
                 bytesForCRC(3) = &H0   '** Device address 0 for tester
                 bytesForCRC(4) = &H80       '** Command instruction - Commence test 
                 '****************** Above is standard
-                Dim shtCurrent As Single = (Val(TxtSetCurrent.Text))
+                Dim shtCurrent As Single = TripCurrent '*** (Val(TxtSetCurrent.Text)) '*** New trip current parameter
                 Dim shtMulti As Single = (Val(TxtMultiplier.Text))
 
                 '*** 12/10/2020
@@ -2140,6 +2195,7 @@ Public Class FrmMain
                     shtCurrent = shtCurrent / shtMulti
                     '****
                     shtCurrent *= 10
+                    If shtCurrent > 5000 Then shtCurrent = 5000
                 End If
 
 
@@ -2337,6 +2393,10 @@ Public Class FrmMain
         Dim TestingLogOpen As Boolean = False
         Select Case ICurrentStep
             Case 1  '*** Connect to WIFI
+                '*** Log activity
+                StrTextToLog = "Connect Wi-Fi - Step 1"
+                LogSaved = WriteLogFile(StrTextToLog)
+                BtnNext.Text = "Next >"
                 '** Clear out put window
                 TxtDebug.Text = ""
                 '*** If skipping master, assume it is already connected
@@ -2347,8 +2407,6 @@ Public Class FrmMain
                         BtnNext.PerformClick()
                     Else
                         LblStatus.Text = "Already Connected"
-                        '*** Display Prompt
-                        LblPrompt.Visible = True
                         ICurrentStep += 1
                     End If
                 Else
@@ -2395,23 +2453,20 @@ Public Class FrmMain
                             ' Threading.Thread.Sleep(1000)
                             BtnNext.PerformClick()
                         Else
-                            '*** Display Prompt
-                            LblPrompt.Visible = True
                         End If
                     End If
                 End If
             Case 2  '*** Get firmware version
                 LblStatus.Text = "Getting Firmware Version"
                 Application.DoEvents()
-                '*** Hide Prompt
-                LblPrompt.Visible = False
                 Debug.Print("In Step " & ICurrentStep.ToString)
                 '*** Update step Label
                 lblCurrentStep.Text = String.Format("Step {0} of {1}", ICurrentStep, IntMaxStep)
 
                 '*** Log activity
-                StrTextToLog = "Get firmware version"
+                StrTextToLog = "Get firmware version - Step 2"
                 LogSaved = WriteLogFile(StrTextToLog)
+                StrCommandInUse = "92"
 
                 Dim StrResult As String = GetMasterVersion()
 
@@ -2432,8 +2487,6 @@ Public Class FrmMain
                         ICurrentStep += 1
                         BtnNext.PerformClick()
                     Else
-                        '*** Display Prompt
-                        LblPrompt.Visible = True
                         ICurrentStep += 1
                     End If
                 End If
@@ -2441,8 +2494,6 @@ Public Class FrmMain
             Case 3  '*** Discover topology (Config)
                 LblStatus.Text = "Getting configuration"
                 Application.DoEvents()
-                '*** Hide Prompt
-                LblPrompt.Visible = False
                 Debug.Print("In Step " & ICurrentStep.ToString)
                 '*** Update step Label
                 lblCurrentStep.Text = String.Format("Step {0} of {1}", ICurrentStep, IntMaxStep)
@@ -2473,8 +2524,6 @@ Public Class FrmMain
                     ICurrentStep += 1
                     BtnNext.PerformClick()
                 Else
-                    '*** Display Prompt
-                    LblPrompt.Visible = True
                     ICurrentStep += 1
                 End If
 
@@ -2482,8 +2531,6 @@ Public Class FrmMain
                 Debug.Print("In Step " & ICurrentStep.ToString)
                 '*** Update step Label
                 lblCurrentStep.Text = String.Format("Step {0} of {1}", ICurrentStep, IntMaxStep)
-                '*** Hide Prompt
-                LblPrompt.Visible = False
                 If ChkSkipMaster.Checked = False Then
                     LblStatus.Text = "Getting Master GUID"
                     Application.DoEvents()
@@ -2510,8 +2557,7 @@ Public Class FrmMain
                         ICurrentStep += 1
                         BtnNext.PerformClick()
                     Else
-                        '*** Display Prompt
-                        LblPrompt.Visible = True
+                        ICurrentStep += 1
                     End If
                 Else
                     LblStatus.Text = "Skipping Master GUID"
@@ -2520,14 +2566,10 @@ Public Class FrmMain
                         ICurrentStep += 5
                         BtnNext.PerformClick()
                     Else
-                        '*** Display Prompt
-                        LblPrompt.Visible = True
                         ICurrentStep += 5
                     End If
                 End If
             Case 5 '*** Update & compare GUIDS
-                '*** Hide Prompt
-                LblPrompt.Visible = False
                 LblStatus.Text = "Update and compare GUIDS"
 
                 '***** WRITE MASTER GUID
@@ -2536,7 +2578,7 @@ Public Class FrmMain
                 GuidString = Microsoft.VisualBasic.Left("MR5FMC8MasterModule_" & Trim(TxtMasterSSID.Text) & "_" & Format(Now(), "ddMMyyyy"), 36)
 
                 '*** Log activity
-                StrTextToLog = "Write Master GUID"
+                StrTextToLog = "Write Master GUID - Step 5"
                 LogSaved = WriteLogFile(StrTextToLog)
 
                 '*** Write GUID
@@ -2572,7 +2614,7 @@ Public Class FrmMain
                         ChkAutoStep.Checked = False
                     End If
                 End If
-                LblMguid.Text = S_MasterGUID
+                LblMguid.Text = S_MasterGUID    '*** Display the Master GUID that was read from the device
                 LblMguid.Visible = True
 
                 TestingLogOpen = False
@@ -2581,8 +2623,6 @@ Public Class FrmMain
                     ICurrentStep += 1
                     BtnNext.PerformClick()
                 Else
-                    '*** Display Prompt
-                    LblPrompt.Visible = True
                     ICurrentStep += 1
                 End If
 
@@ -2593,11 +2633,9 @@ Public Class FrmMain
 
                     '*** Update step Label
                     lblCurrentStep.Text = String.Format("Step {0} of {1}", ICurrentStep, IntMaxStep)
-                    '*** Hide Prompt
-                    LblPrompt.Visible = False
 
                     '*** Log activity
-                    StrTextToLog = "Set Master SSID"
+                    StrTextToLog = "Set Master SSID Step 6"
                     LogSaved = WriteLogFile(StrTextToLog)
 
                     StrCommandInUse = "91"
@@ -2654,31 +2692,30 @@ Public Class FrmMain
                     ICurrentStep += 1
                     BtnNext.PerformClick()
                 Else
-                    '*** Display Prompt
-                    LblPrompt.Visible = True
                     ICurrentStep += 1
                 End If
 
-            Case 7 '*** Trip Master RCD
-                LblStatus.Text = "Tripping MC8 RCDs"
+                '******* TRIP CHANNEL 1 FOR 10 mA Trip
+
+            Case 7 '*** Trip Master RCD 1
+                LblStatus.Text = String.Format("Tripping MC8 RCD 1 @ {0} mA", TxtRcdM1.Text)
                 Application.DoEvents()
 
                 '*** Update step Label
                 lblCurrentStep.Text = String.Format("Step {0} of {1}", ICurrentStep, IntMaxStep)
-                '*** Hide Prompt
-                LblPrompt.Visible = False
 
                 '*** Log activity
-                StrTextToLog = "Tripping MC8 RCDs"
+                StrTextToLog = "Tripping MC8 RCD 1 - Step 7"
                 LogSaved = WriteLogFile(StrTextToLog)
 
                 '*** Update step Label
                 lblCurrentStep.Text = String.Format("Step {0} of {1}", ICurrentStep, IntMaxStep)
-                '*** Hide Prompt
-                LblPrompt.Visible = False
-                LblChannel.Text = "1"
+
+                RtUnitChannel = 0   '*** zero based
+                LblChannel.Text = (RtUnitChannel + 1).ToString
+                ' LblChannel.Text = "1"
                 StrCommandInUse = "80"
-                Dim StrResult As String = TripRCD()
+                Dim StrResult As String = TripRCD(Val(TxtRcdM1.Text)) '*** Default is 10mA
 
                 IntMasterTestsDone += 1
 
@@ -2711,50 +2748,178 @@ Public Class FrmMain
                         PicStatM1.Image = My.Resources.StatusGreen
                         Application.DoEvents()
                         StrTextToLog += "Trip on ch 1"
-                        '  IntContinueTrip = MsgBox("RCD tripped on channel 1." & vbNewLine & "Do you wish to continue. Y/N", vbYesNo + vbQuestion, "Question")
+                        IntContinueTrip = 6 'MsgBox("RCD tripped on channel 1." & vbNewLine & "Do you wish to continue. Y/N", vbYesNo + vbQuestion, "Question")
                         ToolTip1.SetToolTip(PicStatM1, "PASS - RCD tripped")
+                    Case Else
+                        StrTextToLog += "Unknown RCD Trip response"
                 End Select
+                LogSaved = WriteLogFile(StrTextToLog)
 
+                '******* TRIP CHANNEL 2 FOR 30 mA Trip
+
+                '*** Continue with channel 2 if tripped or continue selected
+                If IntContinueTrip Then
+                    '*** Trip Master RCD 2
+                    LblStatus.Text = String.Format("Tripping MC8 RCD 2 @ {0} mA", TxtRcdM2.Text)
+                    Application.DoEvents()
+
+                    '*** Update step Label
+                    lblCurrentStep.Text = String.Format("Step {0} of {1}", ICurrentStep, IntMaxStep)
+
+                    '*** Log activity
+                    StrTextToLog = "Tripping MC8 RCD 2 - Step 7"
+                    LogSaved = WriteLogFile(StrTextToLog)
+
+                    '*** Update step Label
+                    lblCurrentStep.Text = String.Format("Step {0} of {1}", ICurrentStep, IntMaxStep)
+
+                    RtUnitChannel = 1   '*** zero based
+                    LblChannel.Text = (RtUnitChannel + 1).ToString
+                    'LblChannel.Text = "2"
+                    StrCommandInUse = "80"
+                    StrResult = TripRCD(Val(TxtRcdM2.Text)) '*** Normally 30mA
+
+                    IntMasterTestsDone += 1
+
+                    '  Dim Decoded As String = RT_Decode("80", StrResult)
+
+                    StrCommandInUse = "81"
+                    StrResult = GetTripResult()
+                    Decoded = RT_Decode("81", StrResult)
+                    StrCommandInUse = "00"
+                    IntContinueTrip = 0
+
+                    Select Case Val(Decoded)
+                        Case -1 '*** Error in command
+                            PicStatM2.Image = My.Resources.StatusRed
+                            Application.DoEvents()
+                            StrTextToLog += "No trip on ch 2"
+                            IntContinueTrip = MsgBox("Error on operation tripping Master Channel 2." & vbNewLine & "Cannot Continue.", vbOKOnly + vbCritical, "ERROR")
+                            ToolTip1.SetToolTip(PicStatM2, "Fail - Error in command response")
+
+                            '*** Clear auto step to stop process
+                            ChkAutoStep.Checked = False
+
+                        Case 0  '*** RCD did not trip
+                            PicStatM2.Image = My.Resources.StatusRed
+                            Application.DoEvents()
+                            StrTextToLog += "No trip on ch 2"
+                            IntContinueTrip = MsgBox("RCD did not trip on channel 2." & vbNewLine & "Do you wish to continue. Y/N", vbYesNo + vbQuestion + MsgBoxStyle.DefaultButton2, "Question")
+                            ToolTip1.SetToolTip(PicStatM2, "Fail - RCD did NOT trip")
+                        Case 1  '*** RCD did trip
+                            PicStatM2.Image = My.Resources.StatusGreen
+                            Application.DoEvents()
+                            StrTextToLog += "Trip on ch 2"
+                            '  IntContinueTrip = MsgBox("RCD tripped on channel 1." & vbNewLine & "Do you wish to continue. Y/N", vbYesNo + vbQuestion, "Question")
+                            IntContinueTrip = 6 '*** Allow to continue without stopping
+                            ToolTip1.SetToolTip(PicStatM2, "PASS - RCD tripped")
+                        Case Else
+                            StrTextToLog += "Unknown RCD Trip response"
+                    End Select
+                    LogSaved = WriteLogFile(StrTextToLog)
+                End If
+
+                '******* TRIP CHANNEL 8 FOR FULL CURRENT MEASUREMENT
                 If IntContinueTrip = 6 Then
-                    B_RelayCheck = True
-                    While RtUnitChannel < 7
-                        IntMasterTestsDone += 1
-                        RtUnitChannel += 1 '*** Use zero based unit channel
-                        Dim Schannel As String = (RtUnitChannel + 1).ToString
-                        LblChannel.Text = Schannel
-                        Application.DoEvents()
-                        StrResult = TripRCD()
-                        For Each cntrl As Control In GrpMaster.Controls
-                            'Debug.Print(cntrl.Name)
+                    '########## TO DO
+                    '########## This section to be modified to trip channel 8 for current measurement
+                    '########## Requires new hardware device for comparing result
+                    '*** Trip Master RCD 8
+                    LblStatus.Text = String.Format("Tripping MC8 RCD 8 @ {0} mA", TxtRcdM2.Text)
+                    Application.DoEvents()
 
-                            If Strings.Left(cntrl.Name, 9) = "PicStatM" & Schannel Then
-                                Dim abc As PictureBox = CType(cntrl, PictureBox)
-                                With abc
-                                    Select Case Trim(StrResult)
-                                        Case -1 '*** Error in command
-                                            .Image = My.Resources.StatusRed
-                                            Application.DoEvents()
-                                            ToolTip1.SetToolTip(abc, "Error in command response.")
-                                            IntContinueTrip = MsgBox("Error on operation tripping Master Channel " & Schannel & vbNewLine & "Cannot Continue.", vbOKOnly + vbCritical, "ERROR")
+                    '*** Update step Label
+                    lblCurrentStep.Text = String.Format("Step {0} of {1}", ICurrentStep, IntMaxStep)
 
-                                            '*** Clear auto step to stop process and exit loop
-                                            ChkAutoStep.Checked = False
-                                            Exit While
-                                        Case "3"
-                                            .Image = My.Resources.StatusBlue
-                                            ToolTip1.SetToolTip(abc, "OK - Relay Test")
-                                        Case "4" ' Relay Test mode
-                                            .Image = My.Resources.StatusYellow
-                                            ToolTip1.SetToolTip(abc, "FAIL - False Trip")
-                                        Case Else
-                                            .Image = My.Resources.StatusRed
-                                            ToolTip1.SetToolTip(abc, "Unknown status")
-                                    End Select
+                    '*** Log activity
+                    StrTextToLog = "Tripping MC8 RCD 8 - Step 7"
+                    LogSaved = WriteLogFile(StrTextToLog)
 
-                                End With
-                            End If
-                        Next
-                    End While
+                    '*** Update step Label
+                    lblCurrentStep.Text = String.Format("Step {0} of {1}", ICurrentStep, IntMaxStep)
+                    RtUnitChannel = 7   '*** zero based
+                    LblChannel.Text = (RtUnitChannel + 1).ToString
+                    'LblChannel.Text = "8"
+                    StrCommandInUse = "80"
+                    StrResult = TripRCD(Val(TxtRcdM2.Text))
+
+                    IntMasterTestsDone += 1
+
+                    '  Dim Decoded As String = RT_Decode("80", StrResult)
+
+                    StrCommandInUse = "81"
+                    StrResult = GetTripResult()
+                    Decoded = RT_Decode("81", StrResult)
+                    StrCommandInUse = "00"
+                    IntContinueTrip = 0
+
+                    Select Case Val(Decoded)
+                        Case -1 '*** Error in command
+                            PicStatM8.Image = My.Resources.StatusRed
+                            Application.DoEvents()
+                            StrTextToLog += "No trip on ch 8"
+                            IntContinueTrip = MsgBox("Error on operation tripping Master Channel 8." & vbNewLine & "Cannot Continue.", vbOKOnly + vbCritical, "ERROR")
+                            ToolTip1.SetToolTip(PicStatM8, "Fail - Error in command response")
+
+                            '*** Clear auto step to stop process
+                            ChkAutoStep.Checked = False
+
+                        Case 0  '*** RCD did not trip
+                            PicStatM8.Image = My.Resources.StatusBlue
+                            Application.DoEvents()
+                            StrTextToLog += "No trip on ch 8 - Step 7"
+                            '**** Channel 8 is not an RCD so does not trip
+                            'IntContinueTrip = MsgBox("RCD did not trip on channel 8." & vbNewLine & "Do you wish to continue. Y/N", vbYesNo + vbQuestion + MsgBoxStyle.DefaultButton2, "Question")
+                            ToolTip1.SetToolTip(PicStatM8, "Current Check")
+                        Case 1  '*** RCD did trip
+                            PicStatM8.Image = My.Resources.StatusGreen
+                            Application.DoEvents()
+                            StrTextToLog += "Trip on ch 8"
+                            '  IntContinueTrip = MsgBox("RCD tripped on channel 1." & vbNewLine & "Do you wish to continue. Y/N", vbYesNo + vbQuestion, "Question")
+                            ToolTip1.SetToolTip(PicStatM8, "PASS - RCD tripped")
+                    End Select
+                    '''****** RELAY CHECK ONLY
+                    ''******** OLD SECTION TO DO RELAY CHECK TESTING ONLY
+                    'B_RelayCheck = True
+                    'While RtUnitChannel < 7
+                    '    IntMasterTestsDone += 1
+                    '    RtUnitChannel += 1 '*** Use zero based unit channel
+                    '    Dim Schannel As String = (RtUnitChannel + 1).ToString
+                    '    LblChannel.Text = Schannel
+                    '    Application.DoEvents()
+                    '    StrResult = TripRCD()
+                    '    For Each cntrl As Control In GrpMaster.Controls
+                    '        'Debug.Print(cntrl.Name)
+
+                    '        If Strings.Left(cntrl.Name, 9) = "PicStatM" & Schannel Then
+                    '            Dim abc As PictureBox = CType(cntrl, PictureBox)
+                    '            With abc
+                    '                Select Case Trim(StrResult)
+                    '                    Case -1 '*** Error in command
+                    '                        .Image = My.Resources.StatusRed
+                    '                        Application.DoEvents()
+                    '                        ToolTip1.SetToolTip(abc, "Error in command response.")
+                    '                        IntContinueTrip = MsgBox("Error on operation tripping Master Channel " & Schannel & vbNewLine & "Cannot Continue.", vbOKOnly + vbCritical, "ERROR")
+
+                    '                        '*** Clear auto step to stop process and exit loop
+                    '                        ChkAutoStep.Checked = False
+                    '                        Exit While
+                    '                    Case "3"
+                    '                        .Image = My.Resources.StatusBlue
+                    '                        ToolTip1.SetToolTip(abc, "OK - Relay Test")
+                    '                    Case "4" ' Relay Test mode
+                    '                        .Image = My.Resources.StatusYellow
+                    '                        ToolTip1.SetToolTip(abc, "FAIL - False Trip")
+                    '                    Case Else
+                    '                        .Image = My.Resources.StatusRed
+                    '                        ToolTip1.SetToolTip(abc, "Unknown status")
+                    '                End Select
+
+                    '            End With
+                    '        End If
+                    '    Next
+                    'End While
+                    ''**** END OLD RELAY CHECK
                 End If
                 B_RelayCheck = False
 
@@ -2767,8 +2932,6 @@ Public Class FrmMain
                     ICurrentStep += 1
                     BtnNext.PerformClick()
                 Else
-                    '*** Display Prompt
-                    LblPrompt.Visible = True
                     ICurrentStep += 1
                 End If
 
@@ -2778,11 +2941,9 @@ Public Class FrmMain
 
                 '*** Update step Label
                 lblCurrentStep.Text = String.Format("Step {0} of {1}", ICurrentStep, IntMaxStep)
-                '*** Hide Prompt
-                LblPrompt.Visible = False
 
                 '*** Log activity
-                StrTextToLog = "Update database for Master"
+                StrTextToLog = "Update database for Master - Step 8"
                 LogSaved = WriteLogFile(StrTextToLog)
                 Dim TmpType As String = "MC8F5"
                 Select Case IntMasterType
@@ -2792,9 +2953,17 @@ Public Class FrmMain
                         TmpType = "MC8"
                 End Select
                 StrTextToLog = "Writing to NDB - Master info"
-                WriteNDB(S_MasterGUID, Trim(TxtMasterSSID.Text), TmpType, IntMasterTestsDone, Trim(TxtMasterManCode.Text))
+                '*** 19/03/2025
+                '*** Add new relay driver tracking
+                Dim masterManCode As String = Trim(TxtMasterManCode.Text)
+
+                If chkMasterNewDriver.Checked Then
+                    masterManCode += " [New Relay Driver]"
+                End If
+
+                WriteNDB(S_MasterGUID, Trim(TxtMasterSSID.Text), TmpType, IntMasterTestsDone, masterManCode)
                 '*** Log data
-                StrTextToLog = S_MasterGUID & " " & Trim(TxtMasterSSID.Text) & " " & TmpType & " " & IntMasterTestsDone & " " & Trim(TxtMasterManCode.Text)
+                StrTextToLog = S_MasterGUID & " " & Trim(TxtMasterSSID.Text) & " " & TmpType & " " & IntMasterTestsDone & " " & masterManCode
                 LogSaved = WriteLogFile(StrTextToLog)
 
                 '*** 
@@ -2802,22 +2971,22 @@ Public Class FrmMain
                     ICurrentStep += 1
                     BtnNext.PerformClick()
                 Else
-                    '*** Display Prompt
-                    LblPrompt.Visible = True
                     ICurrentStep += 1
                 End If
-            Case 9 '*** Commence Channel board
+
+            '*** Commence Channel board ****
+            Case 9
+                '########## TO DO
+                '########## This section to be modified to trip channel 24 for current measurement
+                '########## Requires new hardware device for comparing result
                 If ChkSkipCIB.Checked Then
-                    '*** 
+                    '*** Skip CIB
+                    LblStatus.Text = "CIB Skipped"
                     If ChkAutoStep.Checked Then
-                        LblStatus.Text = "CIB Skipped"
                         ICurrentStep = 11
                         BtnNext.PerformClick()
                     Else
-                        LblStatus.Text = "CIB Skipped"
                         ICurrentStep = 11
-                        '*** Display Prompt
-                        LblPrompt.Visible = True
                     End If
                 Else    '*** TEST CIB
 
@@ -2826,12 +2995,8 @@ Public Class FrmMain
 
                     '*** Update step Label
                     lblCurrentStep.Text = String.Format("Step {0} of {1}", ICurrentStep, IntMaxStep)
-                    '*** Hide Prompt
-                    LblPrompt.Visible = False
                     IntCIBTestsDone = 0
                     '*** Update & compare GUIDS
-                    '*** Hide Prompt
-                    LblPrompt.Visible = False
                     LblStatus.Text = "Update and compare CIB GUIDS"
 
                     '***** WRITE CIB GUID
@@ -2840,7 +3005,7 @@ Public Class FrmMain
                     GuidString = Microsoft.VisualBasic.Left("MRF_MECHANICAL_RELAY_" & Trim(TxtCIBid.Text) & "_" & Format(Now(), "ddMMyyyy"), 36)
 
                     '*** Log activity
-                    StrTextToLog = "Write CIB GUID"
+                    StrTextToLog = "Write CIB GUID - Step 9"
                     LogSaved = WriteLogFile(StrTextToLog)
 
                     '*** Write GUID
@@ -2877,7 +3042,7 @@ Public Class FrmMain
                             ChkAutoStep.Checked = False
                         End If
                     End If
-                    sNewGUID = GuidString
+                    sNewGUID = GuidString   '*** Display Channel Board GUID that was read back from the device
                     LblCIBguid.Text = sCB_OriginalGUID
                     LblCIBguid.Visible = True
 
@@ -2885,36 +3050,40 @@ Public Class FrmMain
                     '*** If not trip channels
                     '   If ChkCIBidOnly.Checked = False Then    '*** Test channels also '*** Trip RCD
 
-                    LblStatus.Text = "Tripping CIB RCDs"
+                    '*** Trip CIB RCD 1 [9]
+                    LblStatus.Text = String.Format("Tripping CIB RCD 1 @ {0} mA", TxtRcdC1.Text)
                     Application.DoEvents()
 
                     '*** Update step Label
                     lblCurrentStep.Text = String.Format("Step {0} of {1}", ICurrentStep, IntMaxStep)
-                    '*** Hide Prompt
-                    LblPrompt.Visible = False
 
                     '*** Log activity
-                    StrTextToLog = "Tripping CIB RCDs"
+                    StrTextToLog = "Tripping CIB RCD 1"
                     LogSaved = WriteLogFile(StrTextToLog)
 
                     '*** Update step Label
                     lblCurrentStep.Text = String.Format("Step {0} of {1}", ICurrentStep, IntMaxStep)
-                    '*** Hide Prompt
-                    LblPrompt.Visible = False
-                    LblChannel.Text = "9"
                     RtUnitChannel = 8   '0 based channel = first on CIB
-                    StrResult = TripRCD()
+                    LblChannel.Text = (RtUnitChannel + 1).ToString
+
+                    StrCommandInUse = "80"
+                    StrResult = TripRCD(Val(TxtRcdC1.Text))
                     Debug.Print("Picture channel " & (RtUnitChannel - 7).ToString & " Testing real channel " & RtUnitChannel.ToString)
                     IntCIBTestsDone += 1
 
-                    Decoded = RT_Decode("80", StrResult)
+                    ' Decoded = RT_Decode("80", StrResult)
+
+                    StrCommandInUse = "81"
+                    StrResult = GetTripResult()
+                    Decoded = RT_Decode("81", StrResult)
+                    StrCommandInUse = "00"
                     Dim IntContinueTrip As Integer = 0
 
-                    Select Case Val(StrResult)
+                    Select Case Val(Decoded)
                         Case -1 '*** Error in command
                             PicStatCIB01.Image = My.Resources.StatusRed
                             Application.DoEvents()
-                            StrTextToLog += "No trip on ch 9 [1]"
+                            StrTextToLog += "No trip on ch 9 [CIB - 1]"
                             IntContinueTrip = MsgBox("Error on operation tripping CIB Channel 1." & vbNewLine & "Cannot Continue.", vbOKOnly + vbCritical, "ERROR")
                             ToolTip1.SetToolTip(PicStatCIB01, "Fail - Error in command response")
 
@@ -2924,59 +3093,118 @@ Public Class FrmMain
                         Case 0  '*** RCD did not trip
                             PicStatCIB01.Image = My.Resources.StatusRed
                             Application.DoEvents()
-                            StrTextToLog += "No trip on ch 9 [1]"
+                            StrTextToLog += "No trip on ch 9 [CIB - 1]"
                             IntContinueTrip = MsgBox("RCD did not trip on channel 1." & vbNewLine & "Do you wish to continue. Y/N", vbYesNo + vbQuestion + MsgBoxStyle.DefaultButton2, "Question")
                             ToolTip1.SetToolTip(PicStatCIB01, "Fail - RCD did NOT trip")
                         Case 1  '*** RCD did trip
                             PicStatCIB01.Image = My.Resources.StatusGreen
                             Application.DoEvents()
-                            StrTextToLog += "Trip on ch 9 [1]"
-                            IntContinueTrip = MsgBox("RCD tripped on channel 1." & vbNewLine & "Do you wish to continue. Y/N", vbYesNo + vbQuestion + MsgBoxStyle.DefaultButton2, "Question")
+                            StrTextToLog += "Trip on ch 9 [CIB - 1]"
+                            IntContinueTrip = 6 'MsgBox("RCD tripped on channel 1." & vbNewLine & "Do you wish to continue. Y/N", vbYesNo + vbQuestion + MsgBoxStyle.DefaultButton2, "Question")
                             ToolTip1.SetToolTip(PicStatCIB01, "PASS - RCD tripped")
                     End Select
 
                     If ChkCIBidOnly.Checked = False Then    '*** If Not ID Only test all channels
                         If IntContinueTrip = 6 Then
-                            B_RelayCheck = True
-                            While RtUnitChannel <= 30
-                                IntCIBTestsDone += 1
-                                RtUnitChannel += 1 '*** Use zero based unit channel
-                                Dim Schannel As String = (RtUnitChannel + 1).ToString
-                                Dim StrPicChannel As String = (RtUnitChannel - 7).ToString
-                                LblChannel.Text = Schannel
-                                Application.DoEvents()
-                                StrResult = TripRCD()
-                                If Strings.Len(StrPicChannel) = 1 Then StrPicChannel = "0" & StrPicChannel
-                                Debug.Print("Picture channel " & StrPicChannel & " Testing real channel " & RtUnitChannel.ToString)
-                                For Each cntrl As Control In GrpCIB.Controls
-                                    If Strings.Left(cntrl.Name, 12) = "PicStatCIB" & StrPicChannel Then
-                                        Dim abc As PictureBox = CType(cntrl, PictureBox)
-                                        With abc
-                                            Select Case Trim(StrResult)
-                                                Case -1 '*** Error in command
-                                                    .Image = My.Resources.StatusRed
-                                                    Application.DoEvents()
-                                                    ToolTip1.SetToolTip(abc, "Error in command response.")
-                                                    IntContinueTrip = MsgBox("Error on operation tripping CIB Channel " & Schannel & vbNewLine & "Cannot Continue.", vbOKOnly + vbCritical, "ERROR")
+                            '########## TO DO
+                            '########## This section to be modified to trip channel 24 for current measurement
+                            '########## This may be removed as it is not REALLY necessary to check the current tripped on the master but good to know???
+                            '########## Requires new hardware device for comparing result
+                            '*** Trip CIB RCD 24
+                            LblStatus.Text = String.Format("Tripping CIB RCD 24 @ {0} mA", TxtRcdC1.Text)
+                            Application.DoEvents()
 
-                                                '*** Clear auto step to stop process and exit loop
-                                                'ChkAutoStep.Checked = False
-                                                'Exit While
-                                                Case "3"
-                                                    .Image = My.Resources.StatusBlue
-                                                    ToolTip1.SetToolTip(abc, "OK - Relay Test")
-                                                Case "4" ' Relay Test mode
-                                                    .Image = My.Resources.StatusYellow
-                                                    ToolTip1.SetToolTip(abc, "FAIL - False Trip")
-                                                Case Else
-                                                    .Image = My.Resources.StatusRed
-                                                    ToolTip1.SetToolTip(abc, "Unknown status")
-                                            End Select
+                            '*** Update step Label
+                            lblCurrentStep.Text = String.Format("Step {0} of {1}", ICurrentStep, IntMaxStep)
 
-                                        End With
-                                    End If
-                                Next
-                            End While
+                            '*** Log activity
+                            StrTextToLog = "Tripping CIB RCD 24"
+                            LogSaved = WriteLogFile(StrTextToLog)
+
+                            '*** Update step Label
+                            lblCurrentStep.Text = String.Format("Step {0} of {1}", ICurrentStep, IntMaxStep)
+                            RtUnitChannel = 31   '*** zero based
+                            LblChannel.Text = (RtUnitChannel + 1).ToString
+                            'LblChannel.Text = "8"
+                            StrCommandInUse = "80"
+                            StrResult = TripRCD(Val(TxtRcdC1.Text))
+
+                            IntMasterTestsDone += 1
+
+                            '  Dim Decoded As String = RT_Decode("80", StrResult)
+
+                            StrCommandInUse = "81"
+                            StrResult = GetTripResult()
+                            Decoded = RT_Decode("81", StrResult)
+                            StrCommandInUse = "00"
+                            IntContinueTrip = 0
+
+                            Select Case Val(Decoded)
+                                Case -1 '*** Error in command
+                                    PicStatCIB24.Image = My.Resources.StatusRed
+                                    Application.DoEvents()
+                                    StrTextToLog += "No trip on ch 24"
+                                    IntContinueTrip = MsgBox("Error on operation tripping Master Channel 8." & vbNewLine & "Cannot Continue.", vbOKOnly + vbCritical, "ERROR")
+                                    ToolTip1.SetToolTip(PicStatCIB24, "Fail - Error in command response")
+
+                                    '*** Clear auto step to stop process
+                                    ChkAutoStep.Checked = False
+
+                                Case 0  '*** RCD did not trip
+                                    PicStatCIB24.Image = My.Resources.StatusBlue
+                                    Application.DoEvents()
+                                    StrTextToLog += "No trip on ch 24"
+                                    ' IntContinueTrip = MsgBox("RCD did not trip on channel 8." & vbNewLine & "Do you wish to continue. Y/N", vbYesNo + vbQuestion + MsgBoxStyle.DefaultButton2, "Question")
+                                    ToolTip1.SetToolTip(PicStatCIB24, "Current Check")
+                                Case 1  '*** RCD did trip
+                                    PicStatCIB24.Image = My.Resources.StatusGreen
+                                    Application.DoEvents()
+                                    StrTextToLog += "Trip on ch 24"
+                                    '  IntContinueTrip = MsgBox("RCD tripped on channel 1." & vbNewLine & "Do you wish to continue. Y/N", vbYesNo + vbQuestion, "Question")
+                                    ToolTip1.SetToolTip(PicStatCIB24, "PASS - RCD tripped")
+                            End Select
+
+                            '******** OLD SECTION TO DO RELAY CHECK TESTING ONLY
+                            'B_RelayCheck = True
+                            'While RtUnitChannel <= 30
+                            '    IntCIBTestsDone += 1
+                            '    RtUnitChannel += 1 '*** Use zero based unit channel
+                            '    Dim Schannel As String = (RtUnitChannel + 1).ToString
+                            '    Dim StrPicChannel As String = (RtUnitChannel - 7).ToString
+                            '    LblChannel.Text = Schannel
+                            '    Application.DoEvents()
+                            '    StrResult = TripRCD()
+                            '    If Strings.Len(StrPicChannel) = 1 Then StrPicChannel = "0" & StrPicChannel
+                            '    Debug.Print("Picture channel " & StrPicChannel & " Testing real channel " & RtUnitChannel.ToString)
+                            '    For Each cntrl As Control In GrpCIB.Controls
+                            '        If Strings.Left(cntrl.Name, 12) = "PicStatCIB" & StrPicChannel Then
+                            '            Dim abc As PictureBox = CType(cntrl, PictureBox)
+                            '            With abc
+                            '                Select Case Trim(StrResult)
+                            '                    Case -1 '*** Error in command
+                            '                        .Image = My.Resources.StatusRed
+                            '                        Application.DoEvents()
+                            '                        ToolTip1.SetToolTip(abc, "Error in command response.")
+                            '                        IntContinueTrip = MsgBox("Error on operation tripping CIB Channel " & Schannel & vbNewLine & "Cannot Continue.", vbOKOnly + vbCritical, "ERROR")
+
+                            '                    '*** Clear auto step to stop process and exit loop
+                            '                    'ChkAutoStep.Checked = False
+                            '                    'Exit While
+                            '                    Case "3"
+                            '                        .Image = My.Resources.StatusBlue
+                            '                        ToolTip1.SetToolTip(abc, "OK - Relay Test")
+                            '                    Case "4" ' Relay Test mode
+                            '                        .Image = My.Resources.StatusYellow
+                            '                        ToolTip1.SetToolTip(abc, "FAIL - False Trip")
+                            '                    Case Else
+                            '                        .Image = My.Resources.StatusRed
+                            '                        ToolTip1.SetToolTip(abc, "Unknown status")
+                            '                End Select
+
+                            '            End With
+                            '        End If
+                            '    Next
+                            'End While
                         End If
                     End If
                     B_RelayCheck = False
@@ -2988,8 +3216,6 @@ Public Class FrmMain
                         ICurrentStep += 1
                         BtnNext.PerformClick()
                     Else
-                        '*** Display Prompt 
-                        LblPrompt.Visible = True
                         ICurrentStep += 1
                     End If
 
@@ -2997,30 +3223,37 @@ Public Class FrmMain
 
             Case 10 '*** Update database for CIB
                 LblStatus.Text = "Update database for CIB"
-                StrTextToLog = "Update database for CIB"
                 Application.DoEvents()
 
                 '*** Update step Label
                 lblCurrentStep.Text = String.Format("Step {0} of {1}", ICurrentStep, IntMaxStep)
 
-
+                StrTextToLog = "Update database for CIB - Step 10"
                 LogSaved = WriteLogFile(StrTextToLog)
 
                 Dim TmpType As String = "CIBF"
 
                 StrTextToLog = "Writing to NDB - CIB info"
-                WriteNDB(sNewGUID, Trim(TxtCIBid.Text), TmpType, IntCIBTestsDone, Trim(TxtCIBManCode.Text))
-                '*** Log data
-                StrTextToLog += vbNewLine & sCB_OriginalGUID & " " & Trim(TxtCIBid.Text) & " " & TmpType & " " & IntCIBTestsDone & " " & Trim(TxtMasterManCode.Text)
+                LogSaved = WriteLogFile(StrTextToLog)
+                '*** 19/03/2025
+                '*** Add new relay driver tracking
+                Dim cibManCode As String = Trim(TxtCIBManCode.Text)
 
+                If chkCibNewDriver.Checked Then
+                    cibManCode += " [New Relay Driver]"
+                End If
+
+                WriteNDB(sNewGUID, Trim(TxtCIBid.Text), TmpType, IntCIBTestsDone, cibManCode)
+
+                '*** Log data
+                StrTextToLog = sCB_OriginalGUID & " " & Trim(TxtCIBid.Text) & " " & TmpType & " " & IntCIBTestsDone & " " & cibManCode
                 LogSaved = WriteLogFile(StrTextToLog)
                 '*** 
+
                 If ChkAutoStep.Checked Then
                     ICurrentStep += 1
                     BtnNext.PerformClick()
                 Else
-                    '*** Display Prompt
-                    LblPrompt.Visible = True
                     ICurrentStep += 1
                 End If
 
@@ -3037,6 +3270,9 @@ Public Class FrmMain
                         My.Computer.Audio.Play(My.Resources.RT_End, AudioPlayMode.Background)
                     End If
                 End If
+                BtnNext.Text = "Done"
+                StrTextToLog = "Cycle Finished - Step 11"
+                LogSaved = WriteLogFile(StrTextToLog)
 
         End Select
         Debug.Print("Finished " & ICurrentStep.ToString)
@@ -3259,13 +3495,13 @@ Public Class FrmMain
             .OrderNumber = TxtOrderRef.Text         '** PO Number
             .ManufacturerCode = S_ManCode   '** Manufacturing code - Serial Number, model & batch date
         End With
-
+        Debug.Print(">>>>>>>>>>>>>>>>> " & S_GUID & "," & S_ID & "," & type & "," & S_ManCode)
         Try
             Dim configurationSaver As New ConfigurationSaver(connectionString)
             configurationSaver.SaveBoardConfiguration(Configuration)
 
         Catch ex As Exception
-            MsgBox("Take screen shot for Kevin" & vbCrLf & "Module WriteNDB()" & vbCrLf & ex.ToString, vbOKOnly, "Error updating remote database.")
+            '  MsgBox("Take screen shot for Kevin" & vbCrLf & "Module WriteNDB()" & vbCrLf & ex.ToString, vbOKOnly, "Error updating remote database.")
             Debug.Print("ERROR " & ex.ToString)
         End Try
 
@@ -3479,19 +3715,23 @@ Public Class FrmMain
                 ChkProdDev.Image = My.Resources.sliderDev
         End Select
 
+        '*** Appp version
+        Dim SversionText As String = My.Application.Info.Version.Major & "." _
+                & My.Application.Info.Version.Minor & "." & My.Application.Info.Version.Build & "." & My.Application.Info.Version.Revision
+
         Select Case ServerToUse
             Case 1  'Azure DEV
                 connectionString = "Server=tcp:ats-dev.database.windows.net,1433;Initial Catalog=RapidTest;Persist Security Info=False;User ID=onebit;Password=1qaz@WSX;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
                 Lbl_Server.ForeColor = Color.Red
                 Lbl_Server.Text = "Azure DEV"
                 Lbl_Server.Visible = True
-                Me.Text = "RTP - AZURE DEVELOPMENT Version"
+                Me.Text = "RTP - AZURE DEVELOPMENT Version - for Test Jig 2 v" & SversionText
             Case 2  'Azure Production
                 connectionString = "Server=tcp:ats-prod.database.windows.net,1433;Initial Catalog=RapidTest;Persist Security Info=False;User ID=atsadmin;Password=pass@word1;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
                 Lbl_Server.ForeColor = Color.Blue
                 Lbl_Server.Text = "Azure Production"
                 Lbl_Server.Visible = True
-                Me.Text = "RTP - AZURE Version"
+                Me.Text = "RTP - AZURE Version - for Test Jig 2 v" & SversionText
         End Select
     End Sub
 
@@ -3507,15 +3747,16 @@ Public Class FrmMain
     Private Sub BtnTestAudio_Click(sender As Object, e As EventArgs) Handles BtnTestAudio.Click
         My.Computer.Audio.Play(My.Resources.RT_End, AudioPlayMode.Background)
     End Sub
-    Private Sub GetSummary()
+    Public Sub GetSummary()
         Dim DateStart As String = Format(DateSummary.Value, "yyyy-MM-dd")
         Dim DateFinish As String = Format(DateSummary.Value.AddDays(1), "yyyy-MM-dd")
         Dim StrWhereClause As String = ""
+        FrmSummary.DataSummaryGrid.Visible = False
 
         Select Case ChkSummary.Checked
             Case True 'PO Search
                 If Trim(TxtSummary.Text) = "" Then
-                    MsgBox("Please enter a PO Number to search for.", vbOKOnly + vbCritical, "No PO.")
+                    MsgBox("Please enter a PO Number to search for on the Utilities tab.", vbOKOnly + vbCritical, "No PO.")
                     Exit Sub
                 End If
                 StrWhereClause = " WHERE dbo.NDB_Board.BRD_OrderNumber Like '" & Trim(TxtSummary.Text) & "%'"
@@ -3550,13 +3791,16 @@ FROM            dbo.NDB_Board INNER JOIN
         Dim StrOrderNumber As String
         Dim StrGUID As String
         Dim StrQADate As String
-
+        '*** For new relay driver tracking
+        Dim newRelayDriverText As String = ""
+        Dim newRelayDriver As String = "OLD"
+        Dim rDriverPos As Integer = 0
 
         With FrmSummary.DataSummaryGrid
             .Rows.Clear()   '** Clear previous data
 
             'Set number of columns
-            .ColumnCount = 7
+            .ColumnCount = 8
 
             'Set names and widths
             Dim x As Integer = 0
@@ -3572,7 +3816,7 @@ FROM            dbo.NDB_Board INNER JOIN
             x += 1
 
             .Columns(x).Name = "Tested By"
-            .Columns(x).Width = 100
+            .Columns(x).Width = 90
             x += 1
 
             .Columns(x).Name = "Order #"
@@ -3580,11 +3824,15 @@ FROM            dbo.NDB_Board INNER JOIN
             x += 1
 
             .Columns(x).Name = "GUID"
-            .Columns(x).Width = 300
+            .Columns(x).Width = 290
             x += 1
 
             .Columns(x).Name = "Date"
-            .Columns(x).Width = 180
+            .Columns(x).Width = 160
+            x += 1
+
+            .Columns(x).Name = "Driver"
+            .Columns(x).Width = 60
             x += 1
 
             '** Display style
@@ -3607,11 +3855,22 @@ FROM            dbo.NDB_Board INNER JOIN
             If IsDBNull(RT_Results.Item("BRD_ModuleGUID")) Then StrGUID = "" Else StrGUID = UCase(RT_Results.Item("BRD_ModuleGUID"))
             'If IsDBNull(RT_Results.Item("BRD_NumberOfChannelsTested")) Then StrChannels = "" Else StrChannels = UCase(RT_Results.Item("BRD_NumberOfChannelsTested")) ' not used here
             If IsDBNull(RT_Results.Item("BRD_QATestedDate")) Then StrQADate = "" Else StrQADate = UCase(RT_Results.Item("BRD_QATestedDate"))
-            Debug.Print(StrModuleID)
+
+            '*** New relay Driver detection
+            If IsDBNull(RT_Results.Item("BRD_ManufacturerCode")) Then newRelayDriverText = "" Else newRelayDriverText = UCase(RT_Results.Item("BRD_ManufacturerCode"))
+            rDriverPos = InStr(newRelayDriverText, "NEW RELAY DRIVER")
+            If rDriverPos > 0 Then
+                newRelayDriver = "NEW"
+            Else
+                newRelayDriver = "OLD"
+            End If
+            '**** End new relay driver detection
+
+            Debug.Print(newRelayDriver)
             '*** Increment number of rows
             RowCount += 1
 
-            FrmSummary.DataSummaryGrid.Rows.Add(StrModuleID, StrModuleType, StrPurchaser, StrTestedBy, StrOrderNumber, StrGUID, StrQADate)
+            FrmSummary.DataSummaryGrid.Rows.Add(StrModuleID, StrModuleType, StrPurchaser, StrTestedBy, StrOrderNumber, StrGUID, StrQADate, newRelayDriver)
             For Each item In RT_Results
                 If IsDBNull(RT_Results.Item("BRD_ModuleID")) Then StrModuleID = "" Else StrModuleID = UCase(RT_Results.Item("BRD_ModuleID"))
                 If IsDBNull(RT_Results.Item("MOD_Type")) Then StrModuleType = "" Else StrModuleType = UCase(RT_Results.Item("MOD_Type"))
@@ -3621,12 +3880,23 @@ FROM            dbo.NDB_Board INNER JOIN
                 If IsDBNull(RT_Results.Item("BRD_ModuleGUID")) Then StrGUID = "" Else StrGUID = UCase(RT_Results.Item("BRD_ModuleGUID"))
                 '   If IsDBNull(RT_Results.Item("BRD_NumberOfChannelsTested")) Then StrChannels = "" Else StrChannels = UCase(RT_Results.Item("BRD_NumberOfChannelsTested"))
                 If IsDBNull(RT_Results.Item("BRD_QATestedDate")) Then StrQADate = "" Else StrQADate = UCase(RT_Results.Item("BRD_QATestedDate"))
-                Debug.Print(StrModuleID)
+
+                '*** New relay Driver detection
+                If IsDBNull(RT_Results.Item("BRD_ManufacturerCode")) Then newRelayDriverText = "" Else newRelayDriverText = UCase(RT_Results.Item("BRD_ManufacturerCode"))
+                rDriverPos = InStr(newRelayDriverText, "NEW RELAY DRIVER")
+                If rDriverPos > 0 Then
+                    newRelayDriver = "NEW"
+                Else
+                    newRelayDriver = "OLD"
+                End If
+                '**** End new relay driver detection
+
+                Debug.Print(newRelayDriver)
                 '*** Increment number of rows
                 RowCount += 1
 
                 '*** Update data grid on form before loading
-                FrmSummary.DataSummaryGrid.Rows.Add(StrModuleID, StrModuleType, StrPurchaser, StrTestedBy, StrOrderNumber, StrGUID, StrQADate)
+                FrmSummary.DataSummaryGrid.Rows.Add(StrModuleID, StrModuleType, StrPurchaser, StrTestedBy, StrOrderNumber, StrGUID, StrQADate, newRelayDriver)
                 Application.DoEvents() 'Allow UI to refresh
             Next
         End If
@@ -3634,12 +3904,12 @@ FROM            dbo.NDB_Board INNER JOIN
         FrmSummary.LblSummaryResult.Visible = True
         FrmSummary.LblSummaryResult.Text = RowCount.ToString & " Items found."
         NDB_DB.Close()
+        FrmSummary.DataSummaryGrid.Visible = True
         Application.DoEvents() 'Allow UI to refresh
-        Dim IntResult As DialogResult = FrmSummary.ShowDialog()
     End Sub
     Private Sub BtnSummary_Click(sender As Object, e As EventArgs) Handles BtnSummary.Click
         GetSummary()
-
+        Dim IntResult As DialogResult = FrmSummary.ShowDialog()
     End Sub
 
     Private Sub ChkSummary_CheckedChanged(sender As Object, e As EventArgs) Handles ChkSummary.CheckedChanged
@@ -4449,7 +4719,7 @@ FROM            dbo.NDB_Board INNER JOIN
     End Function
     Private Sub TxtMasterSSID_TextChanged(sender As Object, e As EventArgs) Handles TxtMasterSSID.TextChanged
         Dim ImoduleFound As Integer = 0
-
+        Dim IntModuleNumber As Integer = 0
 
         TxtMasterSSID.Text = Strings.Replace(TxtMasterSSID.Text, vbCrLf, "")
         TxtMasterSSID.Text = Strings.Replace(TxtMasterSSID.Text, vbCr, "")
@@ -4479,7 +4749,7 @@ FROM            dbo.NDB_Board INNER JOIN
                     End Select
 
                     '***** Check if code matches NHP checkbox setting
-                    Dim IntModuleNumber As Integer = Val(Strings.Right(sScannerString, 5))
+                    IntModuleNumber = Val(Strings.Right(sScannerString, 5))
                     Select Case IntModuleNumber
                         Case >= 50000
                             '** NHP Unit
@@ -4536,7 +4806,7 @@ FROM            dbo.NDB_Board INNER JOIN
                     Else
 
                         '***** Check if code matches NHP checkbox setting
-                        Dim IntModuleNumber As Integer = Val(Strings.Right(sScannerString, 5))
+                        IntModuleNumber = Val(Strings.Right(sScannerString, 5))
                         Select Case IntModuleNumber
                             Case >= 50000
                                 '** NHP Unit
@@ -4558,10 +4828,18 @@ FROM            dbo.NDB_Board INNER JOIN
             Case Else
 
         End Select
+        '*** Check if master in new driver range
+        If IntModuleNumber >= 54845 Then
+            chkMasterNewDriver.Checked = True
+        Else
+            chkMasterNewDriver.Checked = False
+        End If
     End Sub
 
     Private Sub TxtCIBid_TextChanged(sender As Object, e As EventArgs) Handles TxtCIBid.TextChanged
         Dim ImoduleFound As Integer = 0
+        Dim IntModuleNumber As Integer = 0
+
         TxtCIBid.Text = Strings.Replace(TxtCIBid.Text, vbCrLf, "")
         TxtCIBid.Text = Strings.Replace(TxtCIBid.Text, vbCr, "")
         TxtCIBid.Text = Strings.Replace(TxtCIBid.Text, vbLf, "")
@@ -4601,7 +4879,7 @@ FROM            dbo.NDB_Board INNER JOIN
 
 
                         '***** Check if code matches NHP checkbox setting
-                        Dim IntModuleNumber As Integer = Val(Strings.Right(sScannerString, 5))
+                        IntModuleNumber = Val(Strings.Right(sScannerString, 5))
                         Select Case IntModuleNumber
                             Case >= 50000
                                 '** NHP Unit
@@ -4620,6 +4898,12 @@ FROM            dbo.NDB_Board INNER JOIN
                 Case Else
 
             End Select
+        End If
+        '*** Check if master in new driver range
+        If IntModuleNumber >= 61092 Then
+            chkCibNewDriver.Checked = True
+        Else
+            chkCibNewDriver.Checked = False
         End If
     End Sub
 
@@ -5047,7 +5331,7 @@ FROM            dbo.NDB_Board INNER JOIN
             .QATestedBy = TestBy                    '** Name of person programming units
             .Purchaser = PurchaseBy                 '** Company purchasing device
             .OrderNumber = OrdNum                   '** PO Number
-            .ManufacturerCode = S_ManCode   '** Manufacturing code - Serial Number, model & batch date
+            .ManufacturerCode = S_ManCode           '** Manufacturing code - Serial Number, model & batch date
         End With
 
         Try
@@ -5240,11 +5524,31 @@ FROM            dbo.NDB_Board INNER JOIN
             sIP = pingString & pingNum.ToString '*** Add last octet
             'Debug.Print(sIP)
         Else
-            sIP = DefaultSip
+            If chkOverrideWiFi.Checked = True Then
+
+                Dim pingNum As Integer = 0
+                Dim pingNumEnd As Integer = 0
+                Dim dotPOSstart As Integer = InStrRev(wiFIOverrideIP.Text, ".")
+                pingNum = Microsoft.VisualBasic.Val(Microsoft.VisualBasic.Right(wiFIOverrideIP.Text, Len(wiFIOverrideIP.Text) - dotPOSstart))
+
+                Dim tempNum As Integer = 0
+                tempNum = Microsoft.VisualBasic.Val(Microsoft.VisualBasic.Left(wiFIOverrideIP.Text, 3)) 'first octet
+                Dim pingString As String = Microsoft.VisualBasic.Val(tempNum)
+                tempNum = Microsoft.VisualBasic.Val(Microsoft.VisualBasic.Mid(wiFIOverrideIP.Text, 5, 3))   ' second octet
+                pingString = pingString & "." & Microsoft.VisualBasic.Val(tempNum)
+                tempNum = Microsoft.VisualBasic.Val(Microsoft.VisualBasic.Mid(wiFIOverrideIP.Text, 9, 3))   'third octet
+                pingString = pingString & "." & Microsoft.VisualBasic.Val(tempNum) & "."
+
+                sIP = pingString & pingNum.ToString '*** Add last octet
+                TTiPAddress.ForeColor = Color.DarkViolet
+            Else
+                sIP = DefaultSip
+                TTiPAddress.ForeColor = Color.Blue
+            End If
             BtnPingLan.Visible = False
             LblPingResult.Visible = False
             TxtIpAddress.Visible = False
-            TTiPAddress.ForeColor = Color.Blue
+
         End If
         Debug.Print("IP Address Set " & sIP)
         TTiPAddress.Text = sIP
@@ -5333,12 +5637,10 @@ FROM            dbo.NDB_Board INNER JOIN
         Return StrToPad
     End Function
 
-    Private Sub BtnPrevious_Click(sender As Object, e As EventArgs) Handles BtnPrevious.Click
-
-    End Sub
 
     Private Sub Button3_Click(sender As Object, e As EventArgs) Handles Button3.Click
         GetSummary()
+        Dim IntResult As DialogResult = FrmSummary.ShowDialog()
     End Sub
 
     Private Sub Button4_Click(sender As Object, e As EventArgs) Handles Button4.Click
@@ -5355,5 +5657,46 @@ FROM            dbo.NDB_Board INNER JOIN
         Dim StrResult As String = GetTripResult()
     End Sub
 
+    Private Sub Label13_Click(sender As Object, e As EventArgs) Handles Label13.Click
 
+    End Sub
+
+    Private Sub BtnMaxChannel_Click(sender As Object, e As EventArgs) Handles BtnMaxChannel.Click
+        Select Case Val(LblChannel.Text)
+            Case < IntMaxChannel
+                RtUnitChannel = IntMaxChannel - 1
+                LblChannel.Text = (RtUnitChannel + 1).ToString
+            Case Else
+                MsgBox("Cannot exceed maximum Channel.", vbOKOnly + vbExclamation, "Error")
+        End Select
+    End Sub
+
+    Private Sub Button5_Click(sender As Object, e As EventArgs) Handles Button5.Click
+        LblChannel.Text = "8"
+        RtUnitChannel = 7 'Zero based
+    End Sub
+
+    Private Sub Btn10mA_Click(sender As Object, e As EventArgs) Handles Btn10mA.Click
+        TxtSetCurrent.Text = 10
+    End Sub
+
+    Private Sub Btn30mA_Click(sender As Object, e As EventArgs) Handles Btn30mA.Click
+        TxtSetCurrent.Text = 30
+    End Sub
+
+    Private Sub Btn100mA_Click(sender As Object, e As EventArgs) Handles Btn100mA.Click
+        TxtSetCurrent.Text = 100
+    End Sub
+
+    Private Sub Btn300mA_Click(sender As Object, e As EventArgs) Handles Btn300mA.Click
+        TxtSetCurrent.Text = 300
+    End Sub
+
+    Private Sub Btn500mA_Click(sender As Object, e As EventArgs) Handles Btn500mA.Click
+        TxtSetCurrent.Text = 500
+    End Sub
+
+    Private Sub chkOverrideWiFi_CheckedChanged(sender As Object, e As EventArgs) Handles chkOverrideWiFi.CheckedChanged
+        SetIP()
+    End Sub
 End Class

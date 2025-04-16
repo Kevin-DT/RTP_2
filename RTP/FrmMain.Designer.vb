@@ -1,9 +1,9 @@
-﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
+﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
 Partial Class FrmMain
     Inherits System.Windows.Forms.Form
 
     'Form overrides dispose to clean up the component list.
-    <System.Diagnostics.DebuggerNonUserCode()> _
+    <System.Diagnostics.DebuggerNonUserCode()>
     Protected Overrides Sub Dispose(ByVal disposing As Boolean)
         Try
             If disposing AndAlso components IsNot Nothing Then
@@ -20,7 +20,7 @@ Partial Class FrmMain
     'NOTE: The following procedure is required by the Windows Form Designer
     'It can be modified using the Windows Form Designer.  
     'Do not modify it using the code editor.
-    <System.Diagnostics.DebuggerStepThrough()> _
+    <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
         Me.components = New System.ComponentModel.Container()
         Dim PrinterToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
@@ -46,6 +46,7 @@ Partial Class FrmMain
         Me.TTiPAddress = New System.Windows.Forms.ToolStripStatusLabel()
         Me.ChkSkipMaster = New System.Windows.Forms.CheckBox()
         Me.GrpMaster = New System.Windows.Forms.GroupBox()
+        Me.chkMasterNewDriver = New System.Windows.Forms.CheckBox()
         Me.TxtIpAddress = New System.Windows.Forms.MaskedTextBox()
         Me.LblPingResult = New System.Windows.Forms.Label()
         Me.BtnPingLan = New System.Windows.Forms.Button()
@@ -74,6 +75,7 @@ Partial Class FrmMain
         Me.ChkConnectToID = New System.Windows.Forms.CheckBox()
         Me.ChkSkipCIB = New System.Windows.Forms.CheckBox()
         Me.GrpCIB = New System.Windows.Forms.GroupBox()
+        Me.chkCibNewDriver = New System.Windows.Forms.CheckBox()
         Me.Label49 = New System.Windows.Forms.Label()
         Me.Label50 = New System.Windows.Forms.Label()
         Me.Label47 = New System.Windows.Forms.Label()
@@ -131,6 +133,21 @@ Partial Class FrmMain
         Me.ChkSound = New System.Windows.Forms.CheckBox()
         Me.ChkManCntrls = New System.Windows.Forms.CheckBox()
         Me.GrpManual = New System.Windows.Forms.GroupBox()
+        Me.chkOverrideWiFi = New System.Windows.Forms.CheckBox()
+        Me.wiFIOverrideIP = New System.Windows.Forms.MaskedTextBox()
+        Me.Btn500mA = New System.Windows.Forms.Button()
+        Me.Btn300mA = New System.Windows.Forms.Button()
+        Me.Btn100mA = New System.Windows.Forms.Button()
+        Me.Btn30mA = New System.Windows.Forms.Button()
+        Me.Btn10mA = New System.Windows.Forms.Button()
+        Me.Button5 = New System.Windows.Forms.Button()
+        Me.BtnMaxChannel = New System.Windows.Forms.Button()
+        Me.LblScaleInUse = New System.Windows.Forms.Label()
+        Me.Label16 = New System.Windows.Forms.Label()
+        Me.TxtMultiplier = New System.Windows.Forms.TextBox()
+        Me.TxtCurrentSent = New System.Windows.Forms.Label()
+        Me.Label15 = New System.Windows.Forms.Label()
+        Me.TxtSetCurrent = New System.Windows.Forms.TextBox()
         Me.BtnGetResult = New System.Windows.Forms.Button()
         Me.Button4 = New System.Windows.Forms.Button()
         Me.Button2 = New System.Windows.Forms.Button()
@@ -168,7 +185,6 @@ Partial Class FrmMain
         Me.ChkLAN = New System.Windows.Forms.CheckBox()
         Me.ChkBLE = New System.Windows.Forms.CheckBox()
         Me.BtnNext = New System.Windows.Forms.Button()
-        Me.BtnPrevious = New System.Windows.Forms.Button()
         Me.BtnRestart = New System.Windows.Forms.Button()
         Me.LblVersion = New System.Windows.Forms.Label()
         Me.LblType = New System.Windows.Forms.Label()
@@ -180,38 +196,42 @@ Partial Class FrmMain
         Me.lblCurrentStep = New System.Windows.Forms.Label()
         Me.GroupBox5 = New System.Windows.Forms.GroupBox()
         Me.LstWiFi = New System.Windows.Forms.ListBox()
-        Me.LblPrompt = New System.Windows.Forms.Label()
         Me.PicRTbarcode = New System.Windows.Forms.PictureBox()
         Me.TabUtil = New System.Windows.Forms.TabPage()
-        Me.btnClearGUID = New System.Windows.Forms.Button()
-        Me.Btn_Override = New System.Windows.Forms.Button()
-        Me.Button17 = New System.Windows.Forms.Button()
-        Me.lblGUIDLength = New System.Windows.Forms.Label()
+        Me.GroupBox10 = New System.Windows.Forms.GroupBox()
         Me.LblPOText = New System.Windows.Forms.Label()
-        Me.LblSearch = New System.Windows.Forms.Label()
-        Me.DateSummary = New System.Windows.Forms.DateTimePicker()
-        Me.TxtSummary = New System.Windows.Forms.TextBox()
-        Me.ChkSummary = New System.Windows.Forms.CheckBox()
         Me.BtnSummary = New System.Windows.Forms.Button()
-        Me.BtnTestAudio = New System.Windows.Forms.Button()
-        Me.Label9 = New System.Windows.Forms.Label()
-        Me.Label11 = New System.Windows.Forms.Label()
+        Me.ChkSummary = New System.Windows.Forms.CheckBox()
+        Me.TxtSummary = New System.Windows.Forms.TextBox()
+        Me.DateSummary = New System.Windows.Forms.DateTimePicker()
+        Me.LblSearch = New System.Windows.Forms.Label()
+        Me.GroupBox9 = New System.Windows.Forms.GroupBox()
         Me.TxtGUID = New System.Windows.Forms.TextBox()
+        Me.Label9 = New System.Windows.Forms.Label()
+        Me.lblGUIDLength = New System.Windows.Forms.Label()
+        Me.btnClearGUID = New System.Windows.Forms.Button()
+        Me.Button17 = New System.Windows.Forms.Button()
+        Me.Btn_Override = New System.Windows.Forms.Button()
+        Me.GroupBox8 = New System.Windows.Forms.GroupBox()
+        Me.TxtRcdC1 = New System.Windows.Forms.TextBox()
+        Me.Label17 = New System.Windows.Forms.Label()
+        Me.GroupBox7 = New System.Windows.Forms.GroupBox()
+        Me.TxtRcdM2 = New System.Windows.Forms.TextBox()
+        Me.TxtRcdM1 = New System.Windows.Forms.TextBox()
+        Me.Label13 = New System.Windows.Forms.Label()
+        Me.Label12 = New System.Windows.Forms.Label()
+        Me.BtnTestAudio = New System.Windows.Forms.Button()
         Me.GroupBox6 = New System.Windows.Forms.GroupBox()
         Me.ChkProdDev = New System.Windows.Forms.CheckBox()
         Me.Label18 = New System.Windows.Forms.Label()
         Me.TxtTimeout = New System.Windows.Forms.TextBox()
-        Me.LblScaleInUse = New System.Windows.Forms.Label()
-        Me.Label16 = New System.Windows.Forms.Label()
-        Me.TxtMultiplier = New System.Windows.Forms.TextBox()
-        Me.TxtCurrentSent = New System.Windows.Forms.Label()
-        Me.Label15 = New System.Windows.Forms.Label()
-        Me.TxtSetCurrent = New System.Windows.Forms.TextBox()
         Me.GroupBox4 = New System.Windows.Forms.GroupBox()
         Me.rbRamp = New System.Windows.Forms.RadioButton()
         Me.rbNegative = New System.Windows.Forms.RadioButton()
         Me.rbPositive = New System.Windows.Forms.RadioButton()
         Me.rbAnyPhase = New System.Windows.Forms.RadioButton()
+        Me.TabRelease = New System.Windows.Forms.TabPage()
+        Me.releaseNotesText = New System.Windows.Forms.TextBox()
         Me.ToolTip1 = New System.Windows.Forms.ToolTip(Me.components)
         Me.Lbl_Server = New System.Windows.Forms.Label()
         Me.PrintDocument11 = New System.Drawing.Printing.PrintDocument()
@@ -274,8 +294,13 @@ Partial Class FrmMain
         Me.GroupBox5.SuspendLayout()
         CType(Me.PicRTbarcode, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.TabUtil.SuspendLayout()
+        Me.GroupBox10.SuspendLayout()
+        Me.GroupBox9.SuspendLayout()
+        Me.GroupBox8.SuspendLayout()
+        Me.GroupBox7.SuspendLayout()
         Me.GroupBox6.SuspendLayout()
         Me.GroupBox4.SuspendLayout()
+        Me.TabRelease.SuspendLayout()
         CType(Me.PicTimerHB, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
@@ -326,11 +351,12 @@ Partial Class FrmMain
         '
         Me.LblWifi.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.LblWifi.AutoSize = True
+        Me.LblWifi.Font = New System.Drawing.Font("Microsoft Sans Serif", 11.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.LblWifi.ForeColor = System.Drawing.Color.Red
-        Me.LblWifi.Location = New System.Drawing.Point(816, 8)
+        Me.LblWifi.Location = New System.Drawing.Point(761, 5)
         Me.LblWifi.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.LblWifi.Name = "LblWifi"
-        Me.LblWifi.Size = New System.Drawing.Size(88, 15)
+        Me.LblWifi.Size = New System.Drawing.Size(108, 18)
         Me.LblWifi.TabIndex = 1
         Me.LblWifi.Text = "Not Connected"
         '
@@ -408,7 +434,7 @@ Partial Class FrmMain
         '
         'BtnReload
         '
-        Me.BtnReload.Location = New System.Drawing.Point(905, 633)
+        Me.BtnReload.Location = New System.Drawing.Point(905, 672)
         Me.BtnReload.Name = "BtnReload"
         Me.BtnReload.Size = New System.Drawing.Size(75, 54)
         Me.BtnReload.TabIndex = 3
@@ -417,7 +443,7 @@ Partial Class FrmMain
         '
         'BtnSave
         '
-        Me.BtnSave.Location = New System.Drawing.Point(1086, 633)
+        Me.BtnSave.Location = New System.Drawing.Point(1086, 672)
         Me.BtnSave.Name = "BtnSave"
         Me.BtnSave.Size = New System.Drawing.Size(75, 54)
         Me.BtnSave.TabIndex = 4
@@ -429,7 +455,7 @@ Partial Class FrmMain
         Me.StatusStrip1.Font = New System.Drawing.Font("Segoe UI", 9.0!)
         Me.StatusStrip1.ImageScalingSize = New System.Drawing.Size(20, 20)
         Me.StatusStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.TSPrinterName, Me.TSLogPath, Me.TTiPAddress})
-        Me.StatusStrip1.Location = New System.Drawing.Point(0, 737)
+        Me.StatusStrip1.Location = New System.Drawing.Point(0, 777)
         Me.StatusStrip1.Name = "StatusStrip1"
         Me.StatusStrip1.Padding = New System.Windows.Forms.Padding(1, 0, 12, 0)
         Me.StatusStrip1.Size = New System.Drawing.Size(1204, 22)
@@ -469,6 +495,7 @@ Partial Class FrmMain
         '
         'GrpMaster
         '
+        Me.GrpMaster.Controls.Add(Me.chkMasterNewDriver)
         Me.GrpMaster.Controls.Add(Me.TxtIpAddress)
         Me.GrpMaster.Controls.Add(Me.LblPingResult)
         Me.GrpMaster.Controls.Add(Me.BtnPingLan)
@@ -502,6 +529,18 @@ Partial Class FrmMain
         Me.GrpMaster.TabIndex = 7
         Me.GrpMaster.TabStop = False
         Me.GrpMaster.Text = " Master "
+        '
+        'chkMasterNewDriver
+        '
+        Me.chkMasterNewDriver.AutoSize = True
+        Me.chkMasterNewDriver.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.chkMasterNewDriver.ForeColor = System.Drawing.Color.Fuchsia
+        Me.chkMasterNewDriver.Location = New System.Drawing.Point(528, 97)
+        Me.chkMasterNewDriver.Name = "chkMasterNewDriver"
+        Me.chkMasterNewDriver.Size = New System.Drawing.Size(164, 24)
+        Me.chkMasterNewDriver.TabIndex = 146
+        Me.chkMasterNewDriver.Text = "New Relay Driver"
+        Me.chkMasterNewDriver.UseVisualStyleBackColor = True
         '
         'TxtIpAddress
         '
@@ -539,7 +578,7 @@ Partial Class FrmMain
         '
         Me.LblMguid.AutoSize = True
         Me.LblMguid.Font = New System.Drawing.Font("Microsoft Sans Serif", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.LblMguid.ForeColor = System.Drawing.Color.Blue
+        Me.LblMguid.ForeColor = System.Drawing.Color.Red
         Me.LblMguid.Location = New System.Drawing.Point(319, 65)
         Me.LblMguid.Name = "LblMguid"
         Me.LblMguid.Size = New System.Drawing.Size(42, 17)
@@ -788,6 +827,7 @@ Partial Class FrmMain
         '
         'GrpCIB
         '
+        Me.GrpCIB.Controls.Add(Me.chkCibNewDriver)
         Me.GrpCIB.Controls.Add(Me.Label49)
         Me.GrpCIB.Controls.Add(Me.Label50)
         Me.GrpCIB.Controls.Add(Me.Label47)
@@ -849,6 +889,18 @@ Partial Class FrmMain
         Me.GrpCIB.TabIndex = 9
         Me.GrpCIB.TabStop = False
         Me.GrpCIB.Text = " CIB "
+        '
+        'chkCibNewDriver
+        '
+        Me.chkCibNewDriver.AutoSize = True
+        Me.chkCibNewDriver.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.chkCibNewDriver.ForeColor = System.Drawing.Color.Fuchsia
+        Me.chkCibNewDriver.Location = New System.Drawing.Point(528, 19)
+        Me.chkCibNewDriver.Name = "chkCibNewDriver"
+        Me.chkCibNewDriver.Size = New System.Drawing.Size(164, 24)
+        Me.chkCibNewDriver.TabIndex = 147
+        Me.chkCibNewDriver.Text = "New Relay Driver"
+        Me.chkCibNewDriver.UseVisualStyleBackColor = True
         '
         'Label49
         '
@@ -1358,7 +1410,7 @@ Partial Class FrmMain
         '
         Me.LblCIBguid.AutoSize = True
         Me.LblCIBguid.Font = New System.Drawing.Font("Microsoft Sans Serif", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.LblCIBguid.ForeColor = System.Drawing.Color.Blue
+        Me.LblCIBguid.ForeColor = System.Drawing.Color.Red
         Me.LblCIBguid.Location = New System.Drawing.Point(319, 53)
         Me.LblCIBguid.Name = "LblCIBguid"
         Me.LblCIBguid.Size = New System.Drawing.Size(42, 17)
@@ -1424,7 +1476,7 @@ Partial Class FrmMain
         Me.ChkSound.CheckState = System.Windows.Forms.CheckState.Checked
         Me.ChkSound.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.ChkSound.ForeColor = System.Drawing.Color.Black
-        Me.ChkSound.Location = New System.Drawing.Point(905, 501)
+        Me.ChkSound.Location = New System.Drawing.Point(905, 638)
         Me.ChkSound.Name = "ChkSound"
         Me.ChkSound.Size = New System.Drawing.Size(171, 19)
         Me.ChkSound.TabIndex = 114
@@ -1446,6 +1498,21 @@ Partial Class FrmMain
         '
         'GrpManual
         '
+        Me.GrpManual.Controls.Add(Me.chkOverrideWiFi)
+        Me.GrpManual.Controls.Add(Me.wiFIOverrideIP)
+        Me.GrpManual.Controls.Add(Me.Btn500mA)
+        Me.GrpManual.Controls.Add(Me.Btn300mA)
+        Me.GrpManual.Controls.Add(Me.Btn100mA)
+        Me.GrpManual.Controls.Add(Me.Btn30mA)
+        Me.GrpManual.Controls.Add(Me.Btn10mA)
+        Me.GrpManual.Controls.Add(Me.Button5)
+        Me.GrpManual.Controls.Add(Me.BtnMaxChannel)
+        Me.GrpManual.Controls.Add(Me.LblScaleInUse)
+        Me.GrpManual.Controls.Add(Me.Label16)
+        Me.GrpManual.Controls.Add(Me.TxtMultiplier)
+        Me.GrpManual.Controls.Add(Me.TxtCurrentSent)
+        Me.GrpManual.Controls.Add(Me.Label15)
+        Me.GrpManual.Controls.Add(Me.TxtSetCurrent)
         Me.GrpManual.Controls.Add(Me.BtnGetResult)
         Me.GrpManual.Controls.Add(Me.Button4)
         Me.GrpManual.Controls.Add(Me.Button2)
@@ -1469,14 +1536,167 @@ Partial Class FrmMain
         Me.GrpManual.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.GrpManual.Location = New System.Drawing.Point(6, 492)
         Me.GrpManual.Name = "GrpManual"
-        Me.GrpManual.Size = New System.Drawing.Size(886, 195)
+        Me.GrpManual.Size = New System.Drawing.Size(886, 237)
         Me.GrpManual.TabIndex = 11
         Me.GrpManual.TabStop = False
         Me.GrpManual.Text = " Manual Controls "
         '
+        'chkOverrideWiFi
+        '
+        Me.chkOverrideWiFi.AutoSize = True
+        Me.chkOverrideWiFi.Location = New System.Drawing.Point(12, 116)
+        Me.chkOverrideWiFi.Name = "chkOverrideWiFi"
+        Me.chkOverrideWiFi.Size = New System.Drawing.Size(117, 19)
+        Me.chkOverrideWiFi.TabIndex = 147
+        Me.chkOverrideWiFi.Text = "Override Wi-Fi IP"
+        Me.chkOverrideWiFi.UseVisualStyleBackColor = True
+        '
+        'wiFIOverrideIP
+        '
+        Me.wiFIOverrideIP.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.wiFIOverrideIP.Location = New System.Drawing.Point(12, 139)
+        Me.wiFIOverrideIP.Mask = "000.000.000.000"
+        Me.wiFIOverrideIP.Name = "wiFIOverrideIP"
+        Me.wiFIOverrideIP.Size = New System.Drawing.Size(97, 20)
+        Me.wiFIOverrideIP.TabIndex = 146
+        Me.wiFIOverrideIP.Text = "192168004001"
+        '
+        'Btn500mA
+        '
+        Me.Btn500mA.Location = New System.Drawing.Point(451, 128)
+        Me.Btn500mA.Name = "Btn500mA"
+        Me.Btn500mA.Size = New System.Drawing.Size(70, 32)
+        Me.Btn500mA.TabIndex = 135
+        Me.Btn500mA.Text = "500 mA"
+        Me.Btn500mA.UseVisualStyleBackColor = True
+        '
+        'Btn300mA
+        '
+        Me.Btn300mA.Location = New System.Drawing.Point(378, 127)
+        Me.Btn300mA.Name = "Btn300mA"
+        Me.Btn300mA.Size = New System.Drawing.Size(70, 32)
+        Me.Btn300mA.TabIndex = 134
+        Me.Btn300mA.Text = "300 mA"
+        Me.Btn300mA.UseVisualStyleBackColor = True
+        '
+        'Btn100mA
+        '
+        Me.Btn100mA.Location = New System.Drawing.Point(305, 127)
+        Me.Btn100mA.Name = "Btn100mA"
+        Me.Btn100mA.Size = New System.Drawing.Size(70, 32)
+        Me.Btn100mA.TabIndex = 133
+        Me.Btn100mA.Text = "100 mA"
+        Me.Btn100mA.UseVisualStyleBackColor = True
+        '
+        'Btn30mA
+        '
+        Me.Btn30mA.Location = New System.Drawing.Point(232, 127)
+        Me.Btn30mA.Name = "Btn30mA"
+        Me.Btn30mA.Size = New System.Drawing.Size(70, 32)
+        Me.Btn30mA.TabIndex = 132
+        Me.Btn30mA.Text = "30 mA"
+        Me.Btn30mA.UseVisualStyleBackColor = True
+        '
+        'Btn10mA
+        '
+        Me.Btn10mA.Location = New System.Drawing.Point(159, 127)
+        Me.Btn10mA.Name = "Btn10mA"
+        Me.Btn10mA.Size = New System.Drawing.Size(70, 32)
+        Me.Btn10mA.TabIndex = 131
+        Me.Btn10mA.Text = "10 mA"
+        Me.Btn10mA.UseVisualStyleBackColor = True
+        '
+        'Button5
+        '
+        Me.Button5.Location = New System.Drawing.Point(657, 67)
+        Me.Button5.Name = "Button5"
+        Me.Button5.Size = New System.Drawing.Size(43, 43)
+        Me.Button5.TabIndex = 130
+        Me.Button5.Text = "Ch 8"
+        Me.Button5.UseVisualStyleBackColor = True
+        '
+        'BtnMaxChannel
+        '
+        Me.BtnMaxChannel.Location = New System.Drawing.Point(759, 67)
+        Me.BtnMaxChannel.Name = "BtnMaxChannel"
+        Me.BtnMaxChannel.Size = New System.Drawing.Size(43, 43)
+        Me.BtnMaxChannel.TabIndex = 129
+        Me.BtnMaxChannel.Text = "Max"
+        Me.BtnMaxChannel.UseVisualStyleBackColor = True
+        '
+        'LblScaleInUse
+        '
+        Me.LblScaleInUse.AutoSize = True
+        Me.LblScaleInUse.BackColor = System.Drawing.Color.Transparent
+        Me.LblScaleInUse.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.LblScaleInUse.ForeColor = System.Drawing.SystemColors.ControlText
+        Me.LblScaleInUse.Location = New System.Drawing.Point(734, 146)
+        Me.LblScaleInUse.Name = "LblScaleInUse"
+        Me.LblScaleInUse.Size = New System.Drawing.Size(28, 13)
+        Me.LblScaleInUse.TabIndex = 128
+        Me.LblScaleInUse.Text = "(.95)"
+        Me.LblScaleInUse.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
+        '
+        'Label16
+        '
+        Me.Label16.AutoSize = True
+        Me.Label16.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Label16.ForeColor = System.Drawing.SystemColors.ControlText
+        Me.Label16.Location = New System.Drawing.Point(711, 127)
+        Me.Label16.Name = "Label16"
+        Me.Label16.Size = New System.Drawing.Size(75, 13)
+        Me.Label16.TabIndex = 127
+        Me.Label16.Text = "Scaling Factor"
+        '
+        'TxtMultiplier
+        '
+        Me.TxtMultiplier.Font = New System.Drawing.Font("Microsoft Sans Serif", 16.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.TxtMultiplier.ForeColor = System.Drawing.SystemColors.ControlText
+        Me.TxtMultiplier.Location = New System.Drawing.Point(789, 127)
+        Me.TxtMultiplier.Name = "TxtMultiplier"
+        Me.TxtMultiplier.Size = New System.Drawing.Size(55, 32)
+        Me.TxtMultiplier.TabIndex = 126
+        Me.TxtMultiplier.Text = ".95"
+        Me.TxtMultiplier.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
+        '
+        'TxtCurrentSent
+        '
+        Me.TxtCurrentSent.AutoSize = True
+        Me.TxtCurrentSent.BackColor = System.Drawing.Color.Transparent
+        Me.TxtCurrentSent.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.TxtCurrentSent.ForeColor = System.Drawing.SystemColors.ControlText
+        Me.TxtCurrentSent.Location = New System.Drawing.Point(561, 146)
+        Me.TxtCurrentSent.Name = "TxtCurrentSent"
+        Me.TxtCurrentSent.Size = New System.Drawing.Size(55, 13)
+        Me.TxtCurrentSent.TabIndex = 124
+        Me.TxtCurrentSent.Text = "(30 hh:hh)"
+        Me.TxtCurrentSent.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
+        '
+        'Label15
+        '
+        Me.Label15.AutoSize = True
+        Me.Label15.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Label15.ForeColor = System.Drawing.SystemColors.ControlText
+        Me.Label15.Location = New System.Drawing.Point(545, 127)
+        Me.Label15.Name = "Label15"
+        Me.Label15.Size = New System.Drawing.Size(88, 13)
+        Me.Label15.TabIndex = 123
+        Me.Label15.Text = "Trip Current {mA}"
+        '
+        'TxtSetCurrent
+        '
+        Me.TxtSetCurrent.Font = New System.Drawing.Font("Microsoft Sans Serif", 16.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.TxtSetCurrent.ForeColor = System.Drawing.SystemColors.ControlText
+        Me.TxtSetCurrent.Location = New System.Drawing.Point(635, 127)
+        Me.TxtSetCurrent.Name = "TxtSetCurrent"
+        Me.TxtSetCurrent.Size = New System.Drawing.Size(55, 32)
+        Me.TxtSetCurrent.TabIndex = 122
+        Me.TxtSetCurrent.Text = "30"
+        Me.TxtSetCurrent.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
+        '
         'BtnGetResult
         '
-        Me.BtnGetResult.Location = New System.Drawing.Point(544, 75)
+        Me.BtnGetResult.Location = New System.Drawing.Point(517, 67)
         Me.BtnGetResult.Name = "BtnGetResult"
         Me.BtnGetResult.Size = New System.Drawing.Size(78, 43)
         Me.BtnGetResult.TabIndex = 36
@@ -1485,16 +1705,17 @@ Partial Class FrmMain
         '
         'Button4
         '
-        Me.Button4.Location = New System.Drawing.Point(342, 61)
+        Me.Button4.BackColor = System.Drawing.Color.LightCoral
+        Me.Button4.Location = New System.Drawing.Point(423, 67)
         Me.Button4.Name = "Button4"
         Me.Button4.Size = New System.Drawing.Size(78, 43)
         Me.Button4.TabIndex = 35
         Me.Button4.Text = "Write C GUID"
-        Me.Button4.UseVisualStyleBackColor = True
+        Me.Button4.UseVisualStyleBackColor = False
         '
         'Button2
         '
-        Me.Button2.Location = New System.Drawing.Point(685, 78)
+        Me.Button2.Location = New System.Drawing.Point(706, 67)
         Me.Button2.Name = "Button2"
         Me.Button2.Size = New System.Drawing.Size(43, 43)
         Me.Button2.TabIndex = 34
@@ -1503,7 +1724,7 @@ Partial Class FrmMain
         '
         'Button1
         '
-        Me.Button1.Location = New System.Drawing.Point(628, 78)
+        Me.Button1.Location = New System.Drawing.Point(601, 67)
         Me.Button1.Name = "Button1"
         Me.Button1.Size = New System.Drawing.Size(43, 43)
         Me.Button1.TabIndex = 33
@@ -1514,33 +1735,35 @@ Partial Class FrmMain
         '
         Me.Label10.AutoSize = True
         Me.Label10.Font = New System.Drawing.Font("Microsoft Sans Serif", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Label10.Location = New System.Drawing.Point(759, 104)
+        Me.Label10.Location = New System.Drawing.Point(808, 97)
         Me.Label10.Name = "Label10"
-        Me.Label10.Size = New System.Drawing.Size(122, 17)
+        Me.Label10.Size = New System.Drawing.Size(67, 17)
         Me.Label10.TabIndex = 32
-        Me.Label10.Text = "Maximum Channel"
+        Me.Label10.Text = "Channels"
         '
         'BtnWriteMGuid
         '
-        Me.BtnWriteMGuid.Location = New System.Drawing.Point(342, 18)
+        Me.BtnWriteMGuid.BackColor = System.Drawing.Color.LightCoral
+        Me.BtnWriteMGuid.Location = New System.Drawing.Point(339, 67)
         Me.BtnWriteMGuid.Name = "BtnWriteMGuid"
         Me.BtnWriteMGuid.Size = New System.Drawing.Size(78, 43)
         Me.BtnWriteMGuid.TabIndex = 31
         Me.BtnWriteMGuid.Text = "Write M GUID"
-        Me.BtnWriteMGuid.UseVisualStyleBackColor = True
+        Me.BtnWriteMGuid.UseVisualStyleBackColor = False
         '
         'BtnSetMasterID
         '
-        Me.BtnSetMasterID.Location = New System.Drawing.Point(426, 18)
+        Me.BtnSetMasterID.BackColor = System.Drawing.Color.LightCoral
+        Me.BtnSetMasterID.Location = New System.Drawing.Point(90, 67)
         Me.BtnSetMasterID.Name = "BtnSetMasterID"
         Me.BtnSetMasterID.Size = New System.Drawing.Size(78, 43)
         Me.BtnSetMasterID.TabIndex = 30
         Me.BtnSetMasterID.Text = "Set SSID"
-        Me.BtnSetMasterID.UseVisualStyleBackColor = True
+        Me.BtnSetMasterID.UseVisualStyleBackColor = False
         '
         'BtnChDn
         '
-        Me.BtnChDn.Location = New System.Drawing.Point(628, 18)
+        Me.BtnChDn.Location = New System.Drawing.Point(601, 15)
         Me.BtnChDn.Name = "BtnChDn"
         Me.BtnChDn.Size = New System.Drawing.Size(101, 43)
         Me.BtnChDn.TabIndex = 29
@@ -1549,8 +1772,8 @@ Partial Class FrmMain
         '
         'BtnTrip
         '
-        Me.BtnTrip.BackColor = System.Drawing.Color.FromArgb(CType(CType(255, Byte), Integer), CType(CType(128, Byte), Integer), CType(CType(128, Byte), Integer))
-        Me.BtnTrip.Location = New System.Drawing.Point(544, 18)
+        Me.BtnTrip.BackColor = System.Drawing.Color.Red
+        Me.BtnTrip.Location = New System.Drawing.Point(517, 15)
         Me.BtnTrip.Name = "BtnTrip"
         Me.BtnTrip.Size = New System.Drawing.Size(78, 43)
         Me.BtnTrip.TabIndex = 23
@@ -1562,7 +1785,7 @@ Partial Class FrmMain
         Me.LblChLimit.AutoSize = True
         Me.LblChLimit.Font = New System.Drawing.Font("Microsoft Sans Serif", 18.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.LblChLimit.ForeColor = System.Drawing.Color.Blue
-        Me.LblChLimit.Location = New System.Drawing.Point(817, 75)
+        Me.LblChLimit.Location = New System.Drawing.Point(828, 68)
         Me.LblChLimit.Name = "LblChLimit"
         Me.LblChLimit.Size = New System.Drawing.Size(27, 29)
         Me.LblChLimit.TabIndex = 27
@@ -1570,7 +1793,7 @@ Partial Class FrmMain
         '
         'BtnReadConfig
         '
-        Me.BtnReadConfig.Location = New System.Drawing.Point(174, 61)
+        Me.BtnReadConfig.Location = New System.Drawing.Point(255, 15)
         Me.BtnReadConfig.Name = "BtnReadConfig"
         Me.BtnReadConfig.Size = New System.Drawing.Size(78, 43)
         Me.BtnReadConfig.TabIndex = 22
@@ -1579,7 +1802,7 @@ Partial Class FrmMain
         '
         'BtnChUp
         '
-        Me.BtnChUp.Location = New System.Drawing.Point(780, 18)
+        Me.BtnChUp.Location = New System.Drawing.Point(759, 15)
         Me.BtnChUp.Name = "BtnChUp"
         Me.BtnChUp.Size = New System.Drawing.Size(101, 43)
         Me.BtnChUp.TabIndex = 26
@@ -1589,7 +1812,7 @@ Partial Class FrmMain
         'BtnWifiConnect
         '
         Me.BtnWifiConnect.BackColor = System.Drawing.Color.FromArgb(CType(CType(192, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(192, Byte), Integer))
-        Me.BtnWifiConnect.Location = New System.Drawing.Point(6, 16)
+        Me.BtnWifiConnect.Location = New System.Drawing.Point(6, 15)
         Me.BtnWifiConnect.Name = "BtnWifiConnect"
         Me.BtnWifiConnect.Size = New System.Drawing.Size(78, 43)
         Me.BtnWifiConnect.TabIndex = 21
@@ -1600,7 +1823,7 @@ Partial Class FrmMain
         '
         Me.LblChannel.AutoSize = True
         Me.LblChannel.Font = New System.Drawing.Font("Microsoft Sans Serif", 20.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.LblChannel.Location = New System.Drawing.Point(736, 24)
+        Me.LblChannel.Location = New System.Drawing.Point(716, 21)
         Me.LblChannel.Name = "LblChannel"
         Me.LblChannel.Size = New System.Drawing.Size(29, 31)
         Me.LblChannel.TabIndex = 25
@@ -1608,7 +1831,7 @@ Partial Class FrmMain
         '
         'BtnBusPwr
         '
-        Me.BtnBusPwr.Location = New System.Drawing.Point(6, 61)
+        Me.BtnBusPwr.Location = New System.Drawing.Point(6, 67)
         Me.BtnBusPwr.Name = "BtnBusPwr"
         Me.BtnBusPwr.Size = New System.Drawing.Size(78, 43)
         Me.BtnBusPwr.TabIndex = 20
@@ -1617,7 +1840,7 @@ Partial Class FrmMain
         '
         'BtnCIBID
         '
-        Me.BtnCIBID.Location = New System.Drawing.Point(258, 61)
+        Me.BtnCIBID.Location = New System.Drawing.Point(421, 15)
         Me.BtnCIBID.Name = "BtnCIBID"
         Me.BtnCIBID.Size = New System.Drawing.Size(78, 43)
         Me.BtnCIBID.TabIndex = 19
@@ -1626,7 +1849,7 @@ Partial Class FrmMain
         '
         'BtnMguid
         '
-        Me.BtnMguid.Location = New System.Drawing.Point(258, 16)
+        Me.BtnMguid.Location = New System.Drawing.Point(338, 15)
         Me.BtnMguid.Name = "BtnMguid"
         Me.BtnMguid.Size = New System.Drawing.Size(78, 43)
         Me.BtnMguid.TabIndex = 18
@@ -1635,7 +1858,7 @@ Partial Class FrmMain
         '
         'BtnConfig
         '
-        Me.BtnConfig.Location = New System.Drawing.Point(174, 16)
+        Me.BtnConfig.Location = New System.Drawing.Point(172, 15)
         Me.BtnConfig.Name = "BtnConfig"
         Me.BtnConfig.Size = New System.Drawing.Size(78, 43)
         Me.BtnConfig.TabIndex = 1
@@ -1644,7 +1867,7 @@ Partial Class FrmMain
         '
         'BtnFirmware
         '
-        Me.BtnFirmware.Location = New System.Drawing.Point(90, 16)
+        Me.BtnFirmware.Location = New System.Drawing.Point(89, 15)
         Me.BtnFirmware.Name = "BtnFirmware"
         Me.BtnFirmware.Size = New System.Drawing.Size(78, 43)
         Me.BtnFirmware.TabIndex = 0
@@ -1654,7 +1877,7 @@ Partial Class FrmMain
         'TxtDebug
         '
         Me.TxtDebug.Dock = System.Windows.Forms.DockStyle.Bottom
-        Me.TxtDebug.Location = New System.Drawing.Point(3, 130)
+        Me.TxtDebug.Location = New System.Drawing.Point(3, 172)
         Me.TxtDebug.Multiline = True
         Me.TxtDebug.Name = "TxtDebug"
         Me.TxtDebug.Size = New System.Drawing.Size(880, 62)
@@ -1756,7 +1979,7 @@ Partial Class FrmMain
         Me.ChkAutoStep.Checked = True
         Me.ChkAutoStep.CheckState = System.Windows.Forms.CheckState.Checked
         Me.ChkAutoStep.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.ChkAutoStep.Location = New System.Drawing.Point(905, 471)
+        Me.ChkAutoStep.Location = New System.Drawing.Point(905, 608)
         Me.ChkAutoStep.Name = "ChkAutoStep"
         Me.ChkAutoStep.Size = New System.Drawing.Size(113, 19)
         Me.ChkAutoStep.TabIndex = 13
@@ -1831,27 +2054,18 @@ Partial Class FrmMain
         '
         Me.BtnNext.BackColor = System.Drawing.Color.FromArgb(CType(CType(0, Byte), Integer), CType(CType(192, Byte), Integer), CType(CType(0, Byte), Integer))
         Me.BtnNext.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(CType(CType(0, Byte), Integer), CType(CType(192, Byte), Integer), CType(CType(0, Byte), Integer))
-        Me.BtnNext.Location = New System.Drawing.Point(1086, 404)
+        Me.BtnNext.Location = New System.Drawing.Point(1054, 404)
         Me.BtnNext.Name = "BtnNext"
-        Me.BtnNext.Size = New System.Drawing.Size(75, 54)
+        Me.BtnNext.Size = New System.Drawing.Size(107, 54)
         Me.BtnNext.TabIndex = 20
-        Me.BtnNext.Text = "Next >"
+        Me.BtnNext.Text = "Start >"
         Me.BtnNext.UseVisualStyleBackColor = False
-        '
-        'BtnPrevious
-        '
-        Me.BtnPrevious.Location = New System.Drawing.Point(905, 403)
-        Me.BtnPrevious.Name = "BtnPrevious"
-        Me.BtnPrevious.Size = New System.Drawing.Size(75, 54)
-        Me.BtnPrevious.TabIndex = 21
-        Me.BtnPrevious.Text = "< Prev"
-        Me.BtnPrevious.UseVisualStyleBackColor = True
         '
         'BtnRestart
         '
-        Me.BtnRestart.Location = New System.Drawing.Point(995, 404)
+        Me.BtnRestart.Location = New System.Drawing.Point(905, 404)
         Me.BtnRestart.Name = "BtnRestart"
-        Me.BtnRestart.Size = New System.Drawing.Size(75, 54)
+        Me.BtnRestart.Size = New System.Drawing.Size(107, 54)
         Me.BtnRestart.TabIndex = 22
         Me.BtnRestart.Text = "Restart"
         Me.BtnRestart.UseVisualStyleBackColor = True
@@ -1883,13 +2097,14 @@ Partial Class FrmMain
         Me.TabControl1.Alignment = System.Windows.Forms.TabAlignment.Left
         Me.TabControl1.Controls.Add(Me.TabProg)
         Me.TabControl1.Controls.Add(Me.TabUtil)
+        Me.TabControl1.Controls.Add(Me.TabRelease)
         Me.TabControl1.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.TabControl1.Location = New System.Drawing.Point(0, 31)
         Me.TabControl1.Multiline = True
         Me.TabControl1.Name = "TabControl1"
         Me.TabControl1.RightToLeftLayout = True
         Me.TabControl1.SelectedIndex = 0
-        Me.TabControl1.Size = New System.Drawing.Size(1202, 701)
+        Me.TabControl1.Size = New System.Drawing.Size(1202, 743)
         Me.TabControl1.TabIndex = 25
         '
         'TabProg
@@ -1900,7 +2115,6 @@ Partial Class FrmMain
         Me.TabProg.Controls.Add(Me.LblStatus)
         Me.TabProg.Controls.Add(Me.lblCurrentStep)
         Me.TabProg.Controls.Add(Me.GroupBox5)
-        Me.TabProg.Controls.Add(Me.LblPrompt)
         Me.TabProg.Controls.Add(Me.GroupBox1)
         Me.TabProg.Controls.Add(Me.LblType)
         Me.TabProg.Controls.Add(Me.GrpManual)
@@ -1918,20 +2132,19 @@ Partial Class FrmMain
         Me.TabProg.Controls.Add(Me.ChkSkipCIB)
         Me.TabProg.Controls.Add(Me.BtnRestart)
         Me.TabProg.Controls.Add(Me.ChkLAN)
-        Me.TabProg.Controls.Add(Me.BtnPrevious)
         Me.TabProg.Controls.Add(Me.GrpMaster)
         Me.TabProg.Controls.Add(Me.ChkSkipMaster)
         Me.TabProg.Location = New System.Drawing.Point(28, 4)
         Me.TabProg.Name = "TabProg"
         Me.TabProg.Padding = New System.Windows.Forms.Padding(3)
-        Me.TabProg.Size = New System.Drawing.Size(1170, 693)
+        Me.TabProg.Size = New System.Drawing.Size(1170, 735)
         Me.TabProg.TabIndex = 0
         Me.TabProg.Text = "Programming"
         Me.TabProg.UseVisualStyleBackColor = True
         '
         'Button3
         '
-        Me.Button3.Location = New System.Drawing.Point(905, 532)
+        Me.Button3.Location = New System.Drawing.Point(905, 513)
         Me.Button3.Name = "Button3"
         Me.Button3.Size = New System.Drawing.Size(75, 54)
         Me.Button3.TabIndex = 116
@@ -1942,7 +2155,7 @@ Partial Class FrmMain
         '
         Me.PicTick.BackgroundImage = Global.RTP.My.Resources.Resources.grn_tick
         Me.PicTick.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch
-        Me.PicTick.Location = New System.Drawing.Point(1093, 527)
+        Me.PicTick.Location = New System.Drawing.Point(1093, 508)
         Me.PicTick.Name = "PicTick"
         Me.PicTick.Size = New System.Drawing.Size(59, 59)
         Me.PicTick.TabIndex = 115
@@ -1953,7 +2166,7 @@ Partial Class FrmMain
         '
         Me.LblStatus.AutoSize = True
         Me.LblStatus.Font = New System.Drawing.Font("Microsoft Sans Serif", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.LblStatus.ForeColor = System.Drawing.Color.Blue
+        Me.LblStatus.ForeColor = System.Drawing.Color.Red
         Me.LblStatus.Location = New System.Drawing.Point(902, 369)
         Me.LblStatus.Name = "LblStatus"
         Me.LblStatus.Size = New System.Drawing.Size(49, 17)
@@ -1993,18 +2206,6 @@ Partial Class FrmMain
         Me.LstWiFi.Size = New System.Drawing.Size(187, 79)
         Me.LstWiFi.TabIndex = 0
         '
-        'LblPrompt
-        '
-        Me.LblPrompt.AutoSize = True
-        Me.LblPrompt.Font = New System.Drawing.Font("Microsoft Sans Serif", 11.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.LblPrompt.ForeColor = System.Drawing.Color.FromArgb(CType(CType(0, Byte), Integer), CType(CType(192, Byte), Integer), CType(CType(0, Byte), Integer))
-        Me.LblPrompt.Location = New System.Drawing.Point(1083, 461)
-        Me.LblPrompt.Name = "LblPrompt"
-        Me.LblPrompt.Size = New System.Drawing.Size(84, 36)
-        Me.LblPrompt.TabIndex = 25
-        Me.LblPrompt.Text = "Click Next" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "to Continue"
-        Me.LblPrompt.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
-        '
         'PicRTbarcode
         '
         Me.PicRTbarcode.Image = Global.RTP.My.Resources.Resources.barcode
@@ -2017,37 +2218,141 @@ Partial Class FrmMain
         '
         'TabUtil
         '
-        Me.TabUtil.Controls.Add(Me.btnClearGUID)
-        Me.TabUtil.Controls.Add(Me.Btn_Override)
-        Me.TabUtil.Controls.Add(Me.Button17)
-        Me.TabUtil.Controls.Add(Me.lblGUIDLength)
-        Me.TabUtil.Controls.Add(Me.LblPOText)
-        Me.TabUtil.Controls.Add(Me.LblSearch)
-        Me.TabUtil.Controls.Add(Me.DateSummary)
-        Me.TabUtil.Controls.Add(Me.TxtSummary)
-        Me.TabUtil.Controls.Add(Me.ChkSummary)
-        Me.TabUtil.Controls.Add(Me.BtnSummary)
+        Me.TabUtil.Controls.Add(Me.GroupBox10)
+        Me.TabUtil.Controls.Add(Me.GroupBox9)
+        Me.TabUtil.Controls.Add(Me.GroupBox8)
+        Me.TabUtil.Controls.Add(Me.GroupBox7)
         Me.TabUtil.Controls.Add(Me.BtnTestAudio)
-        Me.TabUtil.Controls.Add(Me.Label9)
-        Me.TabUtil.Controls.Add(Me.Label11)
-        Me.TabUtil.Controls.Add(Me.TxtGUID)
         Me.TabUtil.Controls.Add(Me.GroupBox6)
         Me.TabUtil.Controls.Add(Me.Label18)
         Me.TabUtil.Controls.Add(Me.TxtTimeout)
-        Me.TabUtil.Controls.Add(Me.LblScaleInUse)
-        Me.TabUtil.Controls.Add(Me.Label16)
-        Me.TabUtil.Controls.Add(Me.TxtMultiplier)
-        Me.TabUtil.Controls.Add(Me.TxtCurrentSent)
-        Me.TabUtil.Controls.Add(Me.Label15)
-        Me.TabUtil.Controls.Add(Me.TxtSetCurrent)
         Me.TabUtil.Controls.Add(Me.GroupBox4)
         Me.TabUtil.Location = New System.Drawing.Point(28, 4)
         Me.TabUtil.Name = "TabUtil"
         Me.TabUtil.Padding = New System.Windows.Forms.Padding(3)
-        Me.TabUtil.Size = New System.Drawing.Size(1170, 693)
+        Me.TabUtil.Size = New System.Drawing.Size(1170, 735)
         Me.TabUtil.TabIndex = 1
         Me.TabUtil.Text = "Utilities"
         Me.TabUtil.UseVisualStyleBackColor = True
+        '
+        'GroupBox10
+        '
+        Me.GroupBox10.Controls.Add(Me.LblPOText)
+        Me.GroupBox10.Controls.Add(Me.BtnSummary)
+        Me.GroupBox10.Controls.Add(Me.ChkSummary)
+        Me.GroupBox10.Controls.Add(Me.TxtSummary)
+        Me.GroupBox10.Controls.Add(Me.DateSummary)
+        Me.GroupBox10.Controls.Add(Me.LblSearch)
+        Me.GroupBox10.Location = New System.Drawing.Point(757, 15)
+        Me.GroupBox10.Name = "GroupBox10"
+        Me.GroupBox10.Size = New System.Drawing.Size(376, 142)
+        Me.GroupBox10.TabIndex = 146
+        Me.GroupBox10.TabStop = False
+        Me.GroupBox10.Text = " PO Search "
+        '
+        'LblPOText
+        '
+        Me.LblPOText.AutoSize = True
+        Me.LblPOText.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.LblPOText.ForeColor = System.Drawing.Color.Fuchsia
+        Me.LblPOText.Location = New System.Drawing.Point(12, 22)
+        Me.LblPOText.Name = "LblPOText"
+        Me.LblPOText.Size = New System.Drawing.Size(347, 20)
+        Me.LblPOText.TabIndex = 138
+        Me.LblPOText.Text = "Enter the start of a PO Number to look up."
+        Me.LblPOText.Visible = False
+        '
+        'BtnSummary
+        '
+        Me.BtnSummary.Location = New System.Drawing.Point(16, 77)
+        Me.BtnSummary.Name = "BtnSummary"
+        Me.BtnSummary.Size = New System.Drawing.Size(144, 42)
+        Me.BtnSummary.TabIndex = 133
+        Me.BtnSummary.Text = "Get Summary"
+        Me.BtnSummary.UseVisualStyleBackColor = True
+        '
+        'ChkSummary
+        '
+        Me.ChkSummary.Appearance = System.Windows.Forms.Appearance.Button
+        Me.ChkSummary.Location = New System.Drawing.Point(188, 77)
+        Me.ChkSummary.Name = "ChkSummary"
+        Me.ChkSummary.Size = New System.Drawing.Size(144, 42)
+        Me.ChkSummary.TabIndex = 135
+        Me.ChkSummary.Text = "Toggle Search"
+        Me.ChkSummary.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
+        Me.ChkSummary.UseVisualStyleBackColor = True
+        '
+        'TxtSummary
+        '
+        Me.TxtSummary.Location = New System.Drawing.Point(16, 45)
+        Me.TxtSummary.Name = "TxtSummary"
+        Me.TxtSummary.Size = New System.Drawing.Size(144, 26)
+        Me.TxtSummary.TabIndex = 136
+        Me.TxtSummary.Visible = False
+        '
+        'DateSummary
+        '
+        Me.DateSummary.Format = System.Windows.Forms.DateTimePickerFormat.[Short]
+        Me.DateSummary.Location = New System.Drawing.Point(25, 45)
+        Me.DateSummary.Name = "DateSummary"
+        Me.DateSummary.Size = New System.Drawing.Size(135, 26)
+        Me.DateSummary.TabIndex = 134
+        '
+        'LblSearch
+        '
+        Me.LblSearch.AutoSize = True
+        Me.LblSearch.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.LblSearch.ForeColor = System.Drawing.Color.Fuchsia
+        Me.LblSearch.Location = New System.Drawing.Point(184, 47)
+        Me.LblSearch.Name = "LblSearch"
+        Me.LblSearch.Size = New System.Drawing.Size(110, 20)
+        Me.LblSearch.TabIndex = 137
+        Me.LblSearch.Text = "Search Date"
+        '
+        'GroupBox9
+        '
+        Me.GroupBox9.Controls.Add(Me.TxtGUID)
+        Me.GroupBox9.Controls.Add(Me.Label9)
+        Me.GroupBox9.Controls.Add(Me.lblGUIDLength)
+        Me.GroupBox9.Controls.Add(Me.btnClearGUID)
+        Me.GroupBox9.Controls.Add(Me.Button17)
+        Me.GroupBox9.Controls.Add(Me.Btn_Override)
+        Me.GroupBox9.Location = New System.Drawing.Point(6, 602)
+        Me.GroupBox9.Name = "GroupBox9"
+        Me.GroupBox9.Size = New System.Drawing.Size(605, 127)
+        Me.GroupBox9.TabIndex = 145
+        Me.GroupBox9.TabStop = False
+        Me.GroupBox9.Text = " Manual GUID "
+        '
+        'TxtGUID
+        '
+        Me.TxtGUID.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.TxtGUID.ForeColor = System.Drawing.SystemColors.ControlText
+        Me.TxtGUID.Location = New System.Drawing.Point(16, 37)
+        Me.TxtGUID.Name = "TxtGUID"
+        Me.TxtGUID.Size = New System.Drawing.Size(393, 26)
+        Me.TxtGUID.TabIndex = 129
+        '
+        'Label9
+        '
+        Me.Label9.AutoSize = True
+        Me.Label9.Font = New System.Drawing.Font("Microsoft Sans Serif", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Label9.ForeColor = System.Drawing.SystemColors.ControlText
+        Me.Label9.Location = New System.Drawing.Point(18, 84)
+        Me.Label9.Name = "Label9"
+        Me.Label9.Size = New System.Drawing.Size(196, 17)
+        Me.Label9.TabIndex = 131
+        Me.Label9.Text = "36 characters including 4 x ""-"""
+        '
+        'lblGUIDLength
+        '
+        Me.lblGUIDLength.AutoSize = True
+        Me.lblGUIDLength.ForeColor = System.Drawing.SystemColors.ControlText
+        Me.lblGUIDLength.Location = New System.Drawing.Point(410, 43)
+        Me.lblGUIDLength.Name = "lblGUIDLength"
+        Me.lblGUIDLength.Size = New System.Drawing.Size(18, 20)
+        Me.lblGUIDLength.TabIndex = 139
+        Me.lblGUIDLength.Text = "0"
         '
         'btnClearGUID
         '
@@ -2057,12 +2362,24 @@ Partial Class FrmMain
         Me.btnClearGUID.FlatStyle = System.Windows.Forms.FlatStyle.Popup
         Me.btnClearGUID.Font = New System.Drawing.Font("Tahoma", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.btnClearGUID.ForeColor = System.Drawing.Color.Black
-        Me.btnClearGUID.Location = New System.Drawing.Point(383, 644)
+        Me.btnClearGUID.Location = New System.Drawing.Point(279, 68)
         Me.btnClearGUID.Name = "btnClearGUID"
         Me.btnClearGUID.Size = New System.Drawing.Size(130, 41)
         Me.btnClearGUID.TabIndex = 142
         Me.btnClearGUID.Text = "Clear GUID"
         Me.btnClearGUID.UseVisualStyleBackColor = False
+        '
+        'Button17
+        '
+        Me.Button17.BackColor = System.Drawing.SystemColors.ButtonFace
+        Me.Button17.FlatStyle = System.Windows.Forms.FlatStyle.Popup
+        Me.Button17.ForeColor = System.Drawing.Color.Black
+        Me.Button17.Location = New System.Drawing.Point(439, 33)
+        Me.Button17.Name = "Button17"
+        Me.Button17.Size = New System.Drawing.Size(130, 35)
+        Me.Button17.TabIndex = 140
+        Me.Button17.Text = "Make GUID"
+        Me.Button17.UseVisualStyleBackColor = False
         '
         'Btn_Override
         '
@@ -2071,7 +2388,7 @@ Partial Class FrmMain
         Me.Btn_Override.FlatStyle = System.Windows.Forms.FlatStyle.Popup
         Me.Btn_Override.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.Btn_Override.ForeColor = System.Drawing.Color.Black
-        Me.Btn_Override.Location = New System.Drawing.Point(543, 650)
+        Me.Btn_Override.Location = New System.Drawing.Point(439, 74)
         Me.Btn_Override.Name = "Btn_Override"
         Me.Btn_Override.Size = New System.Drawing.Size(130, 35)
         Me.Btn_Override.TabIndex = 141
@@ -2079,131 +2396,97 @@ Partial Class FrmMain
         Me.Btn_Override.UseVisualStyleBackColor = False
         Me.Btn_Override.Visible = False
         '
-        'Button17
+        'GroupBox8
         '
-        Me.Button17.BackColor = System.Drawing.SystemColors.ButtonFace
-        Me.Button17.FlatStyle = System.Windows.Forms.FlatStyle.Popup
-        Me.Button17.ForeColor = System.Drawing.Color.Black
-        Me.Button17.Location = New System.Drawing.Point(543, 609)
-        Me.Button17.Name = "Button17"
-        Me.Button17.Size = New System.Drawing.Size(130, 35)
-        Me.Button17.TabIndex = 140
-        Me.Button17.Text = "Make GUID"
-        Me.Button17.UseVisualStyleBackColor = False
+        Me.GroupBox8.Controls.Add(Me.TxtRcdC1)
+        Me.GroupBox8.Controls.Add(Me.Label17)
+        Me.GroupBox8.Location = New System.Drawing.Point(503, 15)
+        Me.GroupBox8.Name = "GroupBox8"
+        Me.GroupBox8.Size = New System.Drawing.Size(243, 142)
+        Me.GroupBox8.TabIndex = 144
+        Me.GroupBox8.TabStop = False
+        Me.GroupBox8.Text = "Channel RCDs "
         '
-        'lblGUIDLength
+        'TxtRcdC1
         '
-        Me.lblGUIDLength.AutoSize = True
-        Me.lblGUIDLength.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.lblGUIDLength.Location = New System.Drawing.Point(514, 619)
-        Me.lblGUIDLength.Name = "lblGUIDLength"
-        Me.lblGUIDLength.Size = New System.Drawing.Size(18, 20)
-        Me.lblGUIDLength.TabIndex = 139
-        Me.lblGUIDLength.Text = "0"
+        Me.TxtRcdC1.Location = New System.Drawing.Point(159, 47)
+        Me.TxtRcdC1.Name = "TxtRcdC1"
+        Me.TxtRcdC1.Size = New System.Drawing.Size(47, 26)
+        Me.TxtRcdC1.TabIndex = 2
+        Me.TxtRcdC1.Text = "30"
+        Me.TxtRcdC1.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
         '
-        'LblPOText
+        'Label17
         '
-        Me.LblPOText.AutoSize = True
-        Me.LblPOText.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.LblPOText.ForeColor = System.Drawing.Color.Fuchsia
-        Me.LblPOText.Location = New System.Drawing.Point(428, 111)
-        Me.LblPOText.Name = "LblPOText"
-        Me.LblPOText.Size = New System.Drawing.Size(535, 20)
-        Me.LblPOText.TabIndex = 138
-        Me.LblPOText.Text = "Enter a PO Number or the Begining of a PO Number to search for."
-        Me.LblPOText.Visible = False
+        Me.Label17.AutoSize = True
+        Me.Label17.Location = New System.Drawing.Point(17, 50)
+        Me.Label17.Name = "Label17"
+        Me.Label17.Size = New System.Drawing.Size(119, 20)
+        Me.Label17.TabIndex = 0
+        Me.Label17.Text = "Channel 1 {mA}"
         '
-        'LblSearch
+        'GroupBox7
         '
-        Me.LblSearch.AutoSize = True
-        Me.LblSearch.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.LblSearch.ForeColor = System.Drawing.Color.Fuchsia
-        Me.LblSearch.Location = New System.Drawing.Point(746, 39)
-        Me.LblSearch.Name = "LblSearch"
-        Me.LblSearch.Size = New System.Drawing.Size(110, 20)
-        Me.LblSearch.TabIndex = 137
-        Me.LblSearch.Text = "Search Date"
+        Me.GroupBox7.Controls.Add(Me.TxtRcdM2)
+        Me.GroupBox7.Controls.Add(Me.TxtRcdM1)
+        Me.GroupBox7.Controls.Add(Me.Label13)
+        Me.GroupBox7.Controls.Add(Me.Label12)
+        Me.GroupBox7.Location = New System.Drawing.Point(249, 15)
+        Me.GroupBox7.Name = "GroupBox7"
+        Me.GroupBox7.Size = New System.Drawing.Size(243, 142)
+        Me.GroupBox7.TabIndex = 143
+        Me.GroupBox7.TabStop = False
+        Me.GroupBox7.Text = " Master RCDs "
         '
-        'DateSummary
+        'TxtRcdM2
         '
-        Me.DateSummary.Format = System.Windows.Forms.DateTimePickerFormat.[Short]
-        Me.DateSummary.Location = New System.Drawing.Point(581, 34)
-        Me.DateSummary.Name = "DateSummary"
-        Me.DateSummary.Size = New System.Drawing.Size(135, 26)
-        Me.DateSummary.TabIndex = 134
+        Me.TxtRcdM2.Location = New System.Drawing.Point(159, 85)
+        Me.TxtRcdM2.Name = "TxtRcdM2"
+        Me.TxtRcdM2.Size = New System.Drawing.Size(47, 26)
+        Me.TxtRcdM2.TabIndex = 3
+        Me.TxtRcdM2.Text = "30"
+        Me.TxtRcdM2.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
         '
-        'TxtSummary
+        'TxtRcdM1
         '
-        Me.TxtSummary.Location = New System.Drawing.Point(572, 34)
-        Me.TxtSummary.Name = "TxtSummary"
-        Me.TxtSummary.Size = New System.Drawing.Size(144, 26)
-        Me.TxtSummary.TabIndex = 136
-        Me.TxtSummary.Visible = False
+        Me.TxtRcdM1.Location = New System.Drawing.Point(159, 47)
+        Me.TxtRcdM1.Name = "TxtRcdM1"
+        Me.TxtRcdM1.Size = New System.Drawing.Size(47, 26)
+        Me.TxtRcdM1.TabIndex = 2
+        Me.TxtRcdM1.Text = "10"
+        Me.TxtRcdM1.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
         '
-        'ChkSummary
+        'Label13
         '
-        Me.ChkSummary.Appearance = System.Windows.Forms.Appearance.Button
-        Me.ChkSummary.Location = New System.Drawing.Point(744, 66)
-        Me.ChkSummary.Name = "ChkSummary"
-        Me.ChkSummary.Size = New System.Drawing.Size(144, 42)
-        Me.ChkSummary.TabIndex = 135
-        Me.ChkSummary.Text = "Toggle Search"
-        Me.ChkSummary.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
-        Me.ChkSummary.UseVisualStyleBackColor = True
+        Me.Label13.AutoSize = True
+        Me.Label13.Location = New System.Drawing.Point(17, 88)
+        Me.Label13.Name = "Label13"
+        Me.Label13.Size = New System.Drawing.Size(119, 20)
+        Me.Label13.TabIndex = 1
+        Me.Label13.Text = "Channel 2 {mA}"
         '
-        'BtnSummary
+        'Label12
         '
-        Me.BtnSummary.Location = New System.Drawing.Point(572, 66)
-        Me.BtnSummary.Name = "BtnSummary"
-        Me.BtnSummary.Size = New System.Drawing.Size(144, 42)
-        Me.BtnSummary.TabIndex = 133
-        Me.BtnSummary.Text = "Get Summary"
-        Me.BtnSummary.UseVisualStyleBackColor = True
+        Me.Label12.AutoSize = True
+        Me.Label12.Location = New System.Drawing.Point(17, 50)
+        Me.Label12.Name = "Label12"
+        Me.Label12.Size = New System.Drawing.Size(119, 20)
+        Me.Label12.TabIndex = 0
+        Me.Label12.Text = "Channel 1 {mA}"
         '
         'BtnTestAudio
         '
-        Me.BtnTestAudio.Location = New System.Drawing.Point(1057, 529)
+        Me.BtnTestAudio.Location = New System.Drawing.Point(890, 693)
         Me.BtnTestAudio.Name = "BtnTestAudio"
-        Me.BtnTestAudio.Size = New System.Drawing.Size(84, 36)
+        Me.BtnTestAudio.Size = New System.Drawing.Size(135, 36)
         Me.BtnTestAudio.TabIndex = 132
         Me.BtnTestAudio.Text = "Test Audio"
         Me.BtnTestAudio.UseVisualStyleBackColor = True
         '
-        'Label9
-        '
-        Me.Label9.AutoSize = True
-        Me.Label9.Font = New System.Drawing.Font("Microsoft Sans Serif", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Label9.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Label9.Location = New System.Drawing.Point(116, 659)
-        Me.Label9.Name = "Label9"
-        Me.Label9.Size = New System.Drawing.Size(196, 17)
-        Me.Label9.TabIndex = 131
-        Me.Label9.Text = "36 characters including 4 x ""-"""
-        '
-        'Label11
-        '
-        Me.Label11.AutoSize = True
-        Me.Label11.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!)
-        Me.Label11.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Label11.Location = New System.Drawing.Point(6, 616)
-        Me.Label11.Name = "Label11"
-        Me.Label11.Size = New System.Drawing.Size(107, 20)
-        Me.Label11.TabIndex = 130
-        Me.Label11.Text = "Manual GUID"
-        '
-        'TxtGUID
-        '
-        Me.TxtGUID.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.TxtGUID.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.TxtGUID.Location = New System.Drawing.Point(120, 613)
-        Me.TxtGUID.Name = "TxtGUID"
-        Me.TxtGUID.Size = New System.Drawing.Size(393, 26)
-        Me.TxtGUID.TabIndex = 129
-        '
         'GroupBox6
         '
         Me.GroupBox6.Controls.Add(Me.ChkProdDev)
-        Me.GroupBox6.Location = New System.Drawing.Point(1031, 587)
+        Me.GroupBox6.Location = New System.Drawing.Point(1031, 629)
         Me.GroupBox6.Name = "GroupBox6"
         Me.GroupBox6.Size = New System.Drawing.Size(135, 100)
         Me.GroupBox6.TabIndex = 128
@@ -2226,11 +2509,11 @@ Partial Class FrmMain
         'Label18
         '
         Me.Label18.AutoSize = True
-        Me.Label18.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Label18.Font = New System.Drawing.Font("Microsoft Sans Serif", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.Label18.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Label18.Location = New System.Drawing.Point(172, 161)
+        Me.Label18.Location = New System.Drawing.Point(56, 129)
         Me.Label18.Name = "Label18"
-        Me.Label18.Size = New System.Drawing.Size(45, 13)
+        Me.Label18.Size = New System.Drawing.Size(59, 17)
         Me.Label18.TabIndex = 127
         Me.Label18.Text = "Timeout"
         '
@@ -2238,82 +2521,12 @@ Partial Class FrmMain
         '
         Me.TxtTimeout.Font = New System.Drawing.Font("Microsoft Sans Serif", 16.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.TxtTimeout.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.TxtTimeout.Location = New System.Drawing.Point(167, 177)
+        Me.TxtTimeout.Location = New System.Drawing.Point(130, 121)
         Me.TxtTimeout.Name = "TxtTimeout"
         Me.TxtTimeout.Size = New System.Drawing.Size(55, 32)
         Me.TxtTimeout.TabIndex = 126
         Me.TxtTimeout.Text = "500"
         Me.TxtTimeout.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
-        '
-        'LblScaleInUse
-        '
-        Me.LblScaleInUse.AutoSize = True
-        Me.LblScaleInUse.BackColor = System.Drawing.Color.Transparent
-        Me.LblScaleInUse.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.LblScaleInUse.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.LblScaleInUse.Location = New System.Drawing.Point(30, 196)
-        Me.LblScaleInUse.Name = "LblScaleInUse"
-        Me.LblScaleInUse.Size = New System.Drawing.Size(28, 13)
-        Me.LblScaleInUse.TabIndex = 125
-        Me.LblScaleInUse.Text = "(.95)"
-        Me.LblScaleInUse.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
-        '
-        'Label16
-        '
-        Me.Label16.AutoSize = True
-        Me.Label16.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Label16.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Label16.Location = New System.Drawing.Point(7, 177)
-        Me.Label16.Name = "Label16"
-        Me.Label16.Size = New System.Drawing.Size(75, 13)
-        Me.Label16.TabIndex = 124
-        Me.Label16.Text = "Scaling Factor"
-        '
-        'TxtMultiplier
-        '
-        Me.TxtMultiplier.Font = New System.Drawing.Font("Microsoft Sans Serif", 16.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.TxtMultiplier.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.TxtMultiplier.Location = New System.Drawing.Point(85, 177)
-        Me.TxtMultiplier.Name = "TxtMultiplier"
-        Me.TxtMultiplier.Size = New System.Drawing.Size(55, 32)
-        Me.TxtMultiplier.TabIndex = 123
-        Me.TxtMultiplier.Text = ".95"
-        Me.TxtMultiplier.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
-        '
-        'TxtCurrentSent
-        '
-        Me.TxtCurrentSent.AutoSize = True
-        Me.TxtCurrentSent.BackColor = System.Drawing.Color.Transparent
-        Me.TxtCurrentSent.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.TxtCurrentSent.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.TxtCurrentSent.Location = New System.Drawing.Point(29, 139)
-        Me.TxtCurrentSent.Name = "TxtCurrentSent"
-        Me.TxtCurrentSent.Size = New System.Drawing.Size(55, 13)
-        Me.TxtCurrentSent.TabIndex = 121
-        Me.TxtCurrentSent.Text = "(30 hh:hh)"
-        Me.TxtCurrentSent.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
-        '
-        'Label15
-        '
-        Me.Label15.AutoSize = True
-        Me.Label15.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Label15.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Label15.Location = New System.Drawing.Point(13, 120)
-        Me.Label15.Name = "Label15"
-        Me.Label15.Size = New System.Drawing.Size(86, 13)
-        Me.Label15.TabIndex = 120
-        Me.Label15.Text = "Trip Current (mA)"
-        '
-        'TxtSetCurrent
-        '
-        Me.TxtSetCurrent.Font = New System.Drawing.Font("Microsoft Sans Serif", 16.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.TxtSetCurrent.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.TxtSetCurrent.Location = New System.Drawing.Point(103, 120)
-        Me.TxtSetCurrent.Name = "TxtSetCurrent"
-        Me.TxtSetCurrent.Size = New System.Drawing.Size(55, 32)
-        Me.TxtSetCurrent.TabIndex = 119
-        Me.TxtSetCurrent.Text = "30"
-        Me.TxtSetCurrent.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
         '
         'GroupBox4
         '
@@ -2323,7 +2536,7 @@ Partial Class FrmMain
         Me.GroupBox4.Controls.Add(Me.rbAnyPhase)
         Me.GroupBox4.Font = New System.Drawing.Font("Microsoft Sans Serif", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.GroupBox4.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.GroupBox4.Location = New System.Drawing.Point(6, 15)
+        Me.GroupBox4.Location = New System.Drawing.Point(27, 15)
         Me.GroupBox4.Name = "GroupBox4"
         Me.GroupBox4.Size = New System.Drawing.Size(181, 99)
         Me.GroupBox4.TabIndex = 51
@@ -2372,17 +2585,38 @@ Partial Class FrmMain
         Me.rbAnyPhase.Text = "Any"
         Me.rbAnyPhase.UseVisualStyleBackColor = True
         '
+        'TabRelease
+        '
+        Me.TabRelease.Controls.Add(Me.releaseNotesText)
+        Me.TabRelease.Location = New System.Drawing.Point(28, 4)
+        Me.TabRelease.Name = "TabRelease"
+        Me.TabRelease.Size = New System.Drawing.Size(1170, 735)
+        Me.TabRelease.TabIndex = 2
+        Me.TabRelease.Text = "Release Notes"
+        Me.TabRelease.UseVisualStyleBackColor = True
+        '
+        'releaseNotesText
+        '
+        Me.releaseNotesText.Location = New System.Drawing.Point(19, 27)
+        Me.releaseNotesText.Multiline = True
+        Me.releaseNotesText.Name = "releaseNotesText"
+        Me.releaseNotesText.ReadOnly = True
+        Me.releaseNotesText.Size = New System.Drawing.Size(1138, 690)
+        Me.releaseNotesText.TabIndex = 0
+        '
         'Lbl_Server
         '
         Me.Lbl_Server.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.Lbl_Server.AutoSize = True
+        Me.Lbl_Server.Font = New System.Drawing.Font("Microsoft Sans Serif", 11.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.Lbl_Server.ForeColor = System.Drawing.Color.Red
-        Me.Lbl_Server.Location = New System.Drawing.Point(581, 8)
+        Me.Lbl_Server.Location = New System.Drawing.Point(1068, 5)
         Me.Lbl_Server.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.Lbl_Server.Name = "Lbl_Server"
-        Me.Lbl_Server.Size = New System.Drawing.Size(88, 15)
+        Me.Lbl_Server.Size = New System.Drawing.Size(108, 18)
         Me.Lbl_Server.TabIndex = 26
         Me.Lbl_Server.Text = "Not Connected"
+        Me.Lbl_Server.TextAlign = System.Drawing.ContentAlignment.MiddleRight
         '
         'PrintDocument11
         '
@@ -2435,7 +2669,7 @@ Partial Class FrmMain
         '
         Me.PicTimerHB.BackgroundImage = Global.RTP.My.Resources.Resources.circle_blue
         Me.PicTimerHB.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom
-        Me.PicTimerHB.Location = New System.Drawing.Point(782, 4)
+        Me.PicTimerHB.Location = New System.Drawing.Point(727, 1)
         Me.PicTimerHB.Name = "PicTimerHB"
         Me.PicTimerHB.Size = New System.Drawing.Size(25, 22)
         Me.PicTimerHB.TabIndex = 16
@@ -2445,7 +2679,7 @@ Partial Class FrmMain
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(7.0!, 15.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(1204, 759)
+        Me.ClientSize = New System.Drawing.Size(1204, 799)
         Me.Controls.Add(Me.LblEmail)
         Me.Controls.Add(Me.Lbl_Server)
         Me.Controls.Add(Me.TabControl1)
@@ -2459,7 +2693,7 @@ Partial Class FrmMain
         Me.MainMenuStrip = Me.MenuStrip1
         Me.Margin = New System.Windows.Forms.Padding(4)
         Me.Name = "FrmMain"
-        Me.Text = "RT Programmer"
+        Me.Text = "RTP 2"
         Me.MenuStrip1.ResumeLayout(False)
         Me.MenuStrip1.PerformLayout()
         Me.GroupBox1.ResumeLayout(False)
@@ -2515,10 +2749,20 @@ Partial Class FrmMain
         CType(Me.PicRTbarcode, System.ComponentModel.ISupportInitialize).EndInit()
         Me.TabUtil.ResumeLayout(False)
         Me.TabUtil.PerformLayout()
+        Me.GroupBox10.ResumeLayout(False)
+        Me.GroupBox10.PerformLayout()
+        Me.GroupBox9.ResumeLayout(False)
+        Me.GroupBox9.PerformLayout()
+        Me.GroupBox8.ResumeLayout(False)
+        Me.GroupBox8.PerformLayout()
+        Me.GroupBox7.ResumeLayout(False)
+        Me.GroupBox7.PerformLayout()
         Me.GroupBox6.ResumeLayout(False)
         Me.GroupBox6.PerformLayout()
         Me.GroupBox4.ResumeLayout(False)
         Me.GroupBox4.PerformLayout()
+        Me.TabRelease.ResumeLayout(False)
+        Me.TabRelease.PerformLayout()
         CType(Me.PicTimerHB, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
         Me.PerformLayout()
@@ -2586,7 +2830,6 @@ Partial Class FrmMain
     Friend WithEvents BtnBusPwr As Button
     Friend WithEvents BtnWifiConnect As Button
     Friend WithEvents BtnNext As Button
-    Friend WithEvents BtnPrevious As Button
     Friend WithEvents BtnRestart As Button
     Friend WithEvents LblVersion As Label
     Friend WithEvents BtnReadConfig As Button
@@ -2606,13 +2849,6 @@ Partial Class FrmMain
     Friend WithEvents rbAnyPhase As RadioButton
     Friend WithEvents Label18 As Label
     Friend WithEvents TxtTimeout As TextBox
-    Friend WithEvents LblScaleInUse As Label
-    Friend WithEvents Label16 As Label
-    Friend WithEvents TxtMultiplier As TextBox
-    Friend WithEvents TxtCurrentSent As Label
-    Friend WithEvents Label15 As Label
-    Friend WithEvents TxtSetCurrent As TextBox
-    Friend WithEvents LblPrompt As Label
     Friend WithEvents GroupBox5 As GroupBox
     Friend WithEvents LstWiFi As ListBox
     Friend WithEvents lblCurrentStep As Label
@@ -2639,7 +2875,6 @@ Partial Class FrmMain
     Friend WithEvents ChkProdDev As CheckBox
     Friend WithEvents Lbl_Server As Label
     Friend WithEvents Label9 As Label
-    Friend WithEvents Label11 As Label
     Friend WithEvents TxtGUID As TextBox
     Friend WithEvents BtnWriteMGuid As Button
     Friend WithEvents LblMguid As Label
@@ -2727,4 +2962,33 @@ Partial Class FrmMain
     Friend WithEvents Button4 As Button
     Friend WithEvents TTiPAddress As ToolStripStatusLabel
     Friend WithEvents BtnGetResult As Button
+    Friend WithEvents GroupBox7 As GroupBox
+    Friend WithEvents Label13 As Label
+    Friend WithEvents Label12 As Label
+    Friend WithEvents TxtRcdM2 As TextBox
+    Friend WithEvents TxtRcdM1 As TextBox
+    Friend WithEvents GroupBox8 As GroupBox
+    Friend WithEvents TxtRcdC1 As TextBox
+    Friend WithEvents Label17 As Label
+    Friend WithEvents GroupBox9 As GroupBox
+    Friend WithEvents GroupBox10 As GroupBox
+    Friend WithEvents LblScaleInUse As Label
+    Friend WithEvents Label16 As Label
+    Friend WithEvents TxtMultiplier As TextBox
+    Friend WithEvents TxtCurrentSent As Label
+    Friend WithEvents Label15 As Label
+    Friend WithEvents TxtSetCurrent As TextBox
+    Friend WithEvents BtnMaxChannel As Button
+    Friend WithEvents Button5 As Button
+    Friend WithEvents Btn10mA As Button
+    Friend WithEvents Btn30mA As Button
+    Friend WithEvents Btn100mA As Button
+    Friend WithEvents Btn500mA As Button
+    Friend WithEvents Btn300mA As Button
+    Friend WithEvents chkMasterNewDriver As CheckBox
+    Friend WithEvents chkCibNewDriver As CheckBox
+    Friend WithEvents TabRelease As TabPage
+    Friend WithEvents releaseNotesText As TextBox
+    Friend WithEvents chkOverrideWiFi As CheckBox
+    Friend WithEvents wiFIOverrideIP As MaskedTextBox
 End Class

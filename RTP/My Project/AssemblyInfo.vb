@@ -8,11 +8,11 @@ Imports System.Runtime.InteropServices
 
 ' Review the values of the assembly attributes
 
-<Assembly: AssemblyTitle("RTP")>
-<Assembly: AssemblyDescription("Rapid Test Programmer")>
+<Assembly: AssemblyTitle("RTP2")>
+<Assembly: AssemblyDescription("Rapid Test Programmer - Test Jig 2")>
 <Assembly: AssemblyCompany("Data Transformation")>
-<Assembly: AssemblyProduct("RTP")>
-<Assembly: AssemblyCopyright("Copyright ©  2024")>
+<Assembly: AssemblyProduct("RTP2")>
+<Assembly: AssemblyCopyright("Copyright ©  2025")>
 <Assembly: AssemblyTrademark("")>
 
 <Assembly: ComVisible(False)>
@@ -31,5 +31,5 @@ Imports System.Runtime.InteropServices
 ' by using the '*' as shown below:
 ' <Assembly: AssemblyVersion("1.0.*")>
 
-<Assembly: AssemblyVersion("1.2.0.2")>
-<Assembly: AssemblyFileVersion("1.2.0.2")>
+<Assembly: AssemblyVersion("1.0.0.2")>
+<Assembly: AssemblyFileVersion("1.0.0.2")>
