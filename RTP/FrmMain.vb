@@ -125,6 +125,8 @@ Public Class FrmMain
     Public S_LogFileText As String = ""
     Public BSuppressTimeWarning As Boolean
     Public SMasterType As String = "UNKNOWN"
+    Public cycleCounter As Integer = 0
+    Public cycleStopWatch As New Stopwatch
 
     Private Sub ExitToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ExitToolStripMenuItem.Click
         Me.Close()
@@ -171,7 +173,6 @@ Public Class FrmMain
         IntCurrentChannel = 1
         RtUnitChannel = IntCurrentChannel - 1 '*** Remove offset of 1 for 0 based unit channels
         LblChannel.Text = IntCurrentChannel.ToString
-
         '*** Appp version
         Dim SversionText As String = My.Application.Info.Version.Major & "." _
                 & My.Application.Info.Version.Minor & "." & My.Application.Info.Version.Build & "." & My.Application.Info.Version.Revision
@@ -188,7 +189,9 @@ Public Class FrmMain
         Dim releaseNotes As String = "RELEASE NOTES
 
 16/04/2025
+Update labels according to communications mode. (Wi-Fi or LAN)
 UI update. Some colours & layout changes.
+Add Read All mappings function.
 
 14/04/2025
 Added Wi-Fi IP address override
@@ -1497,6 +1500,7 @@ Added displaying of Relay Driver type in summary table (QCheck).
         '*** Disable button
         BtnConfig.Enabled = False
         Dim LogSaved As Integer = 0
+        Application.DoEvents()
 
         '*** Log activity
         StrTextToLog = "Discover Config"
@@ -1521,6 +1525,7 @@ Added displaying of Relay Driver type in summary table (QCheck).
         LogSaved = WriteLogFile(StrTextToLog)
         '*** Enable button
         BtnConfig.Enabled = True
+
     End Sub
     Private Function DiscoverTopology()
         '*** Connect to device
@@ -2391,6 +2396,7 @@ Added displaying of Relay Driver type in summary table (QCheck).
     Private Function TestStep() As Integer
         Dim LogSaved As Integer = 0
         Dim TestingLogOpen As Boolean = False
+
         Select Case ICurrentStep
             Case 1  '*** Connect to WIFI
                 '*** Log activity
@@ -5507,6 +5513,8 @@ FROM            dbo.NDB_Board INNER JOIN
             TxtIpAddress.Visible = True
             sIP = TxtIpAddress.Text
             TTiPAddress.ForeColor = Color.DarkViolet
+            Label4.Visible = False
+            Label6.Text = "Host Name"
 
             Dim pingNum As Integer = 0
             Dim pingNumEnd As Integer = 0
@@ -5548,6 +5556,8 @@ FROM            dbo.NDB_Board INNER JOIN
             BtnPingLan.Visible = False
             LblPingResult.Visible = False
             TxtIpAddress.Visible = False
+            Label4.Visible = True
+            Label6.Text = "SSID"
 
         End If
         Debug.Print("IP Address Set " & sIP)
@@ -5698,5 +5708,285 @@ FROM            dbo.NDB_Board INNER JOIN
 
     Private Sub chkOverrideWiFi_CheckedChanged(sender As Object, e As EventArgs) Handles chkOverrideWiFi.CheckedChanged
         SetIP()
+    End Sub
+
+    Private Sub btnReadAllMapping_Click(sender As Object, e As EventArgs) Handles btnReadAllMapping.Click
+        '*** Connect to device
+        '*** Make sure it is disconnected to start with
+        MakeConnection(sIP, False, iPort)
+
+        '** Clear debug window
+        Me.TxtDebug.Text = ""
+
+        '*** Enable connection and disable manual connection button
+        MakeConnection(sIP, True, iPort)
+        Me.btnReadAllMapping.Enabled = False
+
+
+        '*** Read RCD Mapping - ALL channels
+        Dim data2Send As String = ""
+        Dim commandLength As Integer = 4   '*** 0 based Length less 2 x Check sum bytes
+
+        Dim bytesForCRC(commandLength) As Byte
+
+        Dim myCRC_16 As New CRC_16()
+        '********** Command bytes
+        bytesForCRC(0) = 85         '** Header A
+        bytesForCRC(1) = 170        '** Header B
+        bytesForCRC(2) = &H7 '8  '** Command length with 2 x checksum
+        bytesForCRC(3) = &H0   '** Device address 0 for tester
+        bytesForCRC(4) = &HBC  '** Command instruction - Read all RCD Mappings
+
+        '*********** START Checksum calculation
+        Dim csum() As Byte = myCRC_16.ComputeChecksumBytes(bytesForCRC)
+        '************ END Checksum calculation
+
+        For x = 0 To commandLength
+            data2Send &= Chr(bytesForCRC(x))
+        Next
+        data2Send = data2Send & Chr(csum(0)) & Chr(csum(1))
+
+        Dim data2SendFormatted As String = ""
+        For x = 1 To Len(data2Send)
+            data2SendFormatted = data2SendFormatted & " " & Hex(Asc(Mid(data2Send, x, 1)))
+        Next
+
+        Debug.Print("Command: Read RCD Mapping - ALL channels 0xBC")
+        TxtDebug.Text = "Command: Read RCD Mapping - ALL channels 0xBC >" & data2SendFormatted & "< " & Len(data2Send).ToString
+
+        S_LogFileText = "_" & TxtMasterSSID.Text & "_" & TxtCIBid.Text
+        Connect(sIP, data2Send, 247, S_LogFileText, TxtOrderRef.Text)
+
+
+        '*** allow app to update graphics
+        Application.DoEvents()
+
+        '*** Disconnect and re-enable manual connect button.
+        MakeConnection(sIP, False, iPort)
+        Me.btnReadAllMapping.Enabled = True
+
+    End Sub
+
+    Private Sub btnMapChannel_Click(sender As Object, e As EventArgs) Handles btnMapChannel.Click
+        MakeConnection(sIP, False, iPort)
+
+        '** Clear debug window
+        Me.TxtDebug.Text = ""
+
+        '*** Enable connection and disable manual connection button
+        MakeConnection(sIP, True, iPort)
+        Me.btnMapChannel.Enabled = False
+
+
+        '*** Set RCD Mapping - single channel
+        Dim data2Send As String = ""
+        Dim commandLength As Integer = 6   '*** 0 based Length less 2 x Check sum bytes
+
+        Dim bytesForCRC(commandLength) As Byte
+
+        Dim myCRC_16 As New CRC_16()
+        '********** Command bytes
+        bytesForCRC(0) = 85    '** Header A
+        bytesForCRC(1) = 170   '** Header B
+        bytesForCRC(2) = &H9   '** Command length with 2 x checksum
+        bytesForCRC(3) = &H0   '** Device address 0 for tester
+        bytesForCRC(4) = &HBA  '** Command instruction - Set mapping
+
+        '********** Data
+        bytesForCRC(5) = (Val(LblChannel.Text) - 1)  '** Channel
+        bytesForCRC(6) = (Val(LblChannel.Text)) ' (Val(TxtRCD.Text))  '** RCD
+
+        '*********** START Checksum calculation
+        Dim csum() As Byte = myCRC_16.ComputeChecksumBytes(bytesForCRC)
+        '************ END Checksum calculation
+
+        For x = 0 To commandLength
+            data2Send &= Chr(bytesForCRC(x))
+        Next
+        data2Send = data2Send & Chr(csum(0)) & Chr(csum(1))
+
+        Dim data2SendFormatted As String = ""
+        For x = 1 To Len(data2Send)
+            data2SendFormatted = data2SendFormatted & " " & Hex(Asc(Mid(data2Send, x, 1)))
+        Next
+
+        Debug.Print("Command: Set RCD Mapping - single channel 0xBA for channel " & (Val(LblChannel.Text)).ToString & " = " & (Val(LblChannel.Text)).ToString)
+        TxtDebug.Text = "Command: Set RCD Mapping - single channel 0xBA for channel " & (Val(LblChannel.Text)).ToString & " = " & (Val(LblChannel.Text)).ToString
+
+        S_LogFileText = "_" & TxtMasterSSID.Text & "_" & TxtCIBid.Text
+        Connect(sIP, data2Send, 10, S_LogFileText, TxtOrderRef.Text)
+
+        '*** allow app to update graphics
+        Application.DoEvents()
+
+        '*** Disconnect and re-enable manual connect button.
+        MakeConnection(sIP, False, iPort)
+
+        Me.btnMapChannel.Enabled = True
+    End Sub
+
+    Private Sub btnReadChannel_Click(sender As Object, e As EventArgs) Handles btnReadChannel.Click
+        '*** Connect to device
+        '*** Make sure it is disconnected to start with
+        MakeConnection(sIP, False, iPort)
+
+        '** Clear debug window
+        Me.TxtDebug.Text = ""
+
+        '*** Enable connection and disable manual connection button
+        MakeConnection(sIP, True, iPort)
+        Me.btnReadChannel.Enabled = False
+
+
+        '*** Read RCD Mapping - single channel
+        Dim data2Send As String = ""
+        Dim commandLength As Integer = 5   '*** 0 based Length less 2 x Check sum bytes
+
+        Dim bytesForCRC(commandLength) As Byte
+
+        Dim myCRC_16 As New CRC_16()
+        '********** Command bytes
+        bytesForCRC(0) = 85         '** Header A
+        bytesForCRC(1) = 170        '** Header B
+        bytesForCRC(2) = &H8  '** Command length with 2 x checksum
+        bytesForCRC(3) = &H0   '** Device address 0 for tester
+        bytesForCRC(4) = &HBB  '** Command instruction - Read single channel map
+        '********** DAta
+        bytesForCRC(5) = (Val(LblChannel.Text) - 1)  '** Channel
+        '*********** START Checksum calculation
+        Dim csum() As Byte = myCRC_16.ComputeChecksumBytes(bytesForCRC)
+        '************ END Checksum calculation
+
+        For x = 0 To commandLength
+            data2Send &= Chr(bytesForCRC(x))
+        Next
+        data2Send = data2Send & Chr(csum(0)) & Chr(csum(1))
+
+        Dim data2SendFormatted As String = ""
+        For x = 1 To Len(data2Send)
+            data2SendFormatted = data2SendFormatted & " " & Hex(Asc(Mid(data2Send, x, 1)))
+        Next
+
+        Debug.Print("Command: Read RCD Mapping - single channel 0xBB for channel " & (Val(LblChannel.Text)).ToString)
+        TxtDebug.Text = "Command: Read RCD Mapping - single channel 0xBB for channel " & (Val(LblChannel.Text)).ToString
+
+        S_LogFileText = "_" & TxtMasterSSID.Text & "_" & TxtCIBid.Text
+        Connect(sIP, data2Send, 9, S_LogFileText, TxtOrderRef.Text)
+
+        '*** allow app to update graphics
+        Application.DoEvents()
+
+        '*** Disconnect and re-enable manual connect button.
+        MakeConnection(sIP, False, iPort)
+        Me.btnReadChannel.Enabled = True
+    End Sub
+
+    Private Sub btnClearMapping_Click(sender As Object, e As EventArgs) Handles btnClearMapping.Click
+        '*** Connect to device
+        '*** Make sure it is disconnected to start with
+        MakeConnection(sIP, False, iPort)
+
+        '** Clear debug window
+        Me.TxtDebug.Text = ""
+
+
+        Me.btnClearMapping.Enabled = False
+
+
+        '*** Clear RCD Mapping - all channels
+
+        Dim commandLength As Integer = 6   '*** 0 based Length less 2 x Check sum bytes
+
+        Dim bytesForCRC(commandLength) As Byte
+
+        Dim myCRC_16 As New CRC_16()
+
+        '*** Loop through all mapping values 0 - 239 // Uncomment loop & y variables
+        ' For y = 0 To 239
+        Dim data2Send As String = ""
+            '*** Enable connection and disable manual connection button
+            MakeConnection(sIP, True, iPort)
+            '********** Command bytes
+            bytesForCRC(0) = 85    '** Header A
+            bytesForCRC(1) = 170   '** Header B
+            bytesForCRC(2) = &H9   '** Command length with 2 x checksum
+            bytesForCRC(3) = &H0   '** Device address 0 for tester
+            bytesForCRC(4) = &HBA  '** Command instruction - Set mapping
+
+        '********** Data
+        bytesForCRC(5) = (Val(LblChannel.Text) - 1) 'y  '** Channel
+        bytesForCRC(6) = 0  '** RCD - set to zer0
+
+            '*********** START Checksum calculation
+            Dim csum() As Byte = myCRC_16.ComputeChecksumBytes(bytesForCRC)
+            '************ END Checksum calculation
+
+            For x = 0 To commandLength
+                data2Send &= Chr(bytesForCRC(x))
+            Next
+            data2Send = data2Send & Chr(csum(0)) & Chr(csum(1))
+
+            Dim data2SendFormatted As String = ""
+            For x = 1 To Len(data2Send)
+                data2SendFormatted = data2SendFormatted & " " & Hex(Asc(Mid(data2Send, x, 1)))
+            Next
+
+        Debug.Print("Command: Clearing RCD Mapping - single channel 0xBA for channel " & Val(LblChannel.Text)) '(y + 1).ToString)
+        TxtDebug.Text = "Command: Clear RCD Mapping - single channel 0xBA for channel " & Val(LblChannel.Text) '(y + 1).ToString
+
+        S_LogFileText = "_" & TxtMasterSSID.Text & "_" & TxtCIBid.Text
+            Connect(sIP, data2Send, 10, S_LogFileText, TxtOrderRef.Text)
+        TxtDebug.Text = "Cleared Channel " & Val(LblChannel.Text)  '(y + 1).ToString
+        System.Threading.Thread.Sleep(100)
+            '*** Disconnect
+            MakeConnection(sIP, False, iPort)
+            Application.DoEvents()
+
+        ' Next
+
+        '*** allow app to update graphics
+        Application.DoEvents()
+        'Re-enable manual connect button.
+        Me.btnClearMapping.Enabled = True
+    End Sub
+
+    Private Sub tmrCycleTest_Tick(sender As Object, e As EventArgs) Handles tmrCycleTest.Tick
+        tmrCycleTest.Enabled = False
+        tmrCycleTest.Interval = 25000
+        If chkCycleTest.Checked Then
+            TxtDebug.Text = "Cycle Testing Active"
+            tmrCycleTest.Enabled = True
+            cycleCounter += 1
+            chkCycleTest.Text = "Cycle Test (" & cycleCounter.ToString & ")"
+        Else
+            TxtDebug.Text = "Cycle Testing Stopped"
+        End If
+        ' BtnConfig.PerformClick()
+        BtnTrip.PerformClick()
+    End Sub
+
+    Private Sub chkCycleTest_CheckedChanged(sender As Object, e As EventArgs) Handles chkCycleTest.CheckedChanged
+
+        If chkCycleTest.Checked Then
+            If Not cycleStopWatch.IsRunning Then cycleStopWatch.Start()
+            TxtDebug.Text = "Cycle Testing Active"
+            tmrCycleTest.Enabled = True
+            tmrElapsedTime.Enabled = True
+        Else
+            cycleStopWatch.Stop()
+            cycleStopWatch.Reset()
+            tmrCycleTest.Enabled = False
+            TxtDebug.Text = "Cycle Testing Stopped"
+            chkCycleTest.Text = "Cycle Test"
+            cycleCounter = 0
+            elapsedTime.Text = "Elapsed"
+            tmrElapsedTime.Enabled = False
+        End If
+    End Sub
+
+    Private Sub tmrElapsedTime_Tick(sender As Object, e As EventArgs) Handles tmrElapsedTime.Tick
+        Dim ts As New TimeSpan
+        ts = cycleStopWatch.Elapsed
+        elapsedTime.Text = String.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10)
     End Sub
 End Class

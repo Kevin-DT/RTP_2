@@ -33,7 +33,7 @@
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
     <OpenBrowserOnPublish>false</OpenBrowserOnPublish>
-    <ApplicationRevision>17</ApplicationRevision>
+    <ApplicationRevision>18</ApplicationRevision>
     <ApplicationVersion>1.0.2.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -241,6 +241,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Rapid Test Logo.ico" />
+    <None Include="Resources\VAyR.gif" />
     <Content Include="RT Logo.ico" />
     <None Include="Resources\giphy.gif" />
     <None Include="Resources\grn tick.JPG" />
