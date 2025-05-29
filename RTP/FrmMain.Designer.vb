@@ -133,6 +133,7 @@ Partial Class FrmMain
         Me.ChkSound = New System.Windows.Forms.CheckBox()
         Me.ChkManCntrls = New System.Windows.Forms.CheckBox()
         Me.GrpManual = New System.Windows.Forms.GroupBox()
+        Me.Label10 = New System.Windows.Forms.Label()
         Me.elapsedTime = New System.Windows.Forms.Label()
         Me.chkCycleTest = New System.Windows.Forms.CheckBox()
         Me.btnClearMapping = New System.Windows.Forms.Button()
@@ -148,7 +149,6 @@ Partial Class FrmMain
         Me.Btn10mA = New System.Windows.Forms.Button()
         Me.Button5 = New System.Windows.Forms.Button()
         Me.BtnMaxChannel = New System.Windows.Forms.Button()
-        Me.LblScaleInUse = New System.Windows.Forms.Label()
         Me.Label16 = New System.Windows.Forms.Label()
         Me.TxtMultiplier = New System.Windows.Forms.TextBox()
         Me.TxtCurrentSent = New System.Windows.Forms.Label()
@@ -158,7 +158,6 @@ Partial Class FrmMain
         Me.Button4 = New System.Windows.Forms.Button()
         Me.Button2 = New System.Windows.Forms.Button()
         Me.Button1 = New System.Windows.Forms.Button()
-        Me.Label10 = New System.Windows.Forms.Label()
         Me.BtnWriteMGuid = New System.Windows.Forms.Button()
         Me.BtnSetMasterID = New System.Windows.Forms.Button()
         Me.BtnChDn = New System.Windows.Forms.Button()
@@ -174,6 +173,7 @@ Partial Class FrmMain
         Me.BtnFirmware = New System.Windows.Forms.Button()
         Me.LblChannel = New System.Windows.Forms.Label()
         Me.TxtDebug = New System.Windows.Forms.TextBox()
+        Me.LblScaleInUse = New System.Windows.Forms.Label()
         Me.ChkNHP = New System.Windows.Forms.CheckBox()
         Me.GroupBox2 = New System.Windows.Forms.GroupBox()
         Me.BtnPrintEquipLbl = New System.Windows.Forms.Button()
@@ -196,6 +196,7 @@ Partial Class FrmMain
         Me.LblType = New System.Windows.Forms.Label()
         Me.TabControl1 = New System.Windows.Forms.TabControl()
         Me.TabProg = New System.Windows.Forms.TabPage()
+        Me.lblCooling = New System.Windows.Forms.Label()
         Me.Button3 = New System.Windows.Forms.Button()
         Me.PicTick = New System.Windows.Forms.PictureBox()
         Me.LblStatus = New System.Windows.Forms.Label()
@@ -204,6 +205,11 @@ Partial Class FrmMain
         Me.LstWiFi = New System.Windows.Forms.ListBox()
         Me.PicRTbarcode = New System.Windows.Forms.PictureBox()
         Me.TabUtil = New System.Windows.Forms.TabPage()
+        Me.GroupBox11 = New System.Windows.Forms.GroupBox()
+        Me.txtDefaultOffset = New System.Windows.Forms.TextBox()
+        Me.txtDefaultLeakage = New System.Windows.Forms.TextBox()
+        Me.Label11 = New System.Windows.Forms.Label()
+        Me.Label14 = New System.Windows.Forms.Label()
         Me.GroupBox10 = New System.Windows.Forms.GroupBox()
         Me.LblPOText = New System.Windows.Forms.Label()
         Me.BtnSummary = New System.Windows.Forms.Button()
@@ -255,6 +261,7 @@ Partial Class FrmMain
         Me.PicTimerHB = New System.Windows.Forms.PictureBox()
         Me.tmrCycleTest = New System.Windows.Forms.Timer(Me.components)
         Me.tmrElapsedTime = New System.Windows.Forms.Timer(Me.components)
+        Me.tmrCoolingMode = New System.Windows.Forms.Timer(Me.components)
         PrinterToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.MenuStrip1.SuspendLayout()
         Me.GroupBox1.SuspendLayout()
@@ -302,6 +309,7 @@ Partial Class FrmMain
         Me.GroupBox5.SuspendLayout()
         CType(Me.PicRTbarcode, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.TabUtil.SuspendLayout()
+        Me.GroupBox11.SuspendLayout()
         Me.GroupBox10.SuspendLayout()
         Me.GroupBox9.SuspendLayout()
         Me.GroupBox8.SuspendLayout()
@@ -1523,8 +1531,6 @@ Partial Class FrmMain
         Me.GrpManual.Controls.Add(Me.Btn10mA)
         Me.GrpManual.Controls.Add(Me.Button5)
         Me.GrpManual.Controls.Add(Me.BtnMaxChannel)
-        Me.GrpManual.Controls.Add(Me.LblScaleInUse)
-        Me.GrpManual.Controls.Add(Me.Label16)
         Me.GrpManual.Controls.Add(Me.TxtMultiplier)
         Me.GrpManual.Controls.Add(Me.TxtCurrentSent)
         Me.GrpManual.Controls.Add(Me.Label15)
@@ -1548,6 +1554,8 @@ Partial Class FrmMain
         Me.GrpManual.Controls.Add(Me.BtnFirmware)
         Me.GrpManual.Controls.Add(Me.LblChannel)
         Me.GrpManual.Controls.Add(Me.TxtDebug)
+        Me.GrpManual.Controls.Add(Me.Label16)
+        Me.GrpManual.Controls.Add(Me.LblScaleInUse)
         Me.GrpManual.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.GrpManual.Location = New System.Drawing.Point(8, 492)
         Me.GrpManual.Name = "GrpManual"
@@ -1556,10 +1564,20 @@ Partial Class FrmMain
         Me.GrpManual.TabStop = False
         Me.GrpManual.Text = " Manual Controls "
         '
+        'Label10
+        '
+        Me.Label10.AutoSize = True
+        Me.Label10.Font = New System.Drawing.Font("Microsoft Sans Serif", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Label10.Location = New System.Drawing.Point(821, 97)
+        Me.Label10.Name = "Label10"
+        Me.Label10.Size = New System.Drawing.Size(67, 17)
+        Me.Label10.TabIndex = 32
+        Me.Label10.Text = "Channels"
+        '
         'elapsedTime
         '
         Me.elapsedTime.AutoSize = True
-        Me.elapsedTime.Location = New System.Drawing.Point(493, 96)
+        Me.elapsedTime.Location = New System.Drawing.Point(477, 96)
         Me.elapsedTime.Name = "elapsedTime"
         Me.elapsedTime.Size = New System.Drawing.Size(52, 15)
         Me.elapsedTime.TabIndex = 152
@@ -1568,7 +1586,7 @@ Partial Class FrmMain
         'chkCycleTest
         '
         Me.chkCycleTest.AutoSize = True
-        Me.chkCycleTest.Location = New System.Drawing.Point(493, 70)
+        Me.chkCycleTest.Location = New System.Drawing.Point(477, 70)
         Me.chkCycleTest.Name = "chkCycleTest"
         Me.chkCycleTest.Size = New System.Drawing.Size(81, 19)
         Me.chkCycleTest.TabIndex = 147
@@ -1578,7 +1596,7 @@ Partial Class FrmMain
         'btnClearMapping
         '
         Me.btnClearMapping.BackColor = System.Drawing.Color.LightCoral
-        Me.btnClearMapping.Location = New System.Drawing.Point(249, 116)
+        Me.btnClearMapping.Location = New System.Drawing.Point(243, 116)
         Me.btnClearMapping.Name = "btnClearMapping"
         Me.btnClearMapping.Size = New System.Drawing.Size(78, 43)
         Me.btnClearMapping.TabIndex = 151
@@ -1587,7 +1605,7 @@ Partial Class FrmMain
         '
         'btnReadChannel
         '
-        Me.btnReadChannel.Location = New System.Drawing.Point(249, 18)
+        Me.btnReadChannel.Location = New System.Drawing.Point(243, 18)
         Me.btnReadChannel.Name = "btnReadChannel"
         Me.btnReadChannel.Size = New System.Drawing.Size(78, 43)
         Me.btnReadChannel.TabIndex = 150
@@ -1597,7 +1615,7 @@ Partial Class FrmMain
         'btnMapChannel
         '
         Me.btnMapChannel.BackColor = System.Drawing.Color.LightCoral
-        Me.btnMapChannel.Location = New System.Drawing.Point(249, 67)
+        Me.btnMapChannel.Location = New System.Drawing.Point(243, 67)
         Me.btnMapChannel.Name = "btnMapChannel"
         Me.btnMapChannel.Size = New System.Drawing.Size(78, 43)
         Me.btnMapChannel.TabIndex = 149
@@ -1606,7 +1624,7 @@ Partial Class FrmMain
         '
         'btnReadAllMapping
         '
-        Me.btnReadAllMapping.Location = New System.Drawing.Point(169, 67)
+        Me.btnReadAllMapping.Location = New System.Drawing.Point(165, 67)
         Me.btnReadAllMapping.Name = "btnReadAllMapping"
         Me.btnReadAllMapping.Size = New System.Drawing.Size(78, 43)
         Me.btnReadAllMapping.TabIndex = 148
@@ -1616,7 +1634,7 @@ Partial Class FrmMain
         'chkOverrideWiFi
         '
         Me.chkOverrideWiFi.AutoSize = True
-        Me.chkOverrideWiFi.Location = New System.Drawing.Point(93, 119)
+        Me.chkOverrideWiFi.Location = New System.Drawing.Point(87, 119)
         Me.chkOverrideWiFi.Name = "chkOverrideWiFi"
         Me.chkOverrideWiFi.Size = New System.Drawing.Size(117, 19)
         Me.chkOverrideWiFi.TabIndex = 147
@@ -1626,7 +1644,7 @@ Partial Class FrmMain
         'wiFIOverrideIP
         '
         Me.wiFIOverrideIP.Font = New System.Drawing.Font("Microsoft Sans Serif", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.wiFIOverrideIP.Location = New System.Drawing.Point(93, 138)
+        Me.wiFIOverrideIP.Location = New System.Drawing.Point(87, 138)
         Me.wiFIOverrideIP.Mask = "000.000.000.000"
         Me.wiFIOverrideIP.Name = "wiFIOverrideIP"
         Me.wiFIOverrideIP.Size = New System.Drawing.Size(112, 23)
@@ -1635,7 +1653,7 @@ Partial Class FrmMain
         '
         'Btn500mA
         '
-        Me.Btn500mA.Location = New System.Drawing.Point(816, 122)
+        Me.Btn500mA.Location = New System.Drawing.Point(813, 122)
         Me.Btn500mA.Name = "Btn500mA"
         Me.Btn500mA.Size = New System.Drawing.Size(62, 32)
         Me.Btn500mA.TabIndex = 135
@@ -1644,7 +1662,7 @@ Partial Class FrmMain
         '
         'Btn300mA
         '
-        Me.Btn300mA.Location = New System.Drawing.Point(753, 122)
+        Me.Btn300mA.Location = New System.Drawing.Point(751, 122)
         Me.Btn300mA.Name = "Btn300mA"
         Me.Btn300mA.Size = New System.Drawing.Size(62, 32)
         Me.Btn300mA.TabIndex = 134
@@ -1653,7 +1671,7 @@ Partial Class FrmMain
         '
         'Btn100mA
         '
-        Me.Btn100mA.Location = New System.Drawing.Point(690, 122)
+        Me.Btn100mA.Location = New System.Drawing.Point(689, 122)
         Me.Btn100mA.Name = "Btn100mA"
         Me.Btn100mA.Size = New System.Drawing.Size(62, 32)
         Me.Btn100mA.TabIndex = 133
@@ -1671,7 +1689,7 @@ Partial Class FrmMain
         '
         'Btn10mA
         '
-        Me.Btn10mA.Location = New System.Drawing.Point(564, 122)
+        Me.Btn10mA.Location = New System.Drawing.Point(565, 122)
         Me.Btn10mA.Name = "Btn10mA"
         Me.Btn10mA.Size = New System.Drawing.Size(62, 32)
         Me.Btn10mA.TabIndex = 131
@@ -1696,39 +1714,26 @@ Partial Class FrmMain
         Me.BtnMaxChannel.Text = "Max"
         Me.BtnMaxChannel.UseVisualStyleBackColor = True
         '
-        'LblScaleInUse
-        '
-        Me.LblScaleInUse.AutoSize = True
-        Me.LblScaleInUse.BackColor = System.Drawing.Color.Transparent
-        Me.LblScaleInUse.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.LblScaleInUse.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.LblScaleInUse.Location = New System.Drawing.Point(468, 139)
-        Me.LblScaleInUse.Name = "LblScaleInUse"
-        Me.LblScaleInUse.Size = New System.Drawing.Size(28, 13)
-        Me.LblScaleInUse.TabIndex = 128
-        Me.LblScaleInUse.Text = "(.95)"
-        Me.LblScaleInUse.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
-        '
         'Label16
         '
         Me.Label16.AutoSize = True
         Me.Label16.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.Label16.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Label16.Location = New System.Drawing.Point(466, 122)
+        Me.Label16.Location = New System.Drawing.Point(456, 122)
         Me.Label16.Name = "Label16"
-        Me.Label16.Size = New System.Drawing.Size(34, 13)
+        Me.Label16.Size = New System.Drawing.Size(46, 13)
         Me.Label16.TabIndex = 127
-        Me.Label16.Text = "Scale"
+        Me.Label16.Text = "Offset %"
         '
         'TxtMultiplier
         '
         Me.TxtMultiplier.Font = New System.Drawing.Font("Microsoft Sans Serif", 16.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.TxtMultiplier.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.TxtMultiplier.Location = New System.Drawing.Point(503, 122)
+        Me.TxtMultiplier.ForeColor = System.Drawing.Color.Blue
+        Me.TxtMultiplier.Location = New System.Drawing.Point(504, 122)
         Me.TxtMultiplier.Name = "TxtMultiplier"
         Me.TxtMultiplier.Size = New System.Drawing.Size(55, 32)
         Me.TxtMultiplier.TabIndex = 126
-        Me.TxtMultiplier.Text = ".95"
+        Me.TxtMultiplier.Text = "0"
         Me.TxtMultiplier.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
         '
         'TxtCurrentSent
@@ -1737,7 +1742,7 @@ Partial Class FrmMain
         Me.TxtCurrentSent.BackColor = System.Drawing.Color.Transparent
         Me.TxtCurrentSent.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.TxtCurrentSent.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.TxtCurrentSent.Location = New System.Drawing.Point(346, 139)
+        Me.TxtCurrentSent.Location = New System.Drawing.Point(321, 139)
         Me.TxtCurrentSent.Name = "TxtCurrentSent"
         Me.TxtCurrentSent.Size = New System.Drawing.Size(55, 13)
         Me.TxtCurrentSent.TabIndex = 124
@@ -1749,17 +1754,17 @@ Partial Class FrmMain
         Me.Label15.AutoSize = True
         Me.Label15.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.Label15.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Label15.Location = New System.Drawing.Point(382, 122)
+        Me.Label15.Location = New System.Drawing.Point(321, 122)
         Me.Label15.Name = "Label15"
-        Me.Label15.Size = New System.Drawing.Size(22, 13)
+        Me.Label15.Size = New System.Drawing.Size(73, 13)
         Me.Label15.TabIndex = 123
-        Me.Label15.Text = "mA"
+        Me.Label15.Text = "Leakage (mA)"
         '
         'TxtSetCurrent
         '
         Me.TxtSetCurrent.Font = New System.Drawing.Font("Microsoft Sans Serif", 16.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.TxtSetCurrent.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.TxtSetCurrent.Location = New System.Drawing.Point(408, 122)
+        Me.TxtSetCurrent.ForeColor = System.Drawing.Color.Blue
+        Me.TxtSetCurrent.Location = New System.Drawing.Point(399, 122)
         Me.TxtSetCurrent.Name = "TxtSetCurrent"
         Me.TxtSetCurrent.Size = New System.Drawing.Size(55, 32)
         Me.TxtSetCurrent.TabIndex = 122
@@ -1768,7 +1773,7 @@ Partial Class FrmMain
         '
         'BtnGetResult
         '
-        Me.BtnGetResult.Location = New System.Drawing.Point(489, 18)
+        Me.BtnGetResult.Location = New System.Drawing.Point(477, 18)
         Me.BtnGetResult.Name = "BtnGetResult"
         Me.BtnGetResult.Size = New System.Drawing.Size(78, 43)
         Me.BtnGetResult.TabIndex = 36
@@ -1778,7 +1783,7 @@ Partial Class FrmMain
         'Button4
         '
         Me.Button4.BackColor = System.Drawing.Color.LightCoral
-        Me.Button4.Location = New System.Drawing.Point(409, 67)
+        Me.Button4.Location = New System.Drawing.Point(399, 67)
         Me.Button4.Name = "Button4"
         Me.Button4.Size = New System.Drawing.Size(78, 43)
         Me.Button4.TabIndex = 35
@@ -1803,20 +1808,10 @@ Partial Class FrmMain
         Me.Button1.Text = "Ch 1"
         Me.Button1.UseVisualStyleBackColor = True
         '
-        'Label10
-        '
-        Me.Label10.AutoSize = True
-        Me.Label10.Font = New System.Drawing.Font("Microsoft Sans Serif", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Label10.Location = New System.Drawing.Point(821, 97)
-        Me.Label10.Name = "Label10"
-        Me.Label10.Size = New System.Drawing.Size(67, 17)
-        Me.Label10.TabIndex = 32
-        Me.Label10.Text = "Channels"
-        '
         'BtnWriteMGuid
         '
         Me.BtnWriteMGuid.BackColor = System.Drawing.Color.LightCoral
-        Me.BtnWriteMGuid.Location = New System.Drawing.Point(329, 67)
+        Me.BtnWriteMGuid.Location = New System.Drawing.Point(321, 67)
         Me.BtnWriteMGuid.Name = "BtnWriteMGuid"
         Me.BtnWriteMGuid.Size = New System.Drawing.Size(78, 43)
         Me.BtnWriteMGuid.TabIndex = 31
@@ -1826,7 +1821,7 @@ Partial Class FrmMain
         'BtnSetMasterID
         '
         Me.BtnSetMasterID.BackColor = System.Drawing.Color.LightCoral
-        Me.BtnSetMasterID.Location = New System.Drawing.Point(89, 67)
+        Me.BtnSetMasterID.Location = New System.Drawing.Point(87, 67)
         Me.BtnSetMasterID.Name = "BtnSetMasterID"
         Me.BtnSetMasterID.Size = New System.Drawing.Size(78, 43)
         Me.BtnSetMasterID.TabIndex = 30
@@ -1857,7 +1852,7 @@ Partial Class FrmMain
         Me.LblChLimit.AutoSize = True
         Me.LblChLimit.Font = New System.Drawing.Font("Microsoft Sans Serif", 18.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.LblChLimit.ForeColor = System.Drawing.Color.Blue
-        Me.LblChLimit.Location = New System.Drawing.Point(841, 74)
+        Me.LblChLimit.Location = New System.Drawing.Point(830, 74)
         Me.LblChLimit.Name = "LblChLimit"
         Me.LblChLimit.Size = New System.Drawing.Size(27, 29)
         Me.LblChLimit.TabIndex = 27
@@ -1865,7 +1860,7 @@ Partial Class FrmMain
         '
         'BtnReadConfig
         '
-        Me.BtnReadConfig.Location = New System.Drawing.Point(169, 18)
+        Me.BtnReadConfig.Location = New System.Drawing.Point(165, 18)
         Me.BtnReadConfig.Name = "BtnReadConfig"
         Me.BtnReadConfig.Size = New System.Drawing.Size(78, 43)
         Me.BtnReadConfig.TabIndex = 22
@@ -1902,7 +1897,7 @@ Partial Class FrmMain
         '
         'BtnCIBID
         '
-        Me.BtnCIBID.Location = New System.Drawing.Point(409, 18)
+        Me.BtnCIBID.Location = New System.Drawing.Point(399, 18)
         Me.BtnCIBID.Name = "BtnCIBID"
         Me.BtnCIBID.Size = New System.Drawing.Size(78, 43)
         Me.BtnCIBID.TabIndex = 19
@@ -1911,7 +1906,7 @@ Partial Class FrmMain
         '
         'BtnMguid
         '
-        Me.BtnMguid.Location = New System.Drawing.Point(329, 18)
+        Me.BtnMguid.Location = New System.Drawing.Point(321, 18)
         Me.BtnMguid.Name = "BtnMguid"
         Me.BtnMguid.Size = New System.Drawing.Size(78, 43)
         Me.BtnMguid.TabIndex = 18
@@ -1920,7 +1915,7 @@ Partial Class FrmMain
         '
         'BtnConfig
         '
-        Me.BtnConfig.Location = New System.Drawing.Point(89, 18)
+        Me.BtnConfig.Location = New System.Drawing.Point(87, 18)
         Me.BtnConfig.Name = "BtnConfig"
         Me.BtnConfig.Size = New System.Drawing.Size(78, 43)
         Me.BtnConfig.TabIndex = 1
@@ -1954,6 +1949,19 @@ Partial Class FrmMain
         Me.TxtDebug.Name = "TxtDebug"
         Me.TxtDebug.Size = New System.Drawing.Size(880, 114)
         Me.TxtDebug.TabIndex = 17
+        '
+        'LblScaleInUse
+        '
+        Me.LblScaleInUse.AutoSize = True
+        Me.LblScaleInUse.BackColor = System.Drawing.Color.Transparent
+        Me.LblScaleInUse.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.LblScaleInUse.ForeColor = System.Drawing.SystemColors.ControlText
+        Me.LblScaleInUse.Location = New System.Drawing.Point(456, 139)
+        Me.LblScaleInUse.Name = "LblScaleInUse"
+        Me.LblScaleInUse.Size = New System.Drawing.Size(37, 13)
+        Me.LblScaleInUse.TabIndex = 128
+        Me.LblScaleInUse.Text = "(0 mA)"
+        Me.LblScaleInUse.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
         '
         'ChkNHP
         '
@@ -2182,6 +2190,7 @@ Partial Class FrmMain
         '
         'TabProg
         '
+        Me.TabProg.Controls.Add(Me.lblCooling)
         Me.TabProg.Controls.Add(Me.Button3)
         Me.TabProg.Controls.Add(Me.PicTick)
         Me.TabProg.Controls.Add(Me.ChkSound)
@@ -2214,6 +2223,18 @@ Partial Class FrmMain
         Me.TabProg.TabIndex = 0
         Me.TabProg.Text = "Programming"
         Me.TabProg.UseVisualStyleBackColor = True
+        '
+        'lblCooling
+        '
+        Me.lblCooling.AutoSize = True
+        Me.lblCooling.Font = New System.Drawing.Font("Microsoft Sans Serif", 14.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lblCooling.ForeColor = System.Drawing.Color.Red
+        Me.lblCooling.Location = New System.Drawing.Point(403, 467)
+        Me.lblCooling.Name = "lblCooling"
+        Me.lblCooling.Size = New System.Drawing.Size(315, 24)
+        Me.lblCooling.TabIndex = 117
+        Me.lblCooling.Text = "Cooling Mode. Testing Disabled."
+        Me.lblCooling.Visible = False
         '
         'Button3
         '
@@ -2291,6 +2312,7 @@ Partial Class FrmMain
         '
         'TabUtil
         '
+        Me.TabUtil.Controls.Add(Me.GroupBox11)
         Me.TabUtil.Controls.Add(Me.GroupBox10)
         Me.TabUtil.Controls.Add(Me.GroupBox9)
         Me.TabUtil.Controls.Add(Me.GroupBox8)
@@ -2305,8 +2327,55 @@ Partial Class FrmMain
         Me.TabUtil.Padding = New System.Windows.Forms.Padding(3)
         Me.TabUtil.Size = New System.Drawing.Size(1170, 781)
         Me.TabUtil.TabIndex = 1
-        Me.TabUtil.Text = "Utilities"
+        Me.TabUtil.Text = "Settings"
         Me.TabUtil.UseVisualStyleBackColor = True
+        '
+        'GroupBox11
+        '
+        Me.GroupBox11.Controls.Add(Me.txtDefaultOffset)
+        Me.GroupBox11.Controls.Add(Me.txtDefaultLeakage)
+        Me.GroupBox11.Controls.Add(Me.Label11)
+        Me.GroupBox11.Controls.Add(Me.Label14)
+        Me.GroupBox11.Location = New System.Drawing.Point(712, 17)
+        Me.GroupBox11.Name = "GroupBox11"
+        Me.GroupBox11.Size = New System.Drawing.Size(243, 142)
+        Me.GroupBox11.TabIndex = 147
+        Me.GroupBox11.TabStop = False
+        Me.GroupBox11.Text = " Leakage Settings "
+        '
+        'txtDefaultOffset
+        '
+        Me.txtDefaultOffset.Location = New System.Drawing.Point(159, 85)
+        Me.txtDefaultOffset.Name = "txtDefaultOffset"
+        Me.txtDefaultOffset.Size = New System.Drawing.Size(47, 26)
+        Me.txtDefaultOffset.TabIndex = 3
+        Me.txtDefaultOffset.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
+        '
+        'txtDefaultLeakage
+        '
+        Me.txtDefaultLeakage.Location = New System.Drawing.Point(159, 47)
+        Me.txtDefaultLeakage.Name = "txtDefaultLeakage"
+        Me.txtDefaultLeakage.Size = New System.Drawing.Size(47, 26)
+        Me.txtDefaultLeakage.TabIndex = 2
+        Me.txtDefaultLeakage.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
+        '
+        'Label11
+        '
+        Me.Label11.AutoSize = True
+        Me.Label11.Location = New System.Drawing.Point(17, 88)
+        Me.Label11.Name = "Label11"
+        Me.Label11.Size = New System.Drawing.Size(81, 20)
+        Me.Label11.TabIndex = 1
+        Me.Label11.Text = "Offset (%)"
+        '
+        'Label14
+        '
+        Me.Label14.AutoSize = True
+        Me.Label14.Location = New System.Drawing.Point(17, 50)
+        Me.Label14.Name = "Label14"
+        Me.Label14.Size = New System.Drawing.Size(109, 20)
+        Me.Label14.TabIndex = 0
+        Me.Label14.Text = "Leakage (mA)"
         '
         'GroupBox10
         '
@@ -2316,7 +2385,7 @@ Partial Class FrmMain
         Me.GroupBox10.Controls.Add(Me.TxtSummary)
         Me.GroupBox10.Controls.Add(Me.DateSummary)
         Me.GroupBox10.Controls.Add(Me.LblSearch)
-        Me.GroupBox10.Location = New System.Drawing.Point(757, 15)
+        Me.GroupBox10.Location = New System.Drawing.Point(622, 602)
         Me.GroupBox10.Name = "GroupBox10"
         Me.GroupBox10.Size = New System.Drawing.Size(376, 142)
         Me.GroupBox10.TabIndex = 146
@@ -2392,7 +2461,7 @@ Partial Class FrmMain
         Me.GroupBox9.Controls.Add(Me.Btn_Override)
         Me.GroupBox9.Location = New System.Drawing.Point(6, 602)
         Me.GroupBox9.Name = "GroupBox9"
-        Me.GroupBox9.Size = New System.Drawing.Size(605, 127)
+        Me.GroupBox9.Size = New System.Drawing.Size(605, 142)
         Me.GroupBox9.TabIndex = 145
         Me.GroupBox9.TabStop = False
         Me.GroupBox9.Text = " Manual GUID "
@@ -2411,7 +2480,7 @@ Partial Class FrmMain
         Me.Label9.AutoSize = True
         Me.Label9.Font = New System.Drawing.Font("Microsoft Sans Serif", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.Label9.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Label9.Location = New System.Drawing.Point(18, 84)
+        Me.Label9.Location = New System.Drawing.Point(18, 94)
         Me.Label9.Name = "Label9"
         Me.Label9.Size = New System.Drawing.Size(196, 17)
         Me.Label9.TabIndex = 131
@@ -2435,7 +2504,7 @@ Partial Class FrmMain
         Me.btnClearGUID.FlatStyle = System.Windows.Forms.FlatStyle.Popup
         Me.btnClearGUID.Font = New System.Drawing.Font("Tahoma", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.btnClearGUID.ForeColor = System.Drawing.Color.Black
-        Me.btnClearGUID.Location = New System.Drawing.Point(279, 68)
+        Me.btnClearGUID.Location = New System.Drawing.Point(279, 78)
         Me.btnClearGUID.Name = "btnClearGUID"
         Me.btnClearGUID.Size = New System.Drawing.Size(130, 41)
         Me.btnClearGUID.TabIndex = 142
@@ -2461,7 +2530,7 @@ Partial Class FrmMain
         Me.Btn_Override.FlatStyle = System.Windows.Forms.FlatStyle.Popup
         Me.Btn_Override.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.Btn_Override.ForeColor = System.Drawing.Color.Black
-        Me.Btn_Override.Location = New System.Drawing.Point(439, 74)
+        Me.Btn_Override.Location = New System.Drawing.Point(439, 84)
         Me.Btn_Override.Name = "Btn_Override"
         Me.Btn_Override.Size = New System.Drawing.Size(130, 35)
         Me.Btn_Override.TabIndex = 141
@@ -2473,7 +2542,7 @@ Partial Class FrmMain
         '
         Me.GroupBox8.Controls.Add(Me.TxtRcdC1)
         Me.GroupBox8.Controls.Add(Me.Label17)
-        Me.GroupBox8.Location = New System.Drawing.Point(503, 15)
+        Me.GroupBox8.Location = New System.Drawing.Point(463, 15)
         Me.GroupBox8.Name = "GroupBox8"
         Me.GroupBox8.Size = New System.Drawing.Size(243, 142)
         Me.GroupBox8.TabIndex = 144
@@ -2504,7 +2573,7 @@ Partial Class FrmMain
         Me.GroupBox7.Controls.Add(Me.TxtRcdM1)
         Me.GroupBox7.Controls.Add(Me.Label13)
         Me.GroupBox7.Controls.Add(Me.Label12)
-        Me.GroupBox7.Location = New System.Drawing.Point(249, 15)
+        Me.GroupBox7.Location = New System.Drawing.Point(214, 15)
         Me.GroupBox7.Name = "GroupBox7"
         Me.GroupBox7.Size = New System.Drawing.Size(243, 142)
         Me.GroupBox7.TabIndex = 143
@@ -2549,7 +2618,7 @@ Partial Class FrmMain
         '
         'BtnTestAudio
         '
-        Me.BtnTestAudio.Location = New System.Drawing.Point(890, 693)
+        Me.BtnTestAudio.Location = New System.Drawing.Point(1029, 739)
         Me.BtnTestAudio.Name = "BtnTestAudio"
         Me.BtnTestAudio.Size = New System.Drawing.Size(135, 36)
         Me.BtnTestAudio.TabIndex = 132
@@ -2584,17 +2653,17 @@ Partial Class FrmMain
         Me.Label18.AutoSize = True
         Me.Label18.Font = New System.Drawing.Font("Microsoft Sans Serif", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.Label18.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Label18.Location = New System.Drawing.Point(56, 129)
+        Me.Label18.Location = New System.Drawing.Point(27, 125)
         Me.Label18.Name = "Label18"
-        Me.Label18.Size = New System.Drawing.Size(59, 17)
+        Me.Label18.Size = New System.Drawing.Size(118, 34)
         Me.Label18.TabIndex = 127
-        Me.Label18.Text = "Timeout"
+        Me.Label18.Text = "Leakage Timeout" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "in Milliseconds"
         '
         'TxtTimeout
         '
         Me.TxtTimeout.Font = New System.Drawing.Font("Microsoft Sans Serif", 16.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.TxtTimeout.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.TxtTimeout.Location = New System.Drawing.Point(130, 121)
+        Me.TxtTimeout.Location = New System.Drawing.Point(153, 125)
         Me.TxtTimeout.Name = "TxtTimeout"
         Me.TxtTimeout.Size = New System.Drawing.Size(55, 32)
         Me.TxtTimeout.TabIndex = 126
@@ -2754,6 +2823,9 @@ Partial Class FrmMain
         'tmrElapsedTime
         '
         '
+        'tmrCoolingMode
+        '
+        '
         'FrmMain
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(7.0!, 15.0!)
@@ -2828,6 +2900,8 @@ Partial Class FrmMain
         CType(Me.PicRTbarcode, System.ComponentModel.ISupportInitialize).EndInit()
         Me.TabUtil.ResumeLayout(False)
         Me.TabUtil.PerformLayout()
+        Me.GroupBox11.ResumeLayout(False)
+        Me.GroupBox11.PerformLayout()
         Me.GroupBox10.ResumeLayout(False)
         Me.GroupBox10.PerformLayout()
         Me.GroupBox9.ResumeLayout(False)
@@ -3078,4 +3152,11 @@ Partial Class FrmMain
     Friend WithEvents tmrCycleTest As Timer
     Friend WithEvents elapsedTime As Label
     Friend WithEvents tmrElapsedTime As Timer
+    Friend WithEvents tmrCoolingMode As Timer
+    Friend WithEvents lblCooling As Label
+    Friend WithEvents GroupBox11 As GroupBox
+    Friend WithEvents txtDefaultOffset As TextBox
+    Friend WithEvents txtDefaultLeakage As TextBox
+    Friend WithEvents Label11 As Label
+    Friend WithEvents Label14 As Label
 End Class

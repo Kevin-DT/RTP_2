@@ -128,6 +128,9 @@ Public Class FrmMain
     Public cycleCounter As Integer = 0
     Public cycleStopWatch As New Stopwatch
 
+    '*** COOLING MODE
+    Public coolingStopWatch As New Stopwatch
+    Public inCoolingMode As Boolean 
     Private Sub ExitToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ExitToolStripMenuItem.Click
         Me.Close()
 
@@ -164,6 +167,7 @@ Public Class FrmMain
         If StrDefaultMaster <> "" Then ChkSkipMaster.Text = "Skip Master (Use " & StrDefaultMaster & ")"
         TSLogPath.Text = StrLogPath
         Initialise()
+        GetDefaults()
         ClearResults()
         '*** Start Wifi Check
         TmrWifi.Enabled = True
@@ -187,16 +191,21 @@ Public Class FrmMain
 
         '***** RELEASE NOTES
         Dim releaseNotes As String = "RELEASE NOTES
+25/05/2025 1.0.0.4
+Changed offset calulation to a percentage so it is easier to understand
+Added default values for Leakage & Offset percentage
+Added defaults to Save/Load functions.
+Fix crash on test before config read.
 
-16/04/2025
+16/04/2025 1.0.0.3
 Update labels according to communications mode. (Wi-Fi or LAN)
 UI update. Some colours & layout changes.
 Add Read All mappings function.
 
-14/04/2025
+14/04/2025 1.0.0.2
 Added Wi-Fi IP address override
 
-19/03/2025
+19/03/2025 1.0.0.1
 Added support for New Relay Driver detection and saving driver type to RT Database.
 Auto select checkboxes for New Drivers. Can be overriden if required.
 Added displaying of Relay Driver type in summary table (QCheck).
@@ -226,6 +235,7 @@ Added displaying of Relay Driver type in summary table (QCheck).
                         For Each currentField In currentRow
                             If rowCount = 0 And fieldCount = 0 Then StrDefaultMaster = currentField
                             If rowCount = 1 And fieldCount = 0 Then StrLogPath = currentField
+
                         Next
                         rowCount += 1
                         fieldCount = 0
@@ -344,7 +354,7 @@ Added displaying of Relay Driver type in summary table (QCheck).
         If wiFIOverrideIP.Text = "" Then TxtIpAddress.Text = "192.168.004.001"
         'wiFIOverrideIP
         '*** Write data to file
-        FileOpen(AutoSaveFileNumber, DataFile, OpenMode.Output)
+        FileOpen(AutoSaveFileNumber, DataFile, OpenMode.Output) '** C:\ats\rtp\RT_Autosave.cfg
         PrintLine(AutoSaveFileNumber, "User" & "," & TxtUser.Text)
         PrintLine(AutoSaveFileNumber, "OrderNo" & "," & TxtOrderRef.Text)
         PrintLine(AutoSaveFileNumber, "Purchaser" & "," & TxtPurchaser.Text)
@@ -374,6 +384,10 @@ Added displaying of Relay Driver type in summary table (QCheck).
         '*** New Wi-Fi override
         PrintLine(AutoSaveFileNumber, "OverrideIP" & "," & wiFIOverrideIP.Text)
         PrintLine(AutoSaveFileNumber, "OverrideChecked" & "," & chkOverrideWiFi.Checked.ToString)
+        '**** New default percentage & leakage values
+        PrintLine(AutoSaveFileNumber, "DefaultLeakage" & "," & txtDefaultLeakage.Text)
+        PrintLine(AutoSaveFileNumber, "DefaultOffset" & "," & txtDefaultOffset.Text)
+
 
         'ChkBLE
         '*** Close file 
@@ -385,6 +399,69 @@ Added displaying of Relay Driver type in summary table (QCheck).
         Dim SaveResult As Integer = SaveData()
 
     End Sub
+    Function GetDefaults() As Integer
+        Dim RowCount As Integer = 1
+        Dim ReturnData As Integer = 1
+        '*** Get data
+        Dim TmpChkMaster As String = ""
+        Dim StrTempSSID As String = ""
+        Dim TmpChkCIB As String = ""
+        Dim StrTempCIB As String = ""
+        Dim StrTempIPAddress As String = ""
+        Dim StrOverrideIPAddress As String = ""
+
+        Try
+            Using MyReader As New Microsoft.VisualBasic.FileIO.TextFieldParser(DataFile)
+                MyReader.TextFieldType = FileIO.FieldType.Delimited
+                MyReader.SetDelimiters(",")
+                Dim currentRow As String()
+
+                Dim fieldCount As Integer = 0
+                While Not MyReader.EndOfData
+                    Try
+                        currentRow = MyReader.ReadFields()
+
+                        Dim currentField As String
+                        Dim Leakage As String = "30"
+                        Dim offset As String
+                        For Each currentField In currentRow
+                            '*** RCD values
+                            If RowCount = 23 And fieldCount = 1 Then TxtRcdM1.Text = currentField
+                            If RowCount = 24 And fieldCount = 1 Then TxtRcdM2.Text = currentField
+                            If RowCount = 25 And fieldCount = 1 Then TxtRcdC1.Text = currentField
+                            '*** New Leakage Defaults
+                            If RowCount = 28 And fieldCount = 1 Then
+                                Leakage = currentField
+                                txtDefaultLeakage.Text = Leakage
+                                TxtSetCurrent.Text = Leakage
+                            End If
+                            If RowCount = 29 And fieldCount = 1 Then
+                                offset = currentField
+                                txtDefaultOffset.Text = offset
+                                TxtMultiplier.Text = offset
+                                LblScaleInUse.Text = "(" & (Val(Leakage) * (Val(offset) / 100)) & " mA)"
+                            End If
+
+                            fieldCount = +1
+                        Next
+                        RowCount += 1
+                        fieldCount = 0
+                    Catch ex As _
+                    Microsoft.VisualBasic.FileIO.MalformedLineException
+                        MsgBox("Line " & ex.Message &
+                        "is not valid and will be skipped.")
+
+                    End Try
+                End While
+            End Using
+        Catch fileNotFound As System.IO.FileNotFoundException
+            'Error handling here. Load default values etc
+            MsgBox("No Configuration File Found.", vbCritical + vbOKOnly, "File not found")
+        End Try
+        '*** END get data
+
+        Return ReturnData
+    End Function
     Function ReloadDataFile() As Integer
         Dim RowCount As Integer = 1
         Dim ReturnData As Integer = 1
@@ -408,6 +485,8 @@ Added displaying of Relay Driver type in summary table (QCheck).
                         currentRow = MyReader.ReadFields()
 
                         Dim currentField As String
+                        Dim Leakage As String = "30"
+                        Dim offset As String
                         For Each currentField In currentRow
                             'User
                             If RowCount = 1 And fieldCount = 1 Then TxtUser.Text = currentField
@@ -446,6 +525,18 @@ Added displaying of Relay Driver type in summary table (QCheck).
                             '*** New Wi-Fi override
                             If RowCount = 26 And fieldCount = 1 Then StrOverrideIPAddress = currentField
                             If RowCount = 27 And fieldCount = 1 Then chkOverrideWiFi.Checked = CBool(currentField)
+                            '*** New Leakage Defaults
+                            If RowCount = 28 And fieldCount = 1 Then
+                                Leakage = currentField
+                                txtDefaultLeakage.Text = Leakage
+                                TxtSetCurrent.Text = Leakage
+                            End If
+                            If RowCount = 29 And fieldCount = 1 Then
+                                offset = currentField
+                                txtDefaultOffset.Text = offset
+                                TxtMultiplier.Text = offset
+                                LblScaleInUse.Text = "(" & (Val(Leakage) * (Val(offset) / 100)) & " mA)"
+                            End If
 
                             fieldCount = +1
                         Next
@@ -461,7 +552,7 @@ Added displaying of Relay Driver type in summary table (QCheck).
             End Using
         Catch fileNotFound As System.IO.FileNotFoundException
             'Error handling here. Load default values etc
-            MsgBox("No printer selected." & vbNewLine & "Please select a printer before continuing.", vbCritical + vbOKOnly, "File not found")
+            MsgBox("No Configuration File Found.", vbCritical + vbOKOnly, "File not found")
         End Try
         '*** END get data
         Application.DoEvents()
@@ -812,12 +903,13 @@ Added displaying of Relay Driver type in summary table (QCheck).
                 NetStream.Write(data, 0, data.Length)
                 Application.DoEvents()
 
+                '** Response Delay
                 '*** Delay reading response buffer
-                Dim sleepDelay As Integer = 1500
+                Dim sleepDelay As Integer ' = 1500
 
                 Select Case FrmMain.StrCommandInUse
-                    Case "81"
-                        sleepDelay = 1200'500
+                    Case "81"   '*** Fetch Result
+                        sleepDelay = 1700'500
                     Case "92", "DA", "EB"
                         sleepDelay = 1500
                     Case "EA"   'Long delay to account for reading from CIB - time delay for additional comms hop
@@ -1006,6 +1098,15 @@ Added displaying of Relay Driver type in summary table (QCheck).
                                 Connect += vbNewLine & sError & " " & sChannel
                             Else
                                 Connect += vbNewLine & sError & " " & sChannel & " " & sDuration & " " & "Current leaked " & sCurrent
+                                If (Val(Strings.Right(sDuration, 3)) >= 400 And Val(sCurrent >= 250)) Then
+                                    '*** Start Cooling Timer
+                                    '** Search for "Stop cooling mode after set time" for cooling control code
+                                    FrmMain.tmrCoolingMode.Enabled = True
+                                    If Not FrmMain.coolingStopWatch.IsRunning Then FrmMain.coolingStopWatch.Start()
+                                    FrmMain.lblCooling.Visible = True
+                                Else
+                                    Debug.Print(sDuration & " " & sCurrent)
+                                End If
                             End If
 
                             ' If debugGUID <> "" Then PrintLine(debugFileNumber, debugTime & "SSID [RT_" & debugSSID & "] GUID [" & debugGUID & "]")
@@ -1429,7 +1530,7 @@ Added displaying of Relay Driver type in summary table (QCheck).
             Case "80", "81"
                 Debug.Print(CMD & " or 81 Should equal " & StrResultArray(5))
                 '*** Do test - Trip RCD
-                TxtDebug.Text = "Trip RCD " & StrRawPacket
+                TxtDebug.Text = "Get Result Trip RCD: " & StrRawPacket '& " <"
 
                 RT_Decode = StrResultArray(13)
 
@@ -1993,14 +2094,17 @@ Added displaying of Relay Driver type in summary table (QCheck).
         BtnTrip.Enabled = False
         StrCommandInUse = "80"
         Dim StrResult As String = TripRCD(Val(TxtSetCurrent.Text))
-        StrCommandInUse = "81"
-        StrResult = GetTripResult()
-        Dim Decoded As String = RT_Decode("81", StrResult)
+        If UCase(StrResult) <> "ERR" Then
+            StrCommandInUse = "81"
+            StrResult = GetTripResult()
+            Dim Decoded As String = RT_Decode("81", StrResult)
+        End If
         BtnTrip.Enabled = True
         BoolManTrip = False
 
     End Sub
     Private Function TripRCD(Optional ByVal TripCurrent = 30) As String
+        Dim StrResult As String = "ERR"
         Dim LogSaved As Integer = 0
         If IntMasterType > 0 Then
             '*** Log activity
@@ -2017,7 +2121,7 @@ Added displaying of Relay Driver type in summary table (QCheck).
             '*** Enable connection and disable manual connection button
             MakeConnection(sIP, True, iPort)
             StrCommandInUse = "80"
-            Dim StrResult As String = DoTest(TripCurrent)
+            StrResult = DoTest(TripCurrent)
             '*** allow app to Update graphics
             Application.DoEvents()
 
@@ -2038,10 +2142,11 @@ Added displaying of Relay Driver type in summary table (QCheck).
             StrTextToLog = Decoded
             LogSaved = WriteLogFile(StrTextToLog)
 
-            Return StrResult
+
         Else
             MsgBox("Please get configuration first", vbOKOnly + vbCritical, "Cannot continue")
         End If
+        Return StrResult
     End Function
     Function GetResult() As String
         Dim iResult As String = 0
@@ -2146,7 +2251,11 @@ Added displaying of Relay Driver type in summary table (QCheck).
         Dim iSelectedChannel As Integer = Microsoft.VisualBasic.Val(LblChannel.Text)
         Dim iChannelLimit As Integer = Microsoft.VisualBasic.Val(LblChLimit.Text) ' - 1
         Dim UseMicroAmp As Boolean = True
-
+        Select Case TripCurrent
+            Case 0, > 500
+                TripCurrent = 30
+                TxtSetCurrent.Text = "30"
+        End Select
         '*** If channel number is valid
         If IsNumeric(LblChannel.Text) Then
             If iSelectedChannel >= 0 And iSelectedChannel <= iChannelLimit Then
@@ -2183,24 +2292,34 @@ Added displaying of Relay Driver type in summary table (QCheck).
                 bytesForCRC(4) = &H80       '** Command instruction - Commence test 
                 '****************** Above is standard
                 Dim shtCurrent As Single = TripCurrent '*** (Val(TxtSetCurrent.Text)) '*** New trip current parameter
+                If TxtMultiplier.Text = "" Then TxtMultiplier.Text = "0"
                 Dim shtMulti As Single = (Val(TxtMultiplier.Text))
-
+                ''*** New to calulate direct percentage
+                If shtMulti > 10 Then
+                    shtMulti = 0
+                    TxtMultiplier.Text = "0"
+                End If
+                '***
+                If shtMulti > 0 Then shtMulti = shtMulti / 100
                 '*** 12/10/2020
                 '** Relay check mode
                 '*** If just testing relay operation reduce trip current
                 If B_RelayCheck Then
                     shtCurrent = 3  'mA
                 End If
+                Dim offsetCurrent As Single = shtCurrent * shtMulti
 
                 If SMasterType = "RTMC8" Then UseMicroAmp = False
                 If UseMicroAmp Then
                     '****
                     '**** 18/03/2020  Disable override for testing
                     '   shtMulti = 1
-                    shtCurrent = shtCurrent / shtMulti
+                    If shtMulti > 0 Then shtCurrent += shtCurrent * shtMulti
                     '****
                     shtCurrent *= 10
                     If shtCurrent > 5000 Then shtCurrent = 5000
+                Else
+                    If shtCurrent > 150 Then shtCurrent = 150
                 End If
 
 
@@ -2215,10 +2334,10 @@ Added displaying of Relay Driver type in summary table (QCheck).
 
                 '****
                 '**** 18/03/2020  Disable override for testing
-                If shtMulti = 1 Then
-                    LblScaleInUse.Text = "(1)"
+                If shtMulti = 0 Then
+                    LblScaleInUse.Text = "(+ 0%)"
                 Else
-                    LblScaleInUse.Text = "(" & TxtMultiplier.Text & ")"
+                    LblScaleInUse.Text = "(" & offsetCurrent & " mA)"
                 End If
                 'Added to Update display
                 'LblScaleInUse.Text = "(" & TxtMultiplier.Text & ")"
@@ -2295,7 +2414,7 @@ Added displaying of Relay Driver type in summary table (QCheck).
 
                 Debug.Print("Command: Commence Test 0x80 on channel " & (Hex(Val(LblChannel.Text)))) 'Chr("&H" & boardNumber.ToString)
                 ' Connect("169.254.1.1", data2Send, 7)
-
+                TxtDebug.Text = "Command:Commence Test 0x80 >" & data2SendFormatted & "< " & Len(data2Send).ToString
                 S_LogFileText = "_" & TxtMasterSSID.Text & "_" & TxtCIBid.Text
                 StrCommandInUse = "80"
                 iResult = Connect(sIP, data2Send, 7, S_LogFileText, TxtOrderRef.Text)
@@ -5952,7 +6071,7 @@ FROM            dbo.NDB_Board INNER JOIN
 
     Private Sub tmrCycleTest_Tick(sender As Object, e As EventArgs) Handles tmrCycleTest.Tick
         tmrCycleTest.Enabled = False
-        tmrCycleTest.Interval = 25000
+        tmrCycleTest.Interval = 20000
         If chkCycleTest.Checked Then
             TxtDebug.Text = "Cycle Testing Active"
             tmrCycleTest.Enabled = True
@@ -5970,6 +6089,7 @@ FROM            dbo.NDB_Board INNER JOIN
         If chkCycleTest.Checked Then
             If Not cycleStopWatch.IsRunning Then cycleStopWatch.Start()
             TxtDebug.Text = "Cycle Testing Active"
+            tmrCycleTest.Interval = 1   '*** Start timer at 1 so first test is immediate (timer sets itself to 20 seconds)
             tmrCycleTest.Enabled = True
             tmrElapsedTime.Enabled = True
         Else
@@ -5979,14 +6099,34 @@ FROM            dbo.NDB_Board INNER JOIN
             TxtDebug.Text = "Cycle Testing Stopped"
             chkCycleTest.Text = "Cycle Test"
             cycleCounter = 0
-            elapsedTime.Text = "Elapsed"
+            elapsedTime.Text = "Ready."
             tmrElapsedTime.Enabled = False
         End If
     End Sub
-
+    
     Private Sub tmrElapsedTime_Tick(sender As Object, e As EventArgs) Handles tmrElapsedTime.Tick
         Dim ts As New TimeSpan
         ts = cycleStopWatch.Elapsed
         elapsedTime.Text = String.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10)
     End Sub
+
+    Private Sub tmrCoolingMode_Tick(sender As Object, e As EventArgs) Handles tmrCoolingMode.Tick
+        '** Search for "Start Cooling Timer" for timer trigger code
+        Dim ts As New TimeSpan
+        BtnTrip.Enabled = False
+        lblCooling.Visible = True
+        ts = coolingStopWatch.Elapsed
+        lblCooling.Text = String.Format("Cooling Mode. Testing Disabled: {0:0}.{1:0}", ts.Seconds, ts.Milliseconds / 100)
+        ' Debug.Print("************************ COOLING MODE ***************************")
+        '*** Stop cooling mode after set time
+        If ts.Seconds >= 30 Then
+            tmrCoolingMode.Enabled = False
+            coolingStopWatch.Stop()
+            coolingStopWatch.Reset()
+            lblCooling.Visible = False
+            BtnTrip.Enabled = True
+            TxtDebug.Text += vbCrLf & vbCrLf & "*** COOLING MODE FINISHED AT " & ts.Seconds.ToString & " Seconds ***"
+        End If
+    End Sub
+
 End Class
