@@ -20,7 +20,7 @@
 
             Next
             table(i) = value
-            ' Debug.Print("CRC-16: " & table(i))
+            Debug.Print("CRC-16: " & i.ToString & " " & table(i))
         Next
     End Sub
     Public Function DisplayResult(sData As String, append As Boolean, pollSuccess As Integer, iErrCode As Integer) As Integer

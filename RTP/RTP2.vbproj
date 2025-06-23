@@ -75,10 +75,10 @@
     <ApplicationIcon>RT Logo.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>1CA89F458F430B542796160438EAE68A99958534</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>F952505572386D41379F6E71E3509E925CEF910C</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>RTP_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestKeyFile>RTP2_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <GenerateManifests>true</GenerateManifests>
@@ -237,6 +237,7 @@
     </None>
     <None Include="App.config" />
     <None Include="packages.config" />
+    <None Include="RTP2_TemporaryKey.pfx" />
     <None Include="RTP_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>

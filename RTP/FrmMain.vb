@@ -130,7 +130,7 @@ Public Class FrmMain
 
     '*** COOLING MODE
     Public coolingStopWatch As New Stopwatch
-    Public inCoolingMode As Boolean 
+    Public inCoolingMode As Boolean
     Private Sub ExitToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ExitToolStripMenuItem.Click
         Me.Close()
 
@@ -191,6 +191,10 @@ Public Class FrmMain
 
         '***** RELEASE NOTES
         Dim releaseNotes As String = "RELEASE NOTES
+23/06/2025 (Unpublished)
+Added cycle timer edit value & save load.
+Accounted for cooling cycle when running cycle timer.
+
 25/05/2025 1.0.0.4
 Changed offset calulation to a percentage so it is easier to understand
 Added default values for Leakage & Offset percentage
@@ -298,7 +302,7 @@ Added displaying of Relay Driver type in summary table (QCheck).
         End If
         Return StrPrinterName
     End Function
-    Private Sub FrmMain_Resize(sender As Object, e As EventArgs) Handles Me.Resize
+    Private Sub FrmMain_Resize(sender As Object, e As EventArgs) Handles MyBase.Resize
         Me.Text = "RT Programmer [ " & Me.Width.ToString & " x " & Me.Height.ToString & "]"
 
     End Sub
@@ -387,6 +391,8 @@ Added displaying of Relay Driver type in summary table (QCheck).
         '**** New default percentage & leakage values
         PrintLine(AutoSaveFileNumber, "DefaultLeakage" & "," & txtDefaultLeakage.Text)
         PrintLine(AutoSaveFileNumber, "DefaultOffset" & "," & txtDefaultOffset.Text)
+        '*** Cycle Test time in seconds
+        PrintLine(AutoSaveFileNumber, "CycleTimer" & "," & Trim(txtCycleInterval.Text))
 
 
         'ChkBLE
@@ -537,6 +543,8 @@ Added displaying of Relay Driver type in summary table (QCheck).
                                 TxtMultiplier.Text = offset
                                 LblScaleInUse.Text = "(" & (Val(Leakage) * (Val(offset) / 100)) & " mA)"
                             End If
+                            '*** New Wi-Fi override
+                            If RowCount = 30 And fieldCount = 1 Then txtCycleInterval.Text = currentField
 
                             fieldCount = +1
                         Next
@@ -600,6 +608,7 @@ Added displaying of Relay Driver type in summary table (QCheck).
                         S_Item = "Hidden"
                     Else
                         S_Item = item.Name
+                        Debug.Print("Signal " & item.SignalStrength.ToString)
                         '***
                         If Strings.Left(S_Item, 3) = "RT_" Then
                             LstWiFi.Items.Add(S_Item)
@@ -695,6 +704,9 @@ Added displaying of Relay Driver type in summary table (QCheck).
         For x = 1 To Len(data2Send)
             data2SendFormatted = data2SendFormatted & " " & Hex(Asc(Mid(data2Send, x, 1)))
         Next
+
+        '*** This is Debug yyyymmdd file
+        WriteLogFile("Sending: " & Trim(data2SendFormatted))
 
         Debug.Print("Command: Read Firmware Version 0x92")
         StrTextToLog = "Getting Frimware Version"
@@ -1098,7 +1110,7 @@ Added displaying of Relay Driver type in summary table (QCheck).
                                 Connect += vbNewLine & sError & " " & sChannel
                             Else
                                 Connect += vbNewLine & sError & " " & sChannel & " " & sDuration & " " & "Current leaked " & sCurrent
-                                If (Val(Strings.Right(sDuration, 3)) >= 400 And Val(sCurrent >= 250)) Then
+                                If (Val(Strings.Right(sDuration, 3)) >= 300 And Val(sCurrent >= 250)) Then
                                     '*** Start Cooling Timer
                                     '** Search for "Stop cooling mode after set time" for cooling control code
                                     FrmMain.tmrCoolingMode.Enabled = True
@@ -1145,9 +1157,9 @@ Added displaying of Relay Driver type in summary table (QCheck).
                                     '****
                                     '*** Current  
                                     sCurrent = "0"
-                                Dim tmpData As String = data(10).ToString("X2") & data(9).ToString("X2")
-                                Dim RealResult As Long = Convert.ToUInt64(tmpData, 16)
-                                sCurrent = (RealResult / 10).ToString
+                                    Dim tmpData As String = data(10).ToString("X2") & data(9).ToString("X2")
+                                    Dim RealResult As Long = Convert.ToUInt64(tmpData, 16)
+                                    sCurrent = (RealResult / 10).ToString
 
                                     '****
                                     '*** 18/12/2019
@@ -1490,7 +1502,7 @@ Added displaying of Relay Driver type in summary table (QCheck).
                 End Try
                 If Byte3OK Then
                     For x = 1 To IntResponseLength
-                           TmpString += StrResultArray(x)
+                        TmpString += StrResultArray(x)
                     Next
                     TxtDebug.Text += vbNewLine & "Configuration " & TmpString
                     '*** decode some info
@@ -1511,7 +1523,7 @@ Added displaying of Relay Driver type in summary table (QCheck).
                             IntMasterType = MC8
                             If StrResultArray(9) IsNot Nothing Then
                                 IntMaxChannel = CInt("&H" & (Trim(StrResultArray(8))))
-
+                                LblChLimit.Text = IntMaxChannel.ToString
                             End If
                         Case Else
                             LblType.Text = "Unknown" '*** Type 3
@@ -1671,6 +1683,9 @@ Added displaying of Relay Driver type in summary table (QCheck).
             data2SendFormatted = data2SendFormatted & " " & Hex(Asc(Mid(data2Send, x, 1)))
         Next
 
+        '*** This is Debug yyyymmdd file
+        WriteLogFile("Sending: " & Trim(data2SendFormatted))
+
         Debug.Print("Command: Discover topology 0xEA")
         TxtDebug.Text = "Command: Discover topology 0xEA"
 
@@ -1732,6 +1747,9 @@ Added displaying of Relay Driver type in summary table (QCheck).
             data2SendFormatted = data2SendFormatted & " " & Hex(Asc(Mid(data2Send, x, 1)))
         Next
 
+        '*** This is Debug yyyymmdd file
+        WriteLogFile("Sending: " & Trim(data2SendFormatted))
+
         Debug.Print("Command:Read GUID 0xBE")
         TxtDebug.Text = "Command:Read GUID 0xBE >" & data2SendFormatted & "< " & Len(data2Send).ToString
 
@@ -1781,12 +1799,12 @@ Added displaying of Relay Driver type in summary table (QCheck).
 
     Private Sub BtnCIBID_Click(sender As Object, e As EventArgs) Handles BtnCIBID.Click
         Dim LogSaved As Integer = 0
-
+        Dim cibNumber As String = Trim(txtCIBGUID.Text)
         '*** Log activity
         StrTextToLog = "Get CIB GUID"
         LogSaved = WriteLogFile(StrTextToLog)
         StrCommandInUse = "BE"
-        Dim StrResult As String = ReadGuid("1")
+        Dim StrResult As String = ReadGuid(cibNumber)
 
         '*** If logging to this file is needed in other areas either replicate the file name or make it global
         '*** OK here only for now.
@@ -1868,8 +1886,10 @@ Added displaying of Relay Driver type in summary table (QCheck).
         TxtDebug.Text = " Command:Read Bus Powered 0xDA"
         'Connect(" 169.254.1.1", data2Send, 8)
 
+        '*** This is Debug yyyymmdd file
+        WriteLogFile("Sending: " & Trim(data2SendFormatted))
 
-        StrTextToLog = " Check Bus Power"
+        StrTextToLog = " Check Bus Power:"
         S_LogFileText = " _" & TxtMasterSSID.Text & " _" & TxtCIBid.Text
         Dim StrResult As String = Connect(sIP, data2Send, 8, S_LogFileText, TxtOrderRef.Text)
         Debug.Print(" ****** Bus Power " & StrResult)
@@ -1974,7 +1994,7 @@ Added displaying of Relay Driver type in summary table (QCheck).
         End If
 
         TmrWifi.Enabled = False
-        For x = 0 To 0
+        For x = 0 To 3
             LblStatus.Text = "Trying to connect to " & StrConnectionID & " (" & (x + 1).ToString & ")"
             Application.DoEvents()
             ConnectWiFi = WiFiAutoConnect(StrConnectionID, StrRTpassword)
@@ -2040,6 +2060,9 @@ Added displaying of Relay Driver type in summary table (QCheck).
         For x = 1 To Len(data2Send)
             data2SendFormatted = data2SendFormatted & " " & Hex(Asc(Mid(data2Send, x, 1)))
         Next
+
+        '*** This is Debug yyyymmdd file
+        WriteLogFile("Sending: " & Trim(data2SendFormatted))
 
         Debug.Print("Command: Read topology 0xEB")
         TxtDebug.Text = "Command: Read topology 0xEB"
@@ -2233,6 +2256,9 @@ Added displaying of Relay Driver type in summary table (QCheck).
             data2SendFormatted = data2SendFormatted & " " & Hex(Asc(Mid(data2Send, x, 1)))
         Next
 
+        '*** This is Debug yyyymmdd file
+        WriteLogFile("Sending Get Trip Result: " & Trim(data2SendFormatted))
+
         Debug.Print("Command: Fetch Result 0x81")
         TxtDebug.Text = "Command: Fetch Result 0x81"
         'Connect("169.254.1.1", data2Send, 14)
@@ -2411,6 +2437,10 @@ Added displaying of Relay Driver type in summary table (QCheck).
                     data2SendFormatted = data2SendFormatted & " " & Hex(Asc(Mid(data2Send, x, 1)))
                 Next
                 '*** Test Reply should be 55 aa 08 00 da 01 8c dd to 0xDA Read Test Bus Powered
+
+                '*** This is Debug yyyymmdd file
+                WriteLogFile("Sending Trip RCD: " & Trim(data2SendFormatted))
+
 
                 Debug.Print("Command: Commence Test 0x80 on channel " & (Hex(Val(LblChannel.Text)))) 'Chr("&H" & boardNumber.ToString)
                 ' Connect("169.254.1.1", data2Send, 7)
@@ -5774,11 +5804,12 @@ FROM            dbo.NDB_Board INNER JOIN
 
     Private Sub Button4_Click(sender As Object, e As EventArgs) Handles Button4.Click
         '***** WRITE MASTER GUID
+        Dim cibNumber As String = Trim(txtCIBGUID.Text)
         Dim G As Guid
         Dim GuidString As String = G.ToString
         GuidString = Microsoft.VisualBasic.Left("MRF_MECHANICAL_RELAY_" & Trim(TxtCIBid.Text) & "_" & Format(Now(), "ddMMyyyy"), 36)
         '*** Write GUID
-        WriteGUID(GuidString, "1")
+        WriteGUID(GuidString, cibNumber)
     End Sub
 
     Private Sub BtnGetResult_Click(sender As Object, e As EventArgs) Handles BtnGetResult.Click
@@ -5869,6 +5900,9 @@ FROM            dbo.NDB_Board INNER JOIN
         For x = 1 To Len(data2Send)
             data2SendFormatted = data2SendFormatted & " " & Hex(Asc(Mid(data2Send, x, 1)))
         Next
+
+        '*** This is Debug yyyymmdd file
+        WriteLogFile("Sending: " & Trim(data2SendFormatted))
 
         Debug.Print("Command: Read RCD Mapping - ALL channels 0xBC")
         TxtDebug.Text = "Command: Read RCD Mapping - ALL channels 0xBC >" & data2SendFormatted & "< " & Len(data2Send).ToString
@@ -5986,6 +6020,9 @@ FROM            dbo.NDB_Board INNER JOIN
             data2SendFormatted = data2SendFormatted & " " & Hex(Asc(Mid(data2Send, x, 1)))
         Next
 
+        '*** This is Debug yyyymmdd file
+        WriteLogFile("Sending: " & Trim(data2SendFormatted))
+
         Debug.Print("Command: Read RCD Mapping - single channel 0xBB for channel " & (Val(LblChannel.Text)).ToString)
         TxtDebug.Text = "Command: Read RCD Mapping - single channel 0xBB for channel " & (Val(LblChannel.Text)).ToString
 
@@ -6023,43 +6060,43 @@ FROM            dbo.NDB_Board INNER JOIN
         '*** Loop through all mapping values 0 - 239 // Uncomment loop & y variables
         ' For y = 0 To 239
         Dim data2Send As String = ""
-            '*** Enable connection and disable manual connection button
-            MakeConnection(sIP, True, iPort)
-            '********** Command bytes
-            bytesForCRC(0) = 85    '** Header A
-            bytesForCRC(1) = 170   '** Header B
-            bytesForCRC(2) = &H9   '** Command length with 2 x checksum
-            bytesForCRC(3) = &H0   '** Device address 0 for tester
-            bytesForCRC(4) = &HBA  '** Command instruction - Set mapping
+        '*** Enable connection and disable manual connection button
+        MakeConnection(sIP, True, iPort)
+        '********** Command bytes
+        bytesForCRC(0) = 85    '** Header A
+        bytesForCRC(1) = 170   '** Header B
+        bytesForCRC(2) = &H9   '** Command length with 2 x checksum
+        bytesForCRC(3) = &H0   '** Device address 0 for tester
+        bytesForCRC(4) = &HBA  '** Command instruction - Set mapping
 
         '********** Data
         bytesForCRC(5) = (Val(LblChannel.Text) - 1) 'y  '** Channel
         bytesForCRC(6) = 0  '** RCD - set to zer0
 
-            '*********** START Checksum calculation
-            Dim csum() As Byte = myCRC_16.ComputeChecksumBytes(bytesForCRC)
-            '************ END Checksum calculation
+        '*********** START Checksum calculation
+        Dim csum() As Byte = myCRC_16.ComputeChecksumBytes(bytesForCRC)
+        '************ END Checksum calculation
 
-            For x = 0 To commandLength
-                data2Send &= Chr(bytesForCRC(x))
-            Next
-            data2Send = data2Send & Chr(csum(0)) & Chr(csum(1))
+        For x = 0 To commandLength
+            data2Send &= Chr(bytesForCRC(x))
+        Next
+        data2Send = data2Send & Chr(csum(0)) & Chr(csum(1))
 
-            Dim data2SendFormatted As String = ""
-            For x = 1 To Len(data2Send)
-                data2SendFormatted = data2SendFormatted & " " & Hex(Asc(Mid(data2Send, x, 1)))
-            Next
+        Dim data2SendFormatted As String = ""
+        For x = 1 To Len(data2Send)
+            data2SendFormatted = data2SendFormatted & " " & Hex(Asc(Mid(data2Send, x, 1)))
+        Next
 
         Debug.Print("Command: Clearing RCD Mapping - single channel 0xBA for channel " & Val(LblChannel.Text)) '(y + 1).ToString)
         TxtDebug.Text = "Command: Clear RCD Mapping - single channel 0xBA for channel " & Val(LblChannel.Text) '(y + 1).ToString
 
         S_LogFileText = "_" & TxtMasterSSID.Text & "_" & TxtCIBid.Text
-            Connect(sIP, data2Send, 10, S_LogFileText, TxtOrderRef.Text)
+        Connect(sIP, data2Send, 10, S_LogFileText, TxtOrderRef.Text)
         TxtDebug.Text = "Cleared Channel " & Val(LblChannel.Text)  '(y + 1).ToString
         System.Threading.Thread.Sleep(100)
-            '*** Disconnect
-            MakeConnection(sIP, False, iPort)
-            Application.DoEvents()
+        '*** Disconnect
+        MakeConnection(sIP, False, iPort)
+        Application.DoEvents()
 
         ' Next
 
@@ -6070,18 +6107,34 @@ FROM            dbo.NDB_Board INNER JOIN
     End Sub
 
     Private Sub tmrCycleTest_Tick(sender As Object, e As EventArgs) Handles tmrCycleTest.Tick
+        'Defile default interval
+        Dim intervalDefault = 20000
+        Dim tmrIntervalSP As Integer = intervalDefault
+
+        If IsNumeric(txtCycleInterval.Text) Then
+            '*** Assign new value
+            tmrIntervalSP = Val(txtCycleInterval.Text) * 1000
+        End If
+
+        If tmrIntervalSP < 8500 Then tmrIntervalSP = intervalDefault
+
+        txtCycleInterval.Text = (tmrIntervalSP / 1000).ToString
+
         tmrCycleTest.Enabled = False
-        tmrCycleTest.Interval = 20000
+        tmrCycleTest.Interval = tmrIntervalSP
         If chkCycleTest.Checked Then
             TxtDebug.Text = "Cycle Testing Active"
             tmrCycleTest.Enabled = True
-            cycleCounter += 1
             chkCycleTest.Text = "Cycle Test (" & cycleCounter.ToString & ")"
         Else
             TxtDebug.Text = "Cycle Testing Stopped"
         End If
         ' BtnConfig.PerformClick()
-        BtnTrip.PerformClick()
+        If Not tmrCoolingMode.Enabled Then
+            BtnTrip.PerformClick()
+            cycleCounter += 1
+
+        End If
     End Sub
 
     Private Sub chkCycleTest_CheckedChanged(sender As Object, e As EventArgs) Handles chkCycleTest.CheckedChanged
@@ -6103,7 +6156,7 @@ FROM            dbo.NDB_Board INNER JOIN
             tmrElapsedTime.Enabled = False
         End If
     End Sub
-    
+
     Private Sub tmrElapsedTime_Tick(sender As Object, e As EventArgs) Handles tmrElapsedTime.Tick
         Dim ts As New TimeSpan
         ts = cycleStopWatch.Elapsed
@@ -6119,7 +6172,8 @@ FROM            dbo.NDB_Board INNER JOIN
         lblCooling.Text = String.Format("Cooling Mode. Testing Disabled: {0:0}.{1:0}", ts.Seconds, ts.Milliseconds / 100)
         ' Debug.Print("************************ COOLING MODE ***************************")
         '*** Stop cooling mode after set time
-        If ts.Seconds >= 30 Then
+        '*** This is effectively the cooling timer interval
+        If ts.Seconds >= 10 Then
             tmrCoolingMode.Enabled = False
             coolingStopWatch.Stop()
             coolingStopWatch.Reset()
@@ -6129,4 +6183,7 @@ FROM            dbo.NDB_Board INNER JOIN
         End If
     End Sub
 
+    Private Sub txtCIBGUID_TextChanged(sender As Object, e As EventArgs) Handles txtCIBGUID.TextChanged
+
+    End Sub
 End Class
