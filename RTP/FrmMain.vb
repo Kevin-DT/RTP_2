@@ -14,7 +14,7 @@ Public Class FrmMain
     '*** Publishing
     'Username: dtsuperuser1
     'Password: dataPublish1$
-    '** Changed GIT repository to RTP_2
+    '** Changed GIT repository to RTP_2.
 
     '*** Settings
     Public StrRootFolder As String = "C:\ats\rtp\"
