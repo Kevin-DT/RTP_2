@@ -1,11 +1,13 @@
-﻿Imports System.Management
-Imports System.Net.Sockets
-Imports System.Net.NetworkInformation
+﻿Imports System.Data.Entity.Core.Common.CommandTrees.ExpressionBuilder
 Imports System.Drawing.Printing
+Imports System.Management
+Imports System.Net
+Imports System.Net.Mail
+Imports System.Net.NetworkInformation
+Imports System.Net.Sockets
+Imports System.Threading
 Imports Ats.RapidTest.DataConfiguration
 Imports Ats.RapidTest.DataConfiguration.Model
-Imports System.Net.Mail
-Imports System.Net
 
 Public Class FrmMain
 
@@ -19,6 +21,7 @@ Public Class FrmMain
     Public S_PrintFile As String = StrRootFolder & "RT_print.cfg"
     Public SettingsFile As String = StrRootFolder & "RT_Settings.cfg"
     Public DataFile As String = StrRootFolder & "RT_Autosave.cfg"
+    Public verboseLoggingFile = " Comms.log"
     Public StrSelectedPrinter As String = ""
     Public BoolHasPrinter As Boolean = False
     Public StrDefaultMaster As String = ""
@@ -136,9 +139,20 @@ Public Class FrmMain
 
     End Sub
 
-    Private Sub FileToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles FileToolStripMenuItem.Click
-
-    End Sub
+    Private Function WriteRawLog(LogData As String) As Integer
+        '*** Raw logging function
+        '*** Log data
+        Dim LogFilename As String = StrLogPath & "Raw " & Format(Now(), "yyyyMMdd") & "_" & TxtMasterSSID.Text & verboseLoggingFile
+        Dim LogFileNumber As Integer
+        Dim LogTime As String = Format(Now(), "hh:mm:ss")
+        LogFileNumber = FreeFile()
+        FileOpen(LogFileNumber, LogFilename, OpenMode.Append)
+        LogTime = Format(Now(), "hh:mm:ss")
+        PrintLine(LogFileNumber, LogTime & " " & LogData)
+        FileClose(LogFileNumber)
+        Return 1
+        '*** 
+    End Function
 
     Private Sub FrmMain_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 
@@ -166,9 +180,12 @@ Public Class FrmMain
         GetSettings()
         If StrDefaultMaster <> "" Then ChkSkipMaster.Text = "Skip Master (Use " & StrDefaultMaster & ")"
         TSLogPath.Text = StrLogPath
+        tsAppName.ForeColor = Color.Purple
+        tsAppName.Text = "Rapid Test Programmer v2"
         Initialise()
         GetDefaults()
         ClearResults()
+        SetIP()
         '*** Start Wifi Check
         TmrWifi.Enabled = True
     End Sub
@@ -187,13 +204,14 @@ Public Class FrmMain
         Lbl_Server.ForeColor = Color.Blue
         Lbl_Server.Text = "Azure Production"
         Lbl_Server.Visible = True
-        Me.Text = "RTP - AZURE Version - for Test Jig 2 v" & SversionText
+        Me.Text = "RTP2 - Test Jig 2 v" & SversionText
 
         '***** RELEASE NOTES
         Dim releaseNotes As String = "RELEASE NOTES
-23/06/2025 (Unpublished)
+01/08/2025 (1.0.0.5)
+Extend wait time for 0xEA discover config (topology)
 Added cycle timer edit value & save load.
-Accounted for cooling cycle when running cycle timer.
+Accounted for cooling cycle when running cycle timer. Cycle canot be shorter that cooling time.
 
 25/05/2025 1.0.0.4
 Changed offset calulation to a percentage so it is easier to understand
@@ -608,7 +626,7 @@ Added displaying of Relay Driver type in summary table (QCheck).
                         S_Item = "Hidden"
                     Else
                         S_Item = item.Name
-                        Debug.Print("Signal " & item.SignalStrength.ToString)
+                        '  Debug.Print("Signal " & item.SignalStrength.ToString)
                         '***
                         If Strings.Left(S_Item, 3) = "RT_" Then
                             LstWiFi.Items.Add(S_Item)
@@ -769,6 +787,7 @@ Added displaying of Relay Driver type in summary table (QCheck).
 
     End Sub
     Private Sub BtnFirmware_Click(sender As Object, e As EventArgs) Handles BtnFirmware.Click
+        WriteRawLog("*** " & "Get Firmware")
         '*** Disable manual version button
         BtnFirmware.Enabled = False
         TxtDebug.Text = ""
@@ -922,10 +941,12 @@ Added displaying of Relay Driver type in summary table (QCheck).
                 Select Case FrmMain.StrCommandInUse
                     Case "81"   '*** Fetch Result
                         sleepDelay = 1700'500
-                    Case "92", "DA", "EB"
+                    Case "92", "DA"
                         sleepDelay = 1500
-                    Case "EA"   'Long delay to account for reading from CIB - time delay for additional comms hop
-                        sleepDelay = 4000
+                    Case "EB"   '*** Less delay as master does not need to poll each device.
+                        sleepDelay = 1200
+                    Case "EA"   'Long delay to account for counting CIBs - time delay for additional comms hop
+                        sleepDelay = 5000
                     Case "BE", "BD"
                         sleepDelay = 2500
                     Case "80"
@@ -977,7 +998,7 @@ Added displaying of Relay Driver type in summary table (QCheck).
                         responseData = System.Text.Encoding.ASCII.GetString(data, 0, bytes)
                         Debug.Print("Received: {0}", responseData)
                         Debug.Print(vbCrLf)
-                        '*** Check incomming checksum
+                        '*** Check incoming checksum
                         '*** Assign data only - no checksum
                         '*** 0 based byte array = reply size - 3. 2 for checksum and 1 to offset to 0
                         Dim dataByteCount As Integer = replySize - 3
@@ -1011,6 +1032,9 @@ Added displaying of Relay Driver type in summary table (QCheck).
                         Next
 
                         '****************************************************
+                        FrmMain.WriteRawLog("Sending packet >" & data2SendFormatted & "< ")
+                        FrmMain.WriteRawLog("Received packet >" & dataReceivedFormatted & "< ")
+                        '****************************************************
                         '**** SAVE RESPONSE TO RETURN FROM FUNCTION
                         '****************************************************
                         Connect = dataReceivedFormatted
@@ -1036,6 +1060,7 @@ Added displaying of Relay Driver type in summary table (QCheck).
                             Dim iDurData As Integer = 0
                             If data(8) > 0 Then iDurData = data(8) * 256 Else iDurData = 0
                             iDurData += data(7)
+                            '  iDurData += 1   '**** Result is a 0 offset
                             Dim sTemp As String = iDurData.ToString
                             sDuration = "Duration = " & sTemp
 
@@ -1060,46 +1085,46 @@ Added displaying of Relay Driver type in summary table (QCheck).
                                     BoolSuppressResult = True
                                     Select Case S_ErrorCode
                                         Case "10", "11", "12", "13"
-                                            sError = "ERROR " & S_ErrorCode & " - Invalid test parameter"
+                                            sError = "ERROR 0x" & S_ErrorCode & " - Invalid test parameter"
                                             FrmMain.BSuppressTimeWarning = True
                                         Case "20"
-                                            sError = "ERROR " & S_ErrorCode & " - Power on Test Bus before board powered"
+                                            sError = "ERROR 0x" & S_ErrorCode & " - Power on Test Bus before board powered"
                                             FrmMain.BSuppressTimeWarning = True
                                         Case "21"
-                                            sError = "ERROR " & S_ErrorCode & " - Power on Test Bus before enable"
+                                            sError = "ERROR 0x" & S_ErrorCode & " - Power on Test Bus before enable"
                                             FrmMain.BSuppressTimeWarning = True
                                         Case "22"
-                                            sError = "ERROR " & S_ErrorCode & " - Power on Test Bus before channel Set"
+                                            sError = "ERROR 0x" & S_ErrorCode & " - Power on Test Bus before channel Set"
                                             FrmMain.BSuppressTimeWarning = True
                                         Case "23"
-                                            sError = "ERROR " & S_ErrorCode & " - No response from set channel"
+                                            sError = "ERROR 0x" & S_ErrorCode & " - No response from set channel"
                                             FrmMain.BSuppressTimeWarning = True
                                         Case "24"
-                                            sError = "ERROR " & S_ErrorCode & " - Invalid Channel selected"
+                                            sError = "ERROR 0x" & S_ErrorCode & " - Invalid Channel selected"
                                             FrmMain.BSuppressTimeWarning = True
                                         Case "25"
-                                            sError = "ERROR " & S_ErrorCode & " - Channel Conflict"
+                                            sError = "ERROR 0x" & S_ErrorCode & " - Channel Conflict"
                                             FrmMain.BSuppressTimeWarning = True
                                         Case "26"
-                                            sError = "ERROR " & S_ErrorCode & " - No response to set power relay"
+                                            sError = "ERROR 0x" & S_ErrorCode & " - No response to set power relay"
                                             FrmMain.BSuppressTimeWarning = True
                                         Case "27"
-                                            sError = "ERROR " & S_ErrorCode & " - Power on Test Bus relay set"
+                                            sError = "ERROR 0x" & S_ErrorCode & " - Power on Test Bus relay set"
                                             FrmMain.BSuppressTimeWarning = True
                                         Case "28"
-                                            sError = "ERROR " & S_ErrorCode & " - No power before test"
+                                            sError = "ERROR 0x" & S_ErrorCode & " - No power before test"
                                             FrmMain.BSuppressTimeWarning = True
                                         Case "29"
-                                            sError = "ERROR " & S_ErrorCode & " - ADC not cleared - Master"
+                                            sError = "ERROR 0x" & S_ErrorCode & " - ADC not cleared - Master"
                                             FrmMain.BSuppressTimeWarning = True
-                                        Case "30"
-                                            sError = "ERROR " & S_ErrorCode & " - Phase not detected - Master"
+                                        Case "2A"
+                                            sError = "ERROR 0x" & S_ErrorCode & " - Phase not detected - Master"
                                             FrmMain.BSuppressTimeWarning = True
                                         Case Else
-                                            sError = "ERROR " & S_ErrorCode & " - Undefined error code"
+                                            sError = "ERROR 0x" & S_ErrorCode & " - Undefined error code"
                                             FrmMain.BSuppressTimeWarning = True
                                     End Select
-
+                                    FrmMain.WriteRawLog(sError & " on channel " & sChannel)
                                     '** IF there are any erorrs ignore and time or current data
                                     iDurData = 0
                                     iCurData = 0
@@ -1110,6 +1135,7 @@ Added displaying of Relay Driver type in summary table (QCheck).
                                 Connect += vbNewLine & sError & " " & sChannel
                             Else
                                 Connect += vbNewLine & sError & " " & sChannel & " " & sDuration & " " & "Current leaked " & sCurrent
+                                FrmMain.WriteRawLog(sError & " " & sChannel & " " & sDuration & " " & "Current leaked " & sCurrent)
                                 If (Val(Strings.Right(sDuration, 3)) >= 300 And Val(sCurrent >= 250)) Then
                                     '*** Start Cooling Timer
                                     '** Search for "Stop cooling mode after set time" for cooling control code
@@ -1526,7 +1552,7 @@ Added displaying of Relay Driver type in summary table (QCheck).
                                 LblChLimit.Text = IntMaxChannel.ToString
                             End If
                         Case Else
-                            LblType.Text = "Unknown" '*** Type 3
+                            LblType.Text = "Unknown" '*** Other Type
                             IntMasterType = MC8
                             If StrResultArray(9) IsNot Nothing Then
                                 IntMaxChannel = CInt("&H" & (Trim(StrResultArray(8))))
@@ -1542,7 +1568,22 @@ Added displaying of Relay Driver type in summary table (QCheck).
             Case "80", "81"
                 Debug.Print(CMD & " or 81 Should equal " & StrResultArray(5))
                 '*** Do test - Trip RCD
-                TxtDebug.Text = "Get Result Trip RCD: " & StrRawPacket '& " <"
+                ' TxtDebug.Text = "Get Result Trip RCD: " & StrRawPacket '& " <"
+                Dim formattedHEX As String = ""
+                If CMD = "81" And StrRawPacket <> "" Then
+                    Dim crPos As Integer = InStr(StrRawPacket, vbCrLf)
+                    StrRawPacket = Strings.Mid(StrRawPacket, crPos + 1, 80)
+                    For x = 1 To 16
+                        Dim tmpVal As String = ""
+                        If Len(Trim(StrResultArray(x)).ToString) = 1 Then
+                            tmpVal = "0" & Trim(StrResultArray(x)).ToString
+                        Else
+                            tmpVal = Trim(StrResultArray(x)).ToString
+                        End If
+                        formattedHEX &= tmpVal & " "
+                    Next
+                    TxtDebug.Text = "Get Result Trip RCD: " & Trim(formattedHEX) & vbCrLf & StrRawPacket
+                End If
 
                 RT_Decode = StrResultArray(13)
 
@@ -1572,6 +1613,8 @@ Added displaying of Relay Driver type in summary table (QCheck).
                 iVersionMajor = StrResultArray(7)
                 LblVersion.Text = "Version: " & iVersionMajor & "." & iVersionMinor
                 TxtDebug.Text += vbNewLine & "Version " & iVersionMajor & "." & iVersionMinor
+                WriteRawLog("Firmware " & iVersionMajor & "." & iVersionMinor)
+
                 RT_Decode = "Response to command " & Trim(StrResultArray(5)) & " = Version: " & iVersionMajor & "." & iVersionMinor
 
             Case "BE" '*** Get GUIDs
@@ -1587,21 +1630,26 @@ Added displaying of Relay Driver type in summary table (QCheck).
                 RT_Decode = StempGUID
                 'RT_Decode = "Response to command " & Trim(StrResultArray(5)) & " = GUID: = " & StempGUID
                 TxtDebug.Text = "Get Master or CIB GUID = " & StempGUID
+                WriteRawLog(StempGUID)
 
             Case "DA" '*** Get BUS power state
                 Debug.Print(CMD & " Should equal " & StrResultArray(5))
                 Dim StrResultText As String = ""
+                Dim resultText As String = ""
+
                 Select Case Trim(StrResultArray(6))
                     Case "0"
-                        TxtDebug.Text = "Get Bus Power Status = Safe"
+                        resultText = "Bus Power Status = Safe"
                         StrResultText = "Safe"
                     Case "1"
-                        TxtDebug.Text = "Get Bus Power Status = Live - DO NOT CONTINUE"
+                        resultText = "Bus Power Status = Live - DO NOT CONTINUE"
                         StrResultText = "DO NOT CONTINUE"
                     Case Else
-                        TxtDebug.Text = "Get Bus Power Status = ERROR - DO NOT CONTINUE"
+                        resultText = "Bus Power Status = ERROR - DO NOT CONTINUE"
                         StrResultText = "DO NOT CONTINUE"
                 End Select
+                TxtDebug.Text = resultText
+                WriteRawLog(resultText)
                 RT_Decode = "Response to command " & Trim(StrResultArray(5)) & " = Bus = " & StrResultText
 
             Case Else
@@ -1610,6 +1658,7 @@ Added displaying of Relay Driver type in summary table (QCheck).
         End Select
     End Function
     Private Sub BtnConfig_Click(sender As Object, e As EventArgs) Handles BtnConfig.Click
+        WriteRawLog("*** " & "Discover Config")
         '*** Disable button
         BtnConfig.Enabled = False
         Dim LogSaved As Integer = 0
@@ -1773,7 +1822,7 @@ Added displaying of Relay Driver type in summary table (QCheck).
     End Function
 
     Private Sub BtnMguid_Click(sender As Object, e As EventArgs) Handles BtnMguid.Click
-
+        WriteRawLog("*** " & "Read Master GUID")
         Dim LogSaved As Integer = 0
 
         '*** Log activity
@@ -1798,6 +1847,7 @@ Added displaying of Relay Driver type in summary table (QCheck).
     End Sub
 
     Private Sub BtnCIBID_Click(sender As Object, e As EventArgs) Handles BtnCIBID.Click
+        WriteRawLog("*** " & "Read channel GUID")
         Dim LogSaved As Integer = 0
         Dim cibNumber As String = Trim(txtCIBGUID.Text)
         '*** Log activity
@@ -1823,7 +1873,7 @@ Added displaying of Relay Driver type in summary table (QCheck).
     Private Sub BtnBusPwr_Click(sender As Object, e As EventArgs) Handles BtnBusPwr.Click
 
         Dim LogSaved As Integer = 0
-
+        WriteRawLog("*** " & "Check Bus Power")
         '*** Log activity
         StrTextToLog = "Check BUS Power"
         LogSaved = WriteLogFile(StrTextToLog)
@@ -1925,7 +1975,7 @@ Added displaying of Relay Driver type in summary table (QCheck).
                     If item.Name = AP_Name And item IsNot Nothing Then
 
                         Debug.Print("Inside " & S_Item & " " & AP_Name & " " & AP_Password)
-                        Debug.Print("Signal " & item.SignalStrength.ToString)
+                        ' Debug.Print("Signal " & item.SignalStrength.ToString)
                         Debug.Print("Secure " & item.IsSecure.ToString)
                         Debug.Print("Connected? " & item.IsConnected)
 
@@ -2009,7 +2059,7 @@ Added displaying of Relay Driver type in summary table (QCheck).
         TmrWifi.Enabled = True
     End Function
     Private Sub BtnWifiConnect_Click(sender As Object, e As EventArgs) Handles BtnWifiConnect.Click
-
+        WriteRawLog("*** " & "Connect")
         If TxtMasterSSID.Text <> "" Then
             ConnectWiFi(False)
         Else
@@ -2087,7 +2137,7 @@ Added displaying of Relay Driver type in summary table (QCheck).
     End Function
 
     Private Sub BtnReadConfig_Click(sender As Object, e As EventArgs) Handles BtnReadConfig.Click
-
+        WriteRawLog("*** " & "Read Config")
         Dim LogSaved As Integer = 0
 
         '*** Log activity
@@ -2111,7 +2161,7 @@ Added displaying of Relay Driver type in summary table (QCheck).
     End Sub
 
     Private Sub BtnTrip_Click(sender As Object, e As EventArgs) Handles BtnTrip.Click
-
+        WriteRawLog("*** " & "Perform Trip Test")
 
         BoolManTrip = True
         BtnTrip.Enabled = False
@@ -2167,6 +2217,7 @@ Added displaying of Relay Driver type in summary table (QCheck).
 
 
         Else
+            chkCycleTest.Checked = False
             MsgBox("Please get configuration first", vbOKOnly + vbCritical, "Cannot continue")
         End If
         Return StrResult
@@ -2298,16 +2349,16 @@ Added displaying of Relay Driver type in summary table (QCheck).
                 Dim iPhase As Integer = 1
 
                 If rbAnyPhase.Checked Then
-                    iPhase = 0
+                    iPhase = 0  '*** Random
                 End If
                 If rbPositive.Checked Then
-                    iPhase = 1
+                    iPhase = 1  '*** Positive
                 End If
                 If rbNegative.Checked Then
-                    iPhase = 2
+                    iPhase = 2  '*** Negative
                 End If
                 If rbRamp.Checked Then
-                    iPhase = 3
+                    iPhase = 3  '*** Ramp test
                 End If
 
 
@@ -2394,7 +2445,7 @@ Added displaying of Relay Driver type in summary table (QCheck).
                 If IsNumeric(TxtTimeout.Text) Then
                     IntTimeout = Val(TxtTimeout.Text)
                     Select Case IntTimeout
-                        Case < 1
+                        Case < 10
                             IntTimeout = 500
                         Case > 500
                             IntTimeout = 500
@@ -2448,6 +2499,10 @@ Added displaying of Relay Driver type in summary table (QCheck).
                 S_LogFileText = "_" & TxtMasterSSID.Text & "_" & TxtCIBid.Text
                 StrCommandInUse = "80"
                 iResult = Connect(sIP, data2Send, 7, S_LogFileText, TxtOrderRef.Text)
+                '*** If using ramp test wait 10 seconds the continue and get result
+                '*** Ramp test does not return any data until it has tripped or reached 10.5 mA without a trip.
+                If iPhase = 3 Then Thread.Sleep(10000)
+                '*** End ramp test sleep
                 Application.DoEvents()
 
                 ''*** Fetch Result after waiting for trip - 
@@ -2485,7 +2540,6 @@ Added displaying of Relay Driver type in summary table (QCheck).
                 'iResult = Trim(iResult)
                 'StrCommandInUse = "00"
                 ''   iResult = "-3"
-
             Else    '** number out of range
 
                 iResult = "-2 " & iSelectedChannel.ToString & " " & iChannelLimit.ToString
@@ -3798,6 +3852,11 @@ Added displaying of Relay Driver type in summary table (QCheck).
                 data2SendFormatted = data2SendFormatted & " " & Hex(Asc(Mid(data2Send, x, 1)))
             Next
 
+
+            '*** This is Debug yyyymmdd file
+            WriteLogFile("Sending: " & Trim(data2SendFormatted))
+            StrCommandInUse = "91"
+
             Debug.Print("Command:Set WiFi Settings " & data2SendFormatted.ToString)
 
             S_LogFileText = "_" & TxtMasterSSID.Text & "_" & TxtCIBid.Text
@@ -3819,6 +3878,7 @@ Added displaying of Relay Driver type in summary table (QCheck).
     End Function
 
     Private Sub BtnSetMasterID_Click(sender As Object, e As EventArgs) Handles BtnSetMasterID.Click
+        WriteRawLog("*** " & "Set SSID")
         Dim IntControlCount As Integer = 0
         Dim LogSaved As Integer = 0
         If ChkLAN.Checked Then IntControlCount = 1
@@ -3880,17 +3940,18 @@ Added displaying of Relay Driver type in summary table (QCheck).
                 Lbl_Server.ForeColor = Color.Red
                 Lbl_Server.Text = "Azure DEV"
                 Lbl_Server.Visible = True
-                Me.Text = "RTP - AZURE DEVELOPMENT Version - for Test Jig 2 v" & SversionText
+                Me.Text = "RTP2 - DEVELOPMENT - Test Jig 2 v" & SversionText
             Case 2  'Azure Production
                 connectionString = "Server=tcp:ats-prod.database.windows.net,1433;Initial Catalog=RapidTest;Persist Security Info=False;User ID=atsadmin;Password=pass@word1;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
                 Lbl_Server.ForeColor = Color.Blue
                 Lbl_Server.Text = "Azure Production"
                 Lbl_Server.Visible = True
-                Me.Text = "RTP - AZURE Version - for Test Jig 2 v" & SversionText
+                Me.Text = "RTP2 - Test Jig 2 v" & SversionText
         End Select
     End Sub
 
     Private Sub BtnWriteMGuid_Click(sender As Object, e As EventArgs) Handles BtnWriteMGuid.Click
+        WriteRawLog("*** " & "Write Master GUID")
         '***** WRITE MASTER GUID
         Dim G As Guid
         Dim GuidString As String = G.ToString
@@ -3939,6 +4000,9 @@ FROM            dbo.NDB_Board INNER JOIN
 
 
         Dim RowCount As Integer = 0
+        Dim masterCount As Integer = 0
+        Dim channelCount As Integer = 0
+
         Dim StrModuleID As String
         Dim StrModuleType As String
         Dim StrPurchaser As String
@@ -3953,7 +4017,7 @@ FROM            dbo.NDB_Board INNER JOIN
 
         With FrmSummary.DataSummaryGrid
             .Rows.Clear()   '** Clear previous data
-
+            .RowHeadersWidth = 100
             'Set number of columns
             .ColumnCount = 8
 
@@ -4022,10 +4086,18 @@ FROM            dbo.NDB_Board INNER JOIN
             '**** End new relay driver detection
 
             Debug.Print(newRelayDriver)
-            '*** Increment number of rows
+            '*** Increment number of rows and modules
             RowCount += 1
+            Select Case Strings.Left(StrModuleID, 1)
+                Case "M"
+                    masterCount += 1
+                Case "C"
+                    channelCount += 1
+            End Select
 
-            FrmSummary.DataSummaryGrid.Rows.Add(StrModuleID, StrModuleType, StrPurchaser, StrTestedBy, StrOrderNumber, StrGUID, StrQADate, newRelayDriver)
+
+            Dim index = FrmSummary.DataSummaryGrid.Rows.Add(StrModuleID, StrModuleType, StrPurchaser, StrTestedBy, StrOrderNumber, StrGUID, StrQADate, newRelayDriver)
+            FrmSummary.DataSummaryGrid.Rows(index).HeaderCell.Value = "Row " & (index + 1).ToString()
             For Each item In RT_Results
                 If IsDBNull(RT_Results.Item("BRD_ModuleID")) Then StrModuleID = "" Else StrModuleID = UCase(RT_Results.Item("BRD_ModuleID"))
                 If IsDBNull(RT_Results.Item("MOD_Type")) Then StrModuleType = "" Else StrModuleType = UCase(RT_Results.Item("MOD_Type"))
@@ -4047,17 +4119,25 @@ FROM            dbo.NDB_Board INNER JOIN
                 '**** End new relay driver detection
 
                 Debug.Print(newRelayDriver)
-                '*** Increment number of rows
+
+                '*** Increment number of rows and modules
                 RowCount += 1
+                Select Case Strings.Left(StrModuleID, 1)
+                    Case "M"
+                        masterCount += 1
+                    Case "C"
+                        channelCount += 1
+                End Select
 
                 '*** Update data grid on form before loading
-                FrmSummary.DataSummaryGrid.Rows.Add(StrModuleID, StrModuleType, StrPurchaser, StrTestedBy, StrOrderNumber, StrGUID, StrQADate, newRelayDriver)
+                index = FrmSummary.DataSummaryGrid.Rows.Add(StrModuleID, StrModuleType, StrPurchaser, StrTestedBy, StrOrderNumber, StrGUID, StrQADate, newRelayDriver)
+                FrmSummary.DataSummaryGrid.Rows(index).HeaderCell.Value = "Row " & (index + 1).ToString()
                 Application.DoEvents() 'Allow UI to refresh
             Next
         End If
 
         FrmSummary.LblSummaryResult.Visible = True
-        FrmSummary.LblSummaryResult.Text = RowCount.ToString & " Items found."
+        FrmSummary.LblSummaryResult.Text = "Total Units = " & RowCount.ToString & "  (Masters = " & masterCount.ToString & ", CIBs = " & channelCount.ToString & ")"
         NDB_DB.Close()
         FrmSummary.DataSummaryGrid.Visible = True
         Application.DoEvents() 'Allow UI to refresh
@@ -4267,11 +4347,11 @@ FROM            dbo.NDB_Board INNER JOIN
                         PrintDocument2.Print()
                         PrintDocument4.Print()
                         If ChkInventoryLbl.Checked Then PrintDocument11.Print()
-                        StickerText01 = "Master Indentification Sticker"
+                        StickerText01 = "Master Identification Sticker"
                         StickerText02 = "Please place label on the escutcheon " & vbCrLf & "for Master identification"
                         PrintStickerLabel.Print()
                         If UCase(Strings.Left(SMasterType, 4)) = "RTMC" Then
-                            StickerText01 = "RCD Indentification Sticker"
+                            StickerText01 = "RCD Identification Sticker"
                             StickerText02 = "Please place labels to identify each " & vbCrLf & "Rapid Test connected RCD"
                             PrintStickerLabel.Print()
                         End If
@@ -4290,7 +4370,7 @@ FROM            dbo.NDB_Board INNER JOIN
                     PrintDocument3.Print()
                     PrintDocument5.Print()
                     If ChkInventoryLbl.Checked Then PrintDocument12.Print()
-                    StickerText01 = "RCD Indentification Sticker"
+                    StickerText01 = "RCD Identification Sticker"
                     StickerText02 = "Please place labels to identify each " & vbCrLf & "Rapid Test connected RCD"
                     PrintStickerLabel.Print()
                 Else
@@ -5803,6 +5883,7 @@ FROM            dbo.NDB_Board INNER JOIN
     End Sub
 
     Private Sub Button4_Click(sender As Object, e As EventArgs) Handles Button4.Click
+        WriteRawLog("*** " & "Write Channel GUID")
         '***** WRITE MASTER GUID
         Dim cibNumber As String = Trim(txtCIBGUID.Text)
         Dim G As Guid
@@ -5813,6 +5894,7 @@ FROM            dbo.NDB_Board INNER JOIN
     End Sub
 
     Private Sub BtnGetResult_Click(sender As Object, e As EventArgs) Handles BtnGetResult.Click
+        WriteRawLog("*** " & "Get Result")
         StrCommandInUse = "81"
         Dim StrResult As String = GetTripResult()
     End Sub
@@ -5861,6 +5943,7 @@ FROM            dbo.NDB_Board INNER JOIN
     End Sub
 
     Private Sub btnReadAllMapping_Click(sender As Object, e As EventArgs) Handles btnReadAllMapping.Click
+        WriteRawLog("*** " & "Read All Mappings")
         '*** Connect to device
         '*** Make sure it is disconnected to start with
         MakeConnection(sIP, False, iPort)
@@ -5921,6 +6004,7 @@ FROM            dbo.NDB_Board INNER JOIN
     End Sub
 
     Private Sub btnMapChannel_Click(sender As Object, e As EventArgs) Handles btnMapChannel.Click
+        WriteRawLog("*** " & "Set Channel Mapping")
         MakeConnection(sIP, False, iPort)
 
         '** Clear debug window
@@ -5979,6 +6063,7 @@ FROM            dbo.NDB_Board INNER JOIN
     End Sub
 
     Private Sub btnReadChannel_Click(sender As Object, e As EventArgs) Handles btnReadChannel.Click
+        WriteRawLog("*** " & "Read Channel Mapping")
         '*** Connect to device
         '*** Make sure it is disconnected to start with
         MakeConnection(sIP, False, iPort)
@@ -6038,6 +6123,7 @@ FROM            dbo.NDB_Board INNER JOIN
     End Sub
 
     Private Sub btnClearMapping_Click(sender As Object, e As EventArgs) Handles btnClearMapping.Click
+        WriteRawLog("*** " & "Clear channel mapping")
         '*** Connect to device
         '*** Make sure it is disconnected to start with
         MakeConnection(sIP, False, iPort)
@@ -6125,7 +6211,7 @@ FROM            dbo.NDB_Board INNER JOIN
         If chkCycleTest.Checked Then
             TxtDebug.Text = "Cycle Testing Active"
             tmrCycleTest.Enabled = True
-            chkCycleTest.Text = "Cycle Test (" & cycleCounter.ToString & ")"
+            chkCycleTest.Text = "Cycle (" & cycleCounter.ToString & ")"
         Else
             TxtDebug.Text = "Cycle Testing Stopped"
         End If
@@ -6183,7 +6269,24 @@ FROM            dbo.NDB_Board INNER JOIN
         End If
     End Sub
 
-    Private Sub txtCIBGUID_TextChanged(sender As Object, e As EventArgs) Handles txtCIBGUID.TextChanged
+    Private Sub txtCIBGUID_TextChanged(sender As Object, e As EventArgs)
+
+    End Sub
+
+    Private Sub rbPositive_CheckedChanged(sender As Object, e As EventArgs) Handles rbPositive.CheckedChanged
+        If rbPositive.Checked Then lblPhaseAngle.Text = "Positive"
+    End Sub
+
+    Private Sub rbNegative_CheckedChanged(sender As Object, e As EventArgs) Handles rbNegative.CheckedChanged
+        If rbNegative.Checked Then lblPhaseAngle.Text = "Negative"
+    End Sub
+
+    Private Sub rbAnyPhase_CheckedChanged(sender As Object, e As EventArgs) Handles rbAnyPhase.CheckedChanged
+        If rbAnyPhase.Checked Then lblPhaseAngle.Text = "Random"
+    End Sub
+
+    Private Sub rbRamp_CheckedChanged(sender As Object, e As EventArgs) Handles rbRamp.CheckedChanged
+        If rbRamp.Checked Then lblPhaseAngle.Text = "Ramp"
 
     End Sub
 End Class

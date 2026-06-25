@@ -133,6 +133,9 @@ Partial Class FrmMain
         Me.ChkSound = New System.Windows.Forms.CheckBox()
         Me.ChkManCntrls = New System.Windows.Forms.CheckBox()
         Me.GrpManual = New System.Windows.Forms.GroupBox()
+        Me.Label51 = New System.Windows.Forms.Label()
+        Me.txtCIBGUID = New System.Windows.Forms.TextBox()
+        Me.lblPhaseAngle = New System.Windows.Forms.Label()
         Me.Label10 = New System.Windows.Forms.Label()
         Me.elapsedTime = New System.Windows.Forms.Label()
         Me.chkCycleTest = New System.Windows.Forms.CheckBox()
@@ -205,6 +208,10 @@ Partial Class FrmMain
         Me.LstWiFi = New System.Windows.Forms.ListBox()
         Me.PicRTbarcode = New System.Windows.Forms.PictureBox()
         Me.TabUtil = New System.Windows.Forms.TabPage()
+        Me.GroupBox12 = New System.Windows.Forms.GroupBox()
+        Me.Label53 = New System.Windows.Forms.Label()
+        Me.Label52 = New System.Windows.Forms.Label()
+        Me.txtCycleInterval = New System.Windows.Forms.TextBox()
         Me.GroupBox11 = New System.Windows.Forms.GroupBox()
         Me.txtDefaultOffset = New System.Windows.Forms.TextBox()
         Me.txtDefaultLeakage = New System.Windows.Forms.TextBox()
@@ -218,8 +225,6 @@ Partial Class FrmMain
         Me.DateSummary = New System.Windows.Forms.DateTimePicker()
         Me.LblSearch = New System.Windows.Forms.Label()
         Me.GroupBox9 = New System.Windows.Forms.GroupBox()
-        Me.Label51 = New System.Windows.Forms.Label()
-        Me.txtCIBGUID = New System.Windows.Forms.TextBox()
         Me.TxtGUID = New System.Windows.Forms.TextBox()
         Me.Label9 = New System.Windows.Forms.Label()
         Me.lblGUIDLength = New System.Windows.Forms.Label()
@@ -264,10 +269,7 @@ Partial Class FrmMain
         Me.tmrCycleTest = New System.Windows.Forms.Timer(Me.components)
         Me.tmrElapsedTime = New System.Windows.Forms.Timer(Me.components)
         Me.tmrCoolingMode = New System.Windows.Forms.Timer(Me.components)
-        Me.GroupBox12 = New System.Windows.Forms.GroupBox()
-        Me.txtCycleInterval = New System.Windows.Forms.TextBox()
-        Me.Label52 = New System.Windows.Forms.Label()
-        Me.Label53 = New System.Windows.Forms.Label()
+        Me.tsAppName = New System.Windows.Forms.ToolStripStatusLabel()
         PrinterToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.MenuStrip1.SuspendLayout()
         Me.GroupBox1.SuspendLayout()
@@ -315,6 +317,7 @@ Partial Class FrmMain
         Me.GroupBox5.SuspendLayout()
         CType(Me.PicRTbarcode, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.TabUtil.SuspendLayout()
+        Me.GroupBox12.SuspendLayout()
         Me.GroupBox11.SuspendLayout()
         Me.GroupBox10.SuspendLayout()
         Me.GroupBox9.SuspendLayout()
@@ -324,7 +327,6 @@ Partial Class FrmMain
         Me.GroupBox4.SuspendLayout()
         Me.TabRelease.SuspendLayout()
         CType(Me.PicTimerHB, System.ComponentModel.ISupportInitialize).BeginInit()
-        Me.GroupBox12.SuspendLayout()
         Me.SuspendLayout()
         '
         'PrinterToolStripMenuItem
@@ -477,7 +479,7 @@ Partial Class FrmMain
         '
         Me.StatusStrip1.Font = New System.Drawing.Font("Segoe UI", 9.0!)
         Me.StatusStrip1.ImageScalingSize = New System.Drawing.Size(20, 20)
-        Me.StatusStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.TSPrinterName, Me.TSLogPath, Me.TTiPAddress})
+        Me.StatusStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.TSPrinterName, Me.TSLogPath, Me.TTiPAddress, Me.tsAppName})
         Me.StatusStrip1.Location = New System.Drawing.Point(0, 823)
         Me.StatusStrip1.Name = "StatusStrip1"
         Me.StatusStrip1.Padding = New System.Windows.Forms.Padding(1, 0, 12, 0)
@@ -1522,6 +1524,9 @@ Partial Class FrmMain
         '
         'GrpManual
         '
+        Me.GrpManual.Controls.Add(Me.Label51)
+        Me.GrpManual.Controls.Add(Me.txtCIBGUID)
+        Me.GrpManual.Controls.Add(Me.lblPhaseAngle)
         Me.GrpManual.Controls.Add(Me.Label10)
         Me.GrpManual.Controls.Add(Me.elapsedTime)
         Me.GrpManual.Controls.Add(Me.chkCycleTest)
@@ -1571,11 +1576,41 @@ Partial Class FrmMain
         Me.GrpManual.TabStop = False
         Me.GrpManual.Text = " Manual Controls "
         '
+        'Label51
+        '
+        Me.Label51.AutoSize = True
+        Me.Label51.Location = New System.Drawing.Point(479, 68)
+        Me.Label51.Name = "Label51"
+        Me.Label51.Size = New System.Drawing.Size(36, 15)
+        Me.Label51.TabIndex = 155
+        Me.Label51.Text = "CIB #"
+        '
+        'txtCIBGUID
+        '
+        Me.txtCIBGUID.Location = New System.Drawing.Point(477, 89)
+        Me.txtCIBGUID.MaxLength = 2
+        Me.txtCIBGUID.Name = "txtCIBGUID"
+        Me.txtCIBGUID.Size = New System.Drawing.Size(40, 21)
+        Me.txtCIBGUID.TabIndex = 154
+        Me.txtCIBGUID.Text = "1"
+        Me.txtCIBGUID.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
+        '
+        'lblPhaseAngle
+        '
+        Me.lblPhaseAngle.AutoSize = True
+        Me.lblPhaseAngle.Font = New System.Drawing.Font("Segoe UI", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lblPhaseAngle.ForeColor = System.Drawing.Color.FromArgb(CType(CType(0, Byte), Integer), CType(CType(192, Byte), Integer), CType(CType(0, Byte), Integer))
+        Me.lblPhaseAngle.Location = New System.Drawing.Point(556, 31)
+        Me.lblPhaseAngle.Name = "lblPhaseAngle"
+        Me.lblPhaseAngle.Size = New System.Drawing.Size(52, 17)
+        Me.lblPhaseAngle.TabIndex = 153
+        Me.lblPhaseAngle.Text = "Positive"
+        '
         'Label10
         '
         Me.Label10.AutoSize = True
         Me.Label10.Font = New System.Drawing.Font("Microsoft Sans Serif", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Label10.Location = New System.Drawing.Point(821, 97)
+        Me.Label10.Location = New System.Drawing.Point(815, 97)
         Me.Label10.Name = "Label10"
         Me.Label10.Size = New System.Drawing.Size(67, 17)
         Me.Label10.TabIndex = 32
@@ -1584,7 +1619,7 @@ Partial Class FrmMain
         'elapsedTime
         '
         Me.elapsedTime.AutoSize = True
-        Me.elapsedTime.Location = New System.Drawing.Point(477, 96)
+        Me.elapsedTime.Location = New System.Drawing.Point(535, 95)
         Me.elapsedTime.Name = "elapsedTime"
         Me.elapsedTime.Size = New System.Drawing.Size(52, 15)
         Me.elapsedTime.TabIndex = 152
@@ -1593,11 +1628,12 @@ Partial Class FrmMain
         'chkCycleTest
         '
         Me.chkCycleTest.AutoSize = True
-        Me.chkCycleTest.Location = New System.Drawing.Point(477, 70)
+        Me.chkCycleTest.Location = New System.Drawing.Point(538, 67)
         Me.chkCycleTest.Name = "chkCycleTest"
-        Me.chkCycleTest.Size = New System.Drawing.Size(81, 19)
+        Me.chkCycleTest.RightToLeft = System.Windows.Forms.RightToLeft.Yes
+        Me.chkCycleTest.Size = New System.Drawing.Size(55, 19)
         Me.chkCycleTest.TabIndex = 147
-        Me.chkCycleTest.Text = "Cycle Test"
+        Me.chkCycleTest.Text = "Cycle"
         Me.chkCycleTest.UseVisualStyleBackColor = True
         '
         'btnClearMapping
@@ -2338,6 +2374,45 @@ Partial Class FrmMain
         Me.TabUtil.Text = "Settings"
         Me.TabUtil.UseVisualStyleBackColor = True
         '
+        'GroupBox12
+        '
+        Me.GroupBox12.Controls.Add(Me.Label53)
+        Me.GroupBox12.Controls.Add(Me.Label52)
+        Me.GroupBox12.Controls.Add(Me.txtCycleInterval)
+        Me.GroupBox12.Location = New System.Drawing.Point(961, 17)
+        Me.GroupBox12.Name = "GroupBox12"
+        Me.GroupBox12.Size = New System.Drawing.Size(202, 141)
+        Me.GroupBox12.TabIndex = 148
+        Me.GroupBox12.TabStop = False
+        Me.GroupBox12.Text = " Cycle Test "
+        '
+        'Label53
+        '
+        Me.Label53.AutoSize = True
+        Me.Label53.Location = New System.Drawing.Point(136, 61)
+        Me.Label53.Name = "Label53"
+        Me.Label53.Size = New System.Drawing.Size(37, 20)
+        Me.Label53.TabIndex = 2
+        Me.Label53.Text = "Sec"
+        '
+        'Label52
+        '
+        Me.Label52.AutoSize = True
+        Me.Label52.Location = New System.Drawing.Point(8, 60)
+        Me.Label52.Name = "Label52"
+        Me.Label52.Size = New System.Drawing.Size(61, 20)
+        Me.Label52.TabIndex = 1
+        Me.Label52.Text = "Interval"
+        '
+        'txtCycleInterval
+        '
+        Me.txtCycleInterval.Location = New System.Drawing.Point(74, 57)
+        Me.txtCycleInterval.Name = "txtCycleInterval"
+        Me.txtCycleInterval.Size = New System.Drawing.Size(56, 26)
+        Me.txtCycleInterval.TabIndex = 0
+        Me.txtCycleInterval.Text = "10"
+        Me.txtCycleInterval.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
+        '
         'GroupBox11
         '
         Me.GroupBox11.Controls.Add(Me.txtDefaultOffset)
@@ -2461,8 +2536,6 @@ Partial Class FrmMain
         '
         'GroupBox9
         '
-        Me.GroupBox9.Controls.Add(Me.Label51)
-        Me.GroupBox9.Controls.Add(Me.txtCIBGUID)
         Me.GroupBox9.Controls.Add(Me.TxtGUID)
         Me.GroupBox9.Controls.Add(Me.Label9)
         Me.GroupBox9.Controls.Add(Me.lblGUIDLength)
@@ -2475,25 +2548,6 @@ Partial Class FrmMain
         Me.GroupBox9.TabIndex = 145
         Me.GroupBox9.TabStop = False
         Me.GroupBox9.Text = " Manual GUID "
-        '
-        'Label51
-        '
-        Me.Label51.AutoSize = True
-        Me.Label51.Location = New System.Drawing.Point(20, 103)
-        Me.Label51.Name = "Label51"
-        Me.Label51.Size = New System.Drawing.Size(99, 20)
-        Me.Label51.TabIndex = 144
-        Me.Label51.Text = "CIB Address"
-        '
-        'txtCIBGUID
-        '
-        Me.txtCIBGUID.Location = New System.Drawing.Point(125, 100)
-        Me.txtCIBGUID.MaxLength = 2
-        Me.txtCIBGUID.Name = "txtCIBGUID"
-        Me.txtCIBGUID.Size = New System.Drawing.Size(40, 26)
-        Me.txtCIBGUID.TabIndex = 143
-        Me.txtCIBGUID.Text = "1"
-        Me.txtCIBGUID.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
         '
         'TxtGUID
         '
@@ -2855,44 +2909,11 @@ Partial Class FrmMain
         'tmrCoolingMode
         '
         '
-        'GroupBox12
+        'tsAppName
         '
-        Me.GroupBox12.Controls.Add(Me.Label53)
-        Me.GroupBox12.Controls.Add(Me.Label52)
-        Me.GroupBox12.Controls.Add(Me.txtCycleInterval)
-        Me.GroupBox12.Location = New System.Drawing.Point(961, 17)
-        Me.GroupBox12.Name = "GroupBox12"
-        Me.GroupBox12.Size = New System.Drawing.Size(202, 141)
-        Me.GroupBox12.TabIndex = 148
-        Me.GroupBox12.TabStop = False
-        Me.GroupBox12.Text = " Cycle Test "
-        '
-        'txtCycleInterval
-        '
-        Me.txtCycleInterval.Location = New System.Drawing.Point(74, 57)
-        Me.txtCycleInterval.Name = "txtCycleInterval"
-        Me.txtCycleInterval.Size = New System.Drawing.Size(56, 26)
-        Me.txtCycleInterval.TabIndex = 0
-        Me.txtCycleInterval.Text = "10"
-        Me.txtCycleInterval.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
-        '
-        'Label52
-        '
-        Me.Label52.AutoSize = True
-        Me.Label52.Location = New System.Drawing.Point(8, 60)
-        Me.Label52.Name = "Label52"
-        Me.Label52.Size = New System.Drawing.Size(61, 20)
-        Me.Label52.TabIndex = 1
-        Me.Label52.Text = "Interval"
-        '
-        'Label53
-        '
-        Me.Label53.AutoSize = True
-        Me.Label53.Location = New System.Drawing.Point(136, 61)
-        Me.Label53.Name = "Label53"
-        Me.Label53.Size = New System.Drawing.Size(37, 20)
-        Me.Label53.TabIndex = 2
-        Me.Label53.Text = "Sec"
+        Me.tsAppName.Name = "tsAppName"
+        Me.tsAppName.Size = New System.Drawing.Size(64, 17)
+        Me.tsAppName.Text = "App Name"
         '
         'FrmMain
         '
@@ -2968,6 +2989,8 @@ Partial Class FrmMain
         CType(Me.PicRTbarcode, System.ComponentModel.ISupportInitialize).EndInit()
         Me.TabUtil.ResumeLayout(False)
         Me.TabUtil.PerformLayout()
+        Me.GroupBox12.ResumeLayout(False)
+        Me.GroupBox12.PerformLayout()
         Me.GroupBox11.ResumeLayout(False)
         Me.GroupBox11.PerformLayout()
         Me.GroupBox10.ResumeLayout(False)
@@ -2985,8 +3008,6 @@ Partial Class FrmMain
         Me.TabRelease.ResumeLayout(False)
         Me.TabRelease.PerformLayout()
         CType(Me.PicTimerHB, System.ComponentModel.ISupportInitialize).EndInit()
-        Me.GroupBox12.ResumeLayout(False)
-        Me.GroupBox12.PerformLayout()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -3229,10 +3250,12 @@ Partial Class FrmMain
     Friend WithEvents txtDefaultLeakage As TextBox
     Friend WithEvents Label11 As Label
     Friend WithEvents Label14 As Label
-    Friend WithEvents txtCIBGUID As TextBox
-    Friend WithEvents Label51 As Label
     Friend WithEvents GroupBox12 As GroupBox
     Friend WithEvents Label53 As Label
     Friend WithEvents Label52 As Label
     Friend WithEvents txtCycleInterval As TextBox
+    Friend WithEvents lblPhaseAngle As Label
+    Friend WithEvents Label51 As Label
+    Friend WithEvents txtCIBGUID As TextBox
+    Friend WithEvents tsAppName As ToolStripStatusLabel
 End Class

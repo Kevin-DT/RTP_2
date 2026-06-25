@@ -12,7 +12,7 @@ Imports System.Runtime.InteropServices
 <Assembly: AssemblyDescription("Rapid Test Programmer - Test Jig 2")>
 <Assembly: AssemblyCompany("Data Transformation")>
 <Assembly: AssemblyProduct("RTP2")>
-<Assembly: AssemblyCopyright("Copyright ©  2025")>
+<Assembly: AssemblyCopyright("Copyright ©  2026")>
 <Assembly: AssemblyTrademark("")>
 
 <Assembly: ComVisible(False)>
@@ -31,5 +31,5 @@ Imports System.Runtime.InteropServices
 ' by using the '*' as shown below:
 ' <Assembly: AssemblyVersion("1.0.*")>
 
-<Assembly: AssemblyVersion("1.0.0.4")>
-<Assembly: AssemblyFileVersion("1.0.0.4")>
+<Assembly: AssemblyVersion("1.0.0.8")>
+<Assembly: AssemblyFileVersion("1.0.0.8")>
