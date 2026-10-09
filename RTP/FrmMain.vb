@@ -157,6 +157,11 @@ Public Class FrmMain
     Private Sub FrmMain_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 
         '** Load config
+        'Setting TLS 1.2 protocol.
+        ServicePointManager.Expect100Continue = True
+        ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
+
+
         'create config folder if needed
         Try
             System.IO.Directory.CreateDirectory("C:\ats\RTP")
@@ -208,6 +213,14 @@ Public Class FrmMain
 
         '***** RELEASE NOTES
         Dim releaseNotes As String = "RELEASE NOTES
+09/10/206 (1.0.0.9)
+Extend Discover Config wait time to 9 seconds based on reocommendation from Xentronics (Ryan)
+
+18/09/2026
+Update Odrder Details email addresses.
+> Remove Lance
+> Add Elliott
+
 01/08/2025 (1.0.0.5)
 Extend wait time for 0xEA discover config (topology)
 Added cycle timer edit value & save load.
@@ -561,7 +574,7 @@ Added displaying of Relay Driver type in summary table (QCheck).
                                 TxtMultiplier.Text = offset
                                 LblScaleInUse.Text = "(" & (Val(Leakage) * (Val(offset) / 100)) & " mA)"
                             End If
-                            '*** New Wi-Fi override
+                            '*** Cycle interval
                             If RowCount = 30 And fieldCount = 1 Then txtCycleInterval.Text = currentField
 
                             fieldCount = +1
@@ -726,7 +739,7 @@ Added displaying of Relay Driver type in summary table (QCheck).
         '*** This is Debug yyyymmdd file
         WriteLogFile("Sending: " & Trim(data2SendFormatted))
 
-        Debug.Print("Command: Read Firmware Version 0x92")
+        Debug.Print("CMD: Read Firmware Version 0x92")
         StrTextToLog = "Getting Frimware Version"
         S_LogFileText = "_" & TxtMasterSSID.Text & "_" & TxtCIBid.Text
         Dim StrResult As String = Connect(sIP, data2Send, 9, S_LogFileText, TxtOrderRef.Text)
@@ -746,7 +759,6 @@ Added displaying of Relay Driver type in summary table (QCheck).
         Dim myCRC_16 As New CRC_16()
         Dim ShowResult As Integer
         Try
-            '  Dim port As Int32 = ' 80 '12000
             If isAlive Then
                 Debug.Print(Format(Now(), "hh:MM.ss") & " Working on Connecting...")
                 client = New TcpClient(server, port)
@@ -946,7 +958,7 @@ Added displaying of Relay Driver type in summary table (QCheck).
                     Case "EB"   '*** Less delay as master does not need to poll each device.
                         sleepDelay = 1200
                     Case "EA"   'Long delay to account for counting CIBs - time delay for additional comms hop
-                        sleepDelay = 5000
+                        sleepDelay = 9000   '*** 5000 '** Extended on suggestion from Ryan (Xentronics)
                     Case "BE", "BD"
                         sleepDelay = 2500
                     Case "80"
@@ -1076,7 +1088,7 @@ Added displaying of Relay Driver type in summary table (QCheck).
 
                             '*** Command errors if any
                             Dim BoolSuppressResult As Boolean = False
-                            Select Case data(5)
+                            Select Case data(5) '*** 0 Based
                                 Case 0
                                     sError = "No Error:"
                                     FrmMain.BSuppressTimeWarning = False
@@ -1120,8 +1132,13 @@ Added displaying of Relay Driver type in summary table (QCheck).
                                         Case "2A"
                                             sError = "ERROR 0x" & S_ErrorCode & " - Phase not detected - Master"
                                             FrmMain.BSuppressTimeWarning = True
+                                        Case "30"
+                                            sError = "ERROR 0x" & S_ErrorCode & " - RYAN - XENTRONICS TEST ERROR CODE 0x30"
+                                            MsgBox("Xentronics new error code trapped" & vbCrLf & "Click OK to continue.", vbCritical + vbOKOnly, "Gotch YA!")
+                                            FrmMain.BSuppressTimeWarning = True
                                         Case Else
                                             sError = "ERROR 0x" & S_ErrorCode & " - Undefined error code"
+                                            MsgBox("Unknown Error Recieved" & vbCrLf & "Click OK to continue.", vbCritical + vbOKOnly, "Surprise!!")
                                             FrmMain.BSuppressTimeWarning = True
                                     End Select
                                     FrmMain.WriteRawLog(sError & " on channel " & sChannel)
@@ -1134,8 +1151,8 @@ Added displaying of Relay Driver type in summary table (QCheck).
                             If BoolSuppressResult Then
                                 Connect += vbNewLine & sError & " " & sChannel
                             Else
-                                Connect += vbNewLine & sError & " " & sChannel & " " & sDuration & " " & "Current leaked " & sCurrent
-                                FrmMain.WriteRawLog(sError & " " & sChannel & " " & sDuration & " " & "Current leaked " & sCurrent)
+                                Connect += vbNewLine & sError & " " & sChannel & " " & sDuration & " " & "Current leaked " & sCurrent & vbCrLf
+                                FrmMain.WriteRawLog(sError & " " & sChannel & " " & sDuration & " " & "Current leaked " & sCurrent & vbCrLf)
                                 If (Val(Strings.Right(sDuration, 3)) >= 300 And Val(sCurrent >= 250)) Then
                                     '*** Start Cooling Timer
                                     '** Search for "Stop cooling mode after set time" for cooling control code
@@ -1495,6 +1512,7 @@ Added displaying of Relay Driver type in summary table (QCheck).
         IntSpacePos = InStr(StrPacket, " ")
         Debug.Print(StrPacket)
 
+        Dim arrayDataLength As Integer = 0
         '############## HERE
         '### Array has CMD at the start and then a space so refernces below should be PLUS 1 - 0 based plus extra space
         '### StrResultArray(5) = StrResultArray(6)
@@ -1507,155 +1525,170 @@ Added displaying of Relay Driver type in summary table (QCheck).
             IntSpacePos = InStr(StrPacket, " ")
             '*** NOTE THIS METHOD DOES NOT RETURN THE SECOND CHECKSUM BYTE, BUT IT IS NOT NEEDED HERE
             '*** AS IT HAS ALREADY BEEN CHECKED
+            arrayDataLength = IntCounter
         End While
+        If Trim(StrResultArray(5)) = "E1" Or Trim(StrResultArray(5)) = "30" Then
+            TxtDebug.Text = "Ryans Test Code (Xentronics)"
+            RT_Decode = "Response From Xentronics Firmware Test Code " & StrRawPacket
+        Else
 
-        Select Case CMD
+            Select Case CMD
 
-            Case "EA", "EB" '*** Discover or get topology
-                Debug.Print(CMD & " or EB Should equal " & StrResultArray(5))
-                TxtDebug.Text = "Read Config Result"
-                Dim TmpString As String = ""
-                Dim IntResponseLength As Integer = 0
-                For x = 0 To 250
-                    Debug.Print(x.ToString & " >" & StrResultArray(x) & "<")
-                Next
-                Dim Byte3OK As Boolean = True
-                Try
-                    IntResponseLength = CInt("&H" & (Trim(StrResultArray(3)))) '- 1 '2
-                Catch
-                    MsgBox("Byte 3 is >" & Trim(StrResultArray(3)) & "<", vbOKOnly, "byte 3 Error")
-                    Byte3OK = False
-                End Try
-                If Byte3OK Then
-                    For x = 1 To IntResponseLength
-                        TmpString += StrResultArray(x)
+                Case "EA", "EB" '*** Discover or get topology
+                    Debug.Print(CMD & " or EB Should equal " & StrResultArray(5))
+                    TxtDebug.Text = "Read Config Result"
+                    Dim TmpString As String = ""
+                    Dim IntResponseLength As Integer = 0
+                    For x = 0 To 250
+                        Debug.Print(x.ToString & " >" & StrResultArray(x) & "<")
                     Next
-                    TxtDebug.Text += vbNewLine & "Configuration " & TmpString
-                    '*** decode some info
-                    Select Case Trim(StrResultArray(9))
-                        Case "1"
-                            LblType.Text = "Type: STANDARD"
-                            IntMasterType = STANDARD
-                            IntMaxChannel = 0
-                            LblChLimit.Text = "0"
-                            MsgBox("Incompatible device detected. Please use RT Auto Config to program this device.", vbCritical + vbOKOnly, "Error - Cannot proceed.")
-                        Case "9"
-                            LblType.Text = "Type: MC8F5"
-                            IntMasterType = MC8F5
-                            IntMaxChannel = CInt("&H" & (Trim(StrResultArray(8))))
-                            LblChLimit.Text = IntMaxChannel.ToString
-                        Case "3"
-                            LblType.Text = "Type: MC8" '*** Type 3
-                            IntMasterType = MC8
-                            If StrResultArray(9) IsNot Nothing Then
+                    Dim Byte3OK As Boolean = True
+                    Try
+                        IntResponseLength = CInt("&H" & (Trim(StrResultArray(3)))) '- 1 '2
+                    Catch
+                        MsgBox("Byte 3 is >" & Trim(StrResultArray(3)) & "<", vbOKOnly, "byte 3 Error")
+                        Byte3OK = False
+                    End Try
+                    If Byte3OK Then
+                        For x = 1 To IntResponseLength
+                            TmpString += StrResultArray(x)
+                        Next
+                        TxtDebug.Text += vbNewLine & "Configuration " & TmpString
+                        '*** decode some info
+                        Select Case Trim(StrResultArray(9))
+                            Case "1"
+                                LblType.Text = "Type: STANDARD"
+                                IntMasterType = STANDARD
+                                IntMaxChannel = 0
+                                LblChLimit.Text = "0"
+                                MsgBox("Incompatible device detected. Please use RT Auto Config to program this device.", vbCritical + vbOKOnly, "Error - Cannot proceed.")
+                            Case "9"
+                                LblType.Text = "Type: MC8F5"
+                                IntMasterType = MC8F5
                                 IntMaxChannel = CInt("&H" & (Trim(StrResultArray(8))))
                                 LblChLimit.Text = IntMaxChannel.ToString
-                            End If
-                        Case Else
-                            LblType.Text = "Unknown" '*** Other Type
-                            IntMasterType = MC8
-                            If StrResultArray(9) IsNot Nothing Then
-                                IntMaxChannel = CInt("&H" & (Trim(StrResultArray(8))))
+                            Case "3"
+                                LblType.Text = "Type: MC8" '*** Type 3
+                                IntMasterType = MC8
+                                If StrResultArray(9) IsNot Nothing Then
+                                    IntMaxChannel = CInt("&H" & (Trim(StrResultArray(8))))
+                                    LblChLimit.Text = IntMaxChannel.ToString
+                                End If
+                            Case Else
+                                LblType.Text = "Unknown" '*** Other Type
+                                IntMasterType = MC8
+                                If StrResultArray(9) IsNot Nothing Then
+                                    IntMaxChannel = CInt("&H" & (Trim(StrResultArray(8))))
 
-                            End If
-                            LblChLimit.Text = IntMaxChannel.ToString
-                    End Select
-
-                    RT_Decode = "Response to command " & Trim(StrResultArray(5)) & " = " & TmpString
-                Else
-                    RT_Decode = "ERROR"
-                End If
-            Case "80", "81"
-                Debug.Print(CMD & " or 81 Should equal " & StrResultArray(5))
-                '*** Do test - Trip RCD
-                ' TxtDebug.Text = "Get Result Trip RCD: " & StrRawPacket '& " <"
-                Dim formattedHEX As String = ""
-                If CMD = "81" And StrRawPacket <> "" Then
-                    Dim crPos As Integer = InStr(StrRawPacket, vbCrLf)
-                    StrRawPacket = Strings.Mid(StrRawPacket, crPos + 1, 80)
-                    For x = 1 To 16
-                        Dim tmpVal As String = ""
-                        If Len(Trim(StrResultArray(x)).ToString) = 1 Then
-                            tmpVal = "0" & Trim(StrResultArray(x)).ToString
-                        Else
-                            tmpVal = Trim(StrResultArray(x)).ToString
-                        End If
-                        formattedHEX &= tmpVal & " "
-                    Next
-                    TxtDebug.Text = "Get Result Trip RCD: " & Trim(formattedHEX) & vbCrLf & StrRawPacket
-                End If
-
-                RT_Decode = StrResultArray(13)
-
-                '*** Overide result if B_RelayCheck is active as these don't trip
-                If B_RelayCheck Then
-                    If Trim(StrResultArray(6)) = "0" Then   '** No Error
-                        Select Case Trim(StrResultArray(13))
-                            Case "0" '*** relay check - no trip
-                                RT_Decode = 3
-                            Case "1" '*** relay check - False trip
-                                RT_Decode = 4
+                                End If
+                                LblChLimit.Text = IntMaxChannel.ToString
                         End Select
+
+                        RT_Decode = "Response to command " & Trim(StrResultArray(5)) & " = " & TmpString
                     Else
-                        RT_Decode = -1
+                        RT_Decode = "ERROR"
                     End If
-                End If
+                Case "80", "81"
+                    Debug.Print(CMD & " or 81 Should equal " & StrResultArray(6))
+                    '*** Do test - Trip RCD
+                    ' TxtDebug.Text = "Get Result Trip RCD: " & StrRawPacket '& " <"
+                    Dim formattedHEX As String = ""
+                    If CMD = "81" And StrRawPacket <> "" Then
+                        Dim crPos As Integer = InStr(StrRawPacket, vbCrLf)
+                        StrRawPacket = Strings.Mid(StrRawPacket, crPos + 1, 80)
+                        For x = 1 To 16
+                            Dim tmpVal As String = ""
+                            If Len(Trim(StrResultArray(x)).ToString) = 1 Then
+                                tmpVal = "0" & Trim(StrResultArray(x)).ToString
+                            Else
+                                tmpVal = Trim(StrResultArray(x)).ToString
+                            End If
+                            formattedHEX &= tmpVal & " "
+                        Next
+                        TxtDebug.Text = "Get Result Trip RCD: " & Trim(formattedHEX) & vbCrLf & StrRawPacket
+                    End If
 
-            Case "91"
-                '*** Set master SSID
-                TxtDebug.Text = "Set Master SSID " & StrRawPacket
-                RT_Decode = "Response to Set Master SSID command " & StrRawPacket
+                    RT_Decode = StrResultArray(13)
 
-            Case "92"   '***  Get firmware version
-                Debug.Print(CMD & " Should equal " & StrResultArray(5))
-                TxtDebug.Text += " Get Firmware Version"
-                iVersionMinor = StrResultArray(6)
-                iVersionMajor = StrResultArray(7)
-                LblVersion.Text = "Version: " & iVersionMajor & "." & iVersionMinor
-                TxtDebug.Text += vbNewLine & "Version " & iVersionMajor & "." & iVersionMinor
-                WriteRawLog("Firmware " & iVersionMajor & "." & iVersionMinor)
+                    '*** Overide result if B_RelayCheck is active as these don't trip
+                    If B_RelayCheck Then
+                        If Trim(StrResultArray(6)) = "0" Then   '** No Error
+                            Select Case Trim(StrResultArray(13))
+                                Case "0" '*** relay check - no trip
+                                    RT_Decode = 3
+                                Case "1" '*** relay check - False trip
+                                    RT_Decode = 4
+                            End Select
+                        Else
+                            RT_Decode = -1
+                        End If
+                    End If
 
-                RT_Decode = "Response to command " & Trim(StrResultArray(5)) & " = Version: " & iVersionMajor & "." & iVersionMinor
+                Case "91"
+                    '*** Set master SSID
+                    TxtDebug.Text = "Set Master SSID " & StrRawPacket
+                    RT_Decode = "Response to Set Master SSID command " & StrRawPacket
 
-            Case "BE" '*** Get GUIDs
-                Debug.Print(CMD & " Should equal " & StrResultArray(5) & " " & StrRawPacket)
-                Dim StempGUID As String = ""
-                If StrRawPacket <> "" Then
-                    For x = 6 To 41
-                        StempGUID &= Chr(CInt("&H" & Trim(StrResultArray(x))))
-                    Next
-                Else
-                    StempGUID = "Error - No response."
-                End If
-                RT_Decode = StempGUID
-                'RT_Decode = "Response to command " & Trim(StrResultArray(5)) & " = GUID: = " & StempGUID
-                TxtDebug.Text = "Get Master or CIB GUID = " & StempGUID
-                WriteRawLog(StempGUID)
+                Case "92"   '***  Get firmware version
+                    Debug.Print(CMD & " Should equal " & StrResultArray(5))
+                    TxtDebug.Text += " Get Firmware Version"
+                    iVersionMinor = StrResultArray(6)
+                    iVersionMajor = StrResultArray(7)
+                    LblVersion.Text = "Version: " & iVersionMajor & "." & iVersionMinor
+                    TxtDebug.Text += vbNewLine & "Version " & iVersionMajor & "." & iVersionMinor
+                    WriteRawLog("Firmware " & iVersionMajor & "." & iVersionMinor)
 
-            Case "DA" '*** Get BUS power state
-                Debug.Print(CMD & " Should equal " & StrResultArray(5))
-                Dim StrResultText As String = ""
-                Dim resultText As String = ""
+                    RT_Decode = "Response to command " & Trim(StrResultArray(5)) & " = Version: " & iVersionMajor & "." & iVersionMinor
 
-                Select Case Trim(StrResultArray(6))
-                    Case "0"
-                        resultText = "Bus Power Status = Safe"
-                        StrResultText = "Safe"
-                    Case "1"
-                        resultText = "Bus Power Status = Live - DO NOT CONTINUE"
-                        StrResultText = "DO NOT CONTINUE"
-                    Case Else
-                        resultText = "Bus Power Status = ERROR - DO NOT CONTINUE"
-                        StrResultText = "DO NOT CONTINUE"
-                End Select
-                TxtDebug.Text = resultText
-                WriteRawLog(resultText)
-                RT_Decode = "Response to command " & Trim(StrResultArray(5)) & " = Bus = " & StrResultText
+                Case "BE" '*** Get GUIDs
+                    Debug.Print(CMD & " Should equal " & StrResultArray(5) & " " & StrRawPacket)
+                    '** Get board number 0 = master >0 = CIBs
+                    Dim repsonsePrefixText As String = ""
 
-            Case Else
-                '*** CHECK FOR ERRORS
+                    If Val(StrResultArray(4)) = 0 Then
+                        repsonsePrefixText = "Get Master GUID = "
+                    Else
+                        repsonsePrefixText = "Get CIB GUID = "
+                    End If
+                    Dim StempGUID As String = ""
+                    If arrayDataLength >= 41 Then
+                        If StrRawPacket <> "" Then
+                            For x = 6 To 41
+                                StempGUID &= Chr(CInt("&H" & Trim(StrResultArray(x))))
+                            Next
+                        Else
+                            StempGUID = "Error - No response."
+                        End If
+                    End If
+                    RT_Decode = StempGUID
+                    'RT_Decode = "Response to command " & Trim(StrResultArray(5)) & " = GUID: = " & StempGUID
+                    TxtDebug.Text = "Response; " & StrRawPacket & vbCrLf & repsonsePrefixText & StempGUID
+                    WriteRawLog(StempGUID)
 
-        End Select
+                Case "DA" '*** Get BUS power state
+                    Debug.Print(CMD & " Should equal " & StrResultArray(5))
+                    Dim StrResultText As String = ""
+                    Dim resultText As String = ""
+
+                    Select Case Trim(StrResultArray(6))
+                        Case "0"
+                            resultText = "Bus Power Status = Safe"
+                            StrResultText = "Safe"
+                        Case "1"
+                            resultText = "Bus Power Status = Live - DO NOT CONTINUE"
+                            StrResultText = "DO NOT CONTINUE"
+                        Case Else
+                            resultText = "Bus Power Status = ERROR - DO NOT CONTINUE"
+                            StrResultText = "DO NOT CONTINUE"
+                    End Select
+                    TxtDebug.Text = "Response; " & StrRawPacket & vbCrLf & resultText
+                    WriteRawLog(resultText)
+                    RT_Decode = "Response to command " & Trim(StrResultArray(5)) & " = Bus = " & StrResultText
+
+                Case Else
+                    '*** CHECK FOR ERRORS
+            End Select
+        End If
     End Function
     Private Sub BtnConfig_Click(sender As Object, e As EventArgs) Handles BtnConfig.Click
         WriteRawLog("*** " & "Discover Config")
@@ -1735,8 +1768,8 @@ Added displaying of Relay Driver type in summary table (QCheck).
         '*** This is Debug yyyymmdd file
         WriteLogFile("Sending: " & Trim(data2SendFormatted))
 
-        Debug.Print("Command: Discover topology 0xEA")
-        TxtDebug.Text = "Command: Discover topology 0xEA"
+        Debug.Print("CMD: Discover topology 0xEA")
+        TxtDebug.Text = "CMD: Discover topology 0xEA"
 
         StrTextToLog = "Discovering Configuration"
         S_LogFileText = "_" & TxtMasterSSID.Text & "_" & TxtCIBid.Text
@@ -1799,8 +1832,8 @@ Added displaying of Relay Driver type in summary table (QCheck).
         '*** This is Debug yyyymmdd file
         WriteLogFile("Sending: " & Trim(data2SendFormatted))
 
-        Debug.Print("Command:Read GUID 0xBE")
-        TxtDebug.Text = "Command:Read GUID 0xBE >" & data2SendFormatted & "< " & Len(data2Send).ToString
+        Debug.Print("CMD:Read GUID 0xBE")
+        TxtDebug.Text = "CMD:Read GUID 0xBE >" & data2SendFormatted & "< " & Len(data2Send).ToString
 
         StrTextToLog = " Getting GUID from device " & Device
         S_LogFileText = "_" & TxtMasterSSID.Text & "_" & TxtCIBid.Text
@@ -1932,8 +1965,8 @@ Added displaying of Relay Driver type in summary table (QCheck).
         Next
         '*** Test Reply should be 55 aa 08 00 da 01 8c dd to 0xDA Read Test Bus Powered
 
-        Debug.Print(" Command:Read Bus Powered 0xDA")
-        TxtDebug.Text = " Command:Read Bus Powered 0xDA"
+        Debug.Print(" CMD:Read Bus Powered 0xDA")
+        TxtDebug.Text = " CMD:Read Bus Powered 0xDA"
         'Connect(" 169.254.1.1", data2Send, 8)
 
         '*** This is Debug yyyymmdd file
@@ -2065,6 +2098,7 @@ Added displaying of Relay Driver type in summary table (QCheck).
         Else
 
         End If
+        WriteRawLog("*** " & " End Connect")
         LblStatus.Text = "Ready"
     End Sub
     Private Function ReadTopology()
@@ -2114,8 +2148,8 @@ Added displaying of Relay Driver type in summary table (QCheck).
         '*** This is Debug yyyymmdd file
         WriteLogFile("Sending: " & Trim(data2SendFormatted))
 
-        Debug.Print("Command: Read topology 0xEB")
-        TxtDebug.Text = "Command: Read topology 0xEB"
+        Debug.Print("CMD: Read topology 0xEB")
+        TxtDebug.Text = "CMD: Read topology 0xEB"
 
         StrTextToLog = "Reading Configuration"
         S_LogFileText = "_" & TxtMasterSSID.Text & "_" & TxtCIBid.Text
@@ -2161,8 +2195,15 @@ Added displaying of Relay Driver type in summary table (QCheck).
     End Sub
 
     Private Sub BtnTrip_Click(sender As Object, e As EventArgs) Handles BtnTrip.Click
-        WriteRawLog("*** " & "Perform Trip Test")
-
+        Dim currentValue As Double = Val(TxtSetCurrent.Text)
+        Dim currentSent As Double = currentValue + (currentValue * (Val(TxtMultiplier.Text) / 100))
+        Dim currentSentMA As Double = currentSent * 10
+        Dim overrideText As String = "Multiplier overridden - 500mA Max"
+        If currentValue >= 500 Then
+            WriteRawLog("*** " & "Perform Trip Test on channel " & LblChannel.Text & " at " & TxtSetCurrent.Text & " mA - Multiplier = " & TxtMultiplier.Text & "%  [" & overrideText & "]")
+        Else
+            WriteRawLog("*** " & "Perform Trip Test on channel " & LblChannel.Text & " at " & TxtSetCurrent.Text & " mA - Multiplier = " & TxtMultiplier.Text & "%  [" & currentSent.ToString & "/" & currentSentMA.ToString & "]")
+        End If
         BoolManTrip = True
         BtnTrip.Enabled = False
         StrCommandInUse = "80"
@@ -2254,7 +2295,7 @@ Added displaying of Relay Driver type in summary table (QCheck).
             data2SendFormatted = data2SendFormatted & " " & Hex(Asc(Mid(data2Send, x, 1)))
         Next
 
-        Debug.Print("Command: Get Test Result 0x81 on channel ")
+        Debug.Print("CMD: Get Test Result 0x81 on channel ")
 
         S_LogFileText = "_" & TxtMasterSSID.Text & "_" & TxtCIBid.Text
         StrCommandInUse = "81"
@@ -2310,8 +2351,8 @@ Added displaying of Relay Driver type in summary table (QCheck).
         '*** This is Debug yyyymmdd file
         WriteLogFile("Sending Get Trip Result: " & Trim(data2SendFormatted))
 
-        Debug.Print("Command: Fetch Result 0x81")
-        TxtDebug.Text = "Command: Fetch Result 0x81"
+        Debug.Print("CMD: Fetch Result 0x81")
+        TxtDebug.Text = "CMD: Fetch Result 0x81"
         'Connect("169.254.1.1", data2Send, 14)
 
         Dim Test As String = Connect(sIP, data2Send, 14, S_LogFileText, TxtOrderRef.Text)
@@ -2330,8 +2371,8 @@ Added displaying of Relay Driver type in summary table (QCheck).
         Dim UseMicroAmp As Boolean = True
         Select Case TripCurrent
             Case 0, > 500
-                TripCurrent = 30
-                TxtSetCurrent.Text = "30"
+                TripCurrent = 500
+                TxtSetCurrent.Text = "500"
         End Select
         '*** If channel number is valid
         If IsNumeric(LblChannel.Text) Then
@@ -2492,10 +2533,9 @@ Added displaying of Relay Driver type in summary table (QCheck).
                 '*** This is Debug yyyymmdd file
                 WriteLogFile("Sending Trip RCD: " & Trim(data2SendFormatted))
 
-
-                Debug.Print("Command: Commence Test 0x80 on channel " & (Hex(Val(LblChannel.Text)))) 'Chr("&H" & boardNumber.ToString)
+                Debug.Print("CMD: Commence Test 0x80 on channel " & (Hex(Val(LblChannel.Text)))) 'Chr("&H" & boardNumber.ToString)
                 ' Connect("169.254.1.1", data2Send, 7)
-                TxtDebug.Text = "Command:Commence Test 0x80 >" & data2SendFormatted & "< " & Len(data2Send).ToString
+                TxtDebug.Text = "CMD:Commence Test 0x80 >" & data2SendFormatted & "< " & Len(data2Send).ToString
                 S_LogFileText = "_" & TxtMasterSSID.Text & "_" & TxtCIBid.Text
                 StrCommandInUse = "80"
                 iResult = Connect(sIP, data2Send, 7, S_LogFileText, TxtOrderRef.Text)
@@ -2532,7 +2572,7 @@ Added displaying of Relay Driver type in summary table (QCheck).
                 '    data2SendFormatted = data2SendFormatted & " " & Hex(Asc(Mid(data2Send, x, 1)))
                 'Next
 
-                'Debug.Print("Command: Fetch Result 0x81")
+                'Debug.Print("CMD: Fetch Result 0x81")
 
                 'S_LogFileText = "_" & TxtMasterSSID.Text & "_" & TxtCIBid.Text
                 'StrCommandInUse = "80"
@@ -3653,8 +3693,8 @@ Added displaying of Relay Driver type in summary table (QCheck).
             data2SendFormatted = data2SendFormatted & " " & Hex(Asc(Mid(data2Send, x, 1)))
         Next
 
-        Debug.Print("Command:Set GUID 0xBD")
-        TxtDebug.Text = "Command:Set GUID 0xBD >" & data2SendFormatted & "< " & Len(data2Send).ToString
+        Debug.Print("CMD:Set GUID 0xBD")
+        TxtDebug.Text = "CMD:Set GUID 0xBD >" & data2SendFormatted & "< " & Len(data2Send).ToString
 
         S_LogFileText = "_" & TxtMasterSSID.Text & "_" & TxtCIBid.Text
         If device = "1" Then
@@ -3857,7 +3897,7 @@ Added displaying of Relay Driver type in summary table (QCheck).
             WriteLogFile("Sending: " & Trim(data2SendFormatted))
             StrCommandInUse = "91"
 
-            Debug.Print("Command:Set WiFi Settings " & data2SendFormatted.ToString)
+            Debug.Print("CMD:Set WiFi Settings " & data2SendFormatted.ToString)
 
             S_LogFileText = "_" & TxtMasterSSID.Text & "_" & TxtCIBid.Text
             Dim StrResult As String = Connect(sIP, data2Send, 10, S_LogFileText, TxtOrderRef.Text)
@@ -5304,7 +5344,7 @@ FROM            dbo.NDB_Board INNER JOIN
             mail.To.Add(EmailSendTo)
             If Not EmailTest Then
                 mail.Bcc.Add("kevin@ats.com.au")
-                mail.To.Add("lance@ats.com.au")
+                mail.To.Add("elliott@ats.com.au")
                 mail.To.Add("wayne@ats.com.au")
             End If
             mail.Subject = EmailSubject
@@ -5987,8 +6027,8 @@ FROM            dbo.NDB_Board INNER JOIN
         '*** This is Debug yyyymmdd file
         WriteLogFile("Sending: " & Trim(data2SendFormatted))
 
-        Debug.Print("Command: Read RCD Mapping - ALL channels 0xBC")
-        TxtDebug.Text = "Command: Read RCD Mapping - ALL channels 0xBC >" & data2SendFormatted & "< " & Len(data2Send).ToString
+        Debug.Print("CMD: Read RCD Mapping - ALL channels 0xBC")
+        TxtDebug.Text = "CMD: Read RCD Mapping - ALL channels 0xBC >" & data2SendFormatted & "< " & Len(data2Send).ToString
 
         S_LogFileText = "_" & TxtMasterSSID.Text & "_" & TxtCIBid.Text
         Connect(sIP, data2Send, 247, S_LogFileText, TxtOrderRef.Text)
@@ -6047,8 +6087,8 @@ FROM            dbo.NDB_Board INNER JOIN
             data2SendFormatted = data2SendFormatted & " " & Hex(Asc(Mid(data2Send, x, 1)))
         Next
 
-        Debug.Print("Command: Set RCD Mapping - single channel 0xBA for channel " & (Val(LblChannel.Text)).ToString & " = " & (Val(LblChannel.Text)).ToString)
-        TxtDebug.Text = "Command: Set RCD Mapping - single channel 0xBA for channel " & (Val(LblChannel.Text)).ToString & " = " & (Val(LblChannel.Text)).ToString
+        Debug.Print("CMD: Set RCD Mapping - single channel 0xBA for channel " & (Val(LblChannel.Text)).ToString & " = " & (Val(LblChannel.Text)).ToString)
+        TxtDebug.Text = "CMD: Set RCD Mapping - single channel 0xBA for channel " & (Val(LblChannel.Text)).ToString & " = " & (Val(LblChannel.Text)).ToString
 
         S_LogFileText = "_" & TxtMasterSSID.Text & "_" & TxtCIBid.Text
         Connect(sIP, data2Send, 10, S_LogFileText, TxtOrderRef.Text)
@@ -6108,8 +6148,8 @@ FROM            dbo.NDB_Board INNER JOIN
         '*** This is Debug yyyymmdd file
         WriteLogFile("Sending: " & Trim(data2SendFormatted))
 
-        Debug.Print("Command: Read RCD Mapping - single channel 0xBB for channel " & (Val(LblChannel.Text)).ToString)
-        TxtDebug.Text = "Command: Read RCD Mapping - single channel 0xBB for channel " & (Val(LblChannel.Text)).ToString
+        Debug.Print("CMD: Read RCD Mapping - single channel 0xBB for channel " & (Val(LblChannel.Text)).ToString)
+        TxtDebug.Text = "CMD: Read RCD Mapping - single channel 0xBB for channel " & (Val(LblChannel.Text)).ToString
 
         S_LogFileText = "_" & TxtMasterSSID.Text & "_" & TxtCIBid.Text
         Connect(sIP, data2Send, 9, S_LogFileText, TxtOrderRef.Text)
@@ -6173,8 +6213,8 @@ FROM            dbo.NDB_Board INNER JOIN
             data2SendFormatted = data2SendFormatted & " " & Hex(Asc(Mid(data2Send, x, 1)))
         Next
 
-        Debug.Print("Command: Clearing RCD Mapping - single channel 0xBA for channel " & Val(LblChannel.Text)) '(y + 1).ToString)
-        TxtDebug.Text = "Command: Clear RCD Mapping - single channel 0xBA for channel " & Val(LblChannel.Text) '(y + 1).ToString
+        Debug.Print("CMD: Clearing RCD Mapping - single channel 0xBA for channel " & Val(LblChannel.Text)) '(y + 1).ToString)
+        TxtDebug.Text = "CMD: Clear RCD Mapping - single channel 0xBA for channel " & Val(LblChannel.Text) '(y + 1).ToString
 
         S_LogFileText = "_" & TxtMasterSSID.Text & "_" & TxtCIBid.Text
         Connect(sIP, data2Send, 10, S_LogFileText, TxtOrderRef.Text)
@@ -6194,7 +6234,7 @@ FROM            dbo.NDB_Board INNER JOIN
 
     Private Sub tmrCycleTest_Tick(sender As Object, e As EventArgs) Handles tmrCycleTest.Tick
         'Defile default interval
-        Dim intervalDefault = 20000
+        Dim intervalDefault = 15000
         Dim tmrIntervalSP As Integer = intervalDefault
 
         If IsNumeric(txtCycleInterval.Text) Then
@@ -6202,7 +6242,7 @@ FROM            dbo.NDB_Board INNER JOIN
             tmrIntervalSP = Val(txtCycleInterval.Text) * 1000
         End If
 
-        If tmrIntervalSP < 8500 Then tmrIntervalSP = intervalDefault
+        If tmrIntervalSP < 9500 Then tmrIntervalSP = intervalDefault
 
         txtCycleInterval.Text = (tmrIntervalSP / 1000).ToString
 
@@ -6219,7 +6259,8 @@ FROM            dbo.NDB_Board INNER JOIN
         If Not tmrCoolingMode.Enabled Then
             BtnTrip.PerformClick()
             cycleCounter += 1
-
+            cycleStopWatch.Reset()
+            cycleStopWatch.Start()
         End If
     End Sub
 
@@ -6259,7 +6300,7 @@ FROM            dbo.NDB_Board INNER JOIN
         ' Debug.Print("************************ COOLING MODE ***************************")
         '*** Stop cooling mode after set time
         '*** This is effectively the cooling timer interval
-        If ts.Seconds >= 10 Then
+        If ts.Seconds >= 5 Then
             tmrCoolingMode.Enabled = False
             coolingStopWatch.Stop()
             coolingStopWatch.Reset()

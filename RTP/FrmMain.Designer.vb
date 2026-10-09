@@ -44,6 +44,7 @@ Partial Class FrmMain
         Me.TSPrinterName = New System.Windows.Forms.ToolStripStatusLabel()
         Me.TSLogPath = New System.Windows.Forms.ToolStripStatusLabel()
         Me.TTiPAddress = New System.Windows.Forms.ToolStripStatusLabel()
+        Me.tsAppName = New System.Windows.Forms.ToolStripStatusLabel()
         Me.ChkSkipMaster = New System.Windows.Forms.CheckBox()
         Me.GrpMaster = New System.Windows.Forms.GroupBox()
         Me.TxtMasterSSID = New System.Windows.Forms.TextBox()
@@ -269,7 +270,6 @@ Partial Class FrmMain
         Me.tmrCycleTest = New System.Windows.Forms.Timer(Me.components)
         Me.tmrElapsedTime = New System.Windows.Forms.Timer(Me.components)
         Me.tmrCoolingMode = New System.Windows.Forms.Timer(Me.components)
-        Me.tsAppName = New System.Windows.Forms.ToolStripStatusLabel()
         PrinterToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.MenuStrip1.SuspendLayout()
         Me.GroupBox1.SuspendLayout()
@@ -506,6 +506,12 @@ Partial Class FrmMain
         Me.TTiPAddress.Name = "TTiPAddress"
         Me.TTiPAddress.Size = New System.Drawing.Size(62, 17)
         Me.TTiPAddress.Text = "IP Address"
+        '
+        'tsAppName
+        '
+        Me.tsAppName.Name = "tsAppName"
+        Me.tsAppName.Size = New System.Drawing.Size(64, 17)
+        Me.tsAppName.Text = "App Name"
         '
         'ChkSkipMaster
         '
@@ -2908,12 +2914,6 @@ Partial Class FrmMain
         '
         'tmrCoolingMode
         '
-        '
-        'tsAppName
-        '
-        Me.tsAppName.Name = "tsAppName"
-        Me.tsAppName.Size = New System.Drawing.Size(64, 17)
-        Me.tsAppName.Text = "App Name"
         '
         'FrmMain
         '
